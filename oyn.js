@@ -3,18 +3,23 @@
  */
 
 class Tuval {
-    constructor(canvas, genislik, yukseklik) {
+    constructor(canvas, genislik, yukseklik, yerKordianti) {
         this.canvas = canvas;
         this.canvas.width = genislik;
         this.canvas.height = yukseklik;
+        this.yerKordinati = yerKordianti;
         this.c = this.canvas.getContext('2d');
         this.temizle();
+
     }
 
     temizle() {
-
-        this.c.fillStyle = 'black';
+        this.c.fillStyle = '#0b2e2f';
         this.c.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    setZamanKutucugu(sayi) {
+        document.getElementById('zaman').innerText = sayi;
     }
 }
 
@@ -34,7 +39,7 @@ class Dikdortgen {
     }
 
     yerdedir() {
-        return this.y >= this.tuval.canvas.height - this.yukseklik;
+        return this.y + this.yukseklik >= this.tuval.yerKordinati;
     }
 
     static carpisir(dikdortgen1, dikdortgen2) {
@@ -69,20 +74,106 @@ class Dikdortgen {
 
 }
 
+/**
+ * Bu hocama teşekkürler grafik için
+ * https://aamatniekss.itch.io/fantasy-knight-free-pixelart-animated-character
+ *
+ */
 class Sprite {
-    static ler = [];
+    constructor(
+        tuval, {
+            pozisyon,
+            pozisyonOffset = { x: 0, y: 0 },
+            resimKaynagi,
+            skala = 1,
+            resimSayisi = 1,
+        }) {
+        this.tuval = tuval;
+        this.pozisyon = pozisyon;
+        this.pozisyonOffset = pozisyonOffset;
+        this.resimSayisi = resimSayisi;
+        this.suankiResim = 0;
+        this.skala = skala;
+
+        this.setResim(resimKaynagi);
+
+        this.kacSahnedeResimDegisir = 10;
+        this.suankiSahne = 0;
+    }
+
+    setResim(resimKaynagi, resimSayisi, suankiResim) {
+        if (!(this.resim && this.resim.src && this.resim.src == resimKaynagi)) {
+            this.resim = new Image();
+            this.resim.src = resimKaynagi;
+        }
+        if (resimSayisi !== undefined) {
+            this.resimSayisi = resimSayisi;
+        }
+        if (suankiResim !== undefined) {
+            this.suankiResim = suankiResim;
+        }
+
+
+    }
+
+    ciz() {
+
+        this.tuval.c.drawImage(
+            this.resim,
+            this.suankiResim * (this.resim.width / this.resimSayisi),
+            0,
+            this.resim.width / this.resimSayisi,
+            this.resim.height,
+            this.pozisyon.x + this.pozisyonOffset.x,
+            this.pozisyon.y + this.pozisyonOffset.y,
+            (this.resim.width / this.resimSayisi) * this.skala,
+            this.resim.height * this.skala);
+        return this;
+    }
+
+    guncelle() {
+        this.suankiResim = this.suankiResim % this.resimSayisi; // farklı resim gelip de suanki resim indeks dışına çıkarsa diye
+        this.ciz();
+        if (this.suankiSahne === 0) {
+            this.suankiResim = (this.suankiResim + 1) % this.resimSayisi;
+        }
+        this.suankiSahne = (this.suankiSahne + 1) % this.kacSahnedeResimDegisir;
+
+        return this;
+    }
+
+}
+
+class Savaskar {
+    static lar = [];
 
     constructor(
-        tuval, { renk, pozisyon, hiz, ivme, solTusu, sagTusu, saldiriTusu, basilanTuslar, genislik, yukseklik, isim}) {
+        tuval, {
+            renk,
+            pozisyon,
+            solTusu,
+            sagTusu,
+            saldiriTusu,
+            basilanTuslar,
+            genislik,
+            yukseklik,
+            isim,
+            canCubuguID,
+            canCubuguIsimID
+        }) {
         this.tuval = tuval;
         this.hitKutusu = new Dikdortgen(this.tuval, pozisyon.x, pozisyon.y, genislik, yukseklik, renk);
-        this.hiz = hiz;
-        this.ivme = ivme; // yercekimi haric
+        this.hiz = { x: 0, y: 0 };
+        this.ivme = { x: 0, y: 0 }; // yercekimi haric
         this.yurumeIvmesi = { x: 0, y: 0 };
         this.solTusu = solTusu;
         this.sagTusu = sagTusu;
         this.saldiriTusu = saldiriTusu;
         this.isim = isim;
+        this.canCubuguID = canCubuguID;
+        this.canCubuguIsimID = canCubuguIsimID;
+
+        document.getElementById(this.canCubuguIsimID ).innerText = this.isim;
 
         this.basilanTuslar = basilanTuslar;
 
@@ -91,10 +182,25 @@ class Sprite {
         this.yurumeHizi = 2;
         this.can = 100;
         this.sagaBakiyor = false;
+        this.kosuyor = false;
         this.silahKutusu = new Dikdortgen(this.tuval, pozisyon.x, pozisyon.y, 50, 10, 'white');
         this.saldiriHasari = 10;
 
-        Sprite.ler.push(this);
+        this.idleResimSag = './sprites/FreeKnight_v1/Colour1/NoOutline/480x320_PNGSheets/_Idle_right.png';
+        this.idleResimSol = './sprites/FreeKnight_v1/Colour1/NoOutline/480x320_PNGSheets/_Idle_left.png';
+        this.idleResimSayisi = 10;
+        this.runResimSag = './sprites/FreeKnight_v1/Colour1/NoOutline/480x320_PNGSheets/_Run_right.png';
+        this.runResimSol = './sprites/FreeKnight_v1/Colour1/NoOutline/480x320_PNGSheets/_Run_left.png';
+        this.runResimSayisi = 10;
+        this.sprite = new Sprite(this.tuval, {
+            pozisyon: pozisyon,
+            pozisyonOffset: { x: -122, y: -115 },
+            resimKaynagi: this.sagaBakiyor ? this.idleResimSag : this.idleResimSol,
+            skala: 0.675,
+            resimSayisi: this.idleResimSayisi
+        });
+
+        Savaskar.lar.push(this);
     }
 
     silahYeriniAyarla() {
@@ -110,10 +216,10 @@ class Sprite {
     }
 
     static carpismaEngelle() {
-        Sprite.ler.forEach((sprite1) => {
-            Sprite.ler.forEach((sprite2) => {
-                if (sprite1 !== sprite2) {
-                    sprite1.carpismayacakKadarOtele(sprite2);
+        Savaskar.lar.forEach((savaskar1) => {
+            Savaskar.lar.forEach((savaskar2) => {
+                if (savaskar1 !== savaskar2) {
+                    savaskar1.carpismayacakKadarOtele(savaskar2);
                 }
             });
         });
@@ -123,40 +229,40 @@ class Sprite {
      * This nesnesini öteler, spriteyi değil.
      * @param sprite
      */
-    carpismayacakKadarOtele(sprite) {
-        if (Dikdortgen.carpisir(this.hitKutusu, sprite.hitKutusu)) {
-            if (Math.abs(this.hitKutusu.merkezKordinat().y - sprite.hitKutusu.merkezKordinat().y) <
-                Math.abs(this.hitKutusu.merkezKordinat().x - sprite.hitKutusu.merkezKordinat().x)) {
-                this.yataydaKenarinaOtele(sprite);
+    carpismayacakKadarOtele(savaskar) {
+        if (Dikdortgen.carpisir(this.hitKutusu, savaskar.hitKutusu)) {
+            if (Math.abs(this.hitKutusu.merkezKordinat().y - savaskar.hitKutusu.merkezKordinat().y) <
+                Math.abs(this.hitKutusu.merkezKordinat().x - savaskar.hitKutusu.merkezKordinat().x)) {
+                this.yataydaKenarinaOtele(savaskar);
                 this.ivme.x = 0;
                 this.hiz.x = 0;
             }
             else {
-                this.duseydeKenarinaOtele(sprite);
+                this.duseydeKenarinaOtele(savaskar);
                 this.hiz.y = 0;
                 this.ivme.y = 0;
             }
         }
     }
 
-    duseydeKenarinaOtele(sprite) {
-        if (this.hitKutusu.merkezKordinat().y < sprite.hitKutusu.merkezKordinat().y) { // yukarisinda olacak
-            this.hitKutusu.y = sprite.hitKutusu.y - this.hitKutusu.yukseklik;
+    duseydeKenarinaOtele(savaskar) {
+        if (this.hitKutusu.merkezKordinat().y < savaskar.hitKutusu.merkezKordinat().y) { // yukarisinda olacak
+            this.hitKutusu.y = savaskar.hitKutusu.y - this.hitKutusu.yukseklik;
         }
-        else if (this.hitKutusu.merkezKordinat().y >= sprite.hitKutusu.merkezKordinat().y) { // asagisinda olacak
-            const yeniYPozisyonu = sprite.hitKutusu.y + sprite.yukseklik;
-            if (yeniYPozisyonu < this.tuval.canvas.height - this.hitKutusu.yukseklik) {
+        else if (this.hitKutusu.merkezKordinat().y >= savaskar.hitKutusu.merkezKordinat().y) { // asagisinda olacak
+            const yeniYPozisyonu = savaskar.hitKutusu.y + savaskar.yukseklik;
+            if (yeniYPozisyonu < this.tuval.yerKordinati - this.hitKutusu.yukseklik) {
                 this.hitKutusu.y = yeniYPozisyonu;
             } // aksi taktirde yerin dibine girer, o durumda oteleme yapilmaz.
         }
     }
 
-    yataydaKenarinaOtele(sprite) {
-        if (this.hitKutusu.merkezKordinat().x < sprite.hitKutusu.merkezKordinat().x) { // solunda olacak
-            this.hitKutusu.x = sprite.hitKutusu.x - this.hitKutusu.genislik;
+    yataydaKenarinaOtele(savaskar) {
+        if (this.hitKutusu.merkezKordinat().x < savaskar.hitKutusu.merkezKordinat().x) { // solunda olacak
+            this.hitKutusu.x = savaskar.hitKutusu.x - this.hitKutusu.genislik;
         }
-        else if (this.hitKutusu.merkezKordinat().x > sprite.hitKutusu.merkezKordinat().x) { // saginda olacak
-            this.hitKutusu.x = sprite.hitKutusu.x + sprite.hitKutusu.genislik;
+        else if (this.hitKutusu.merkezKordinat().x > savaskar.hitKutusu.merkezKordinat().x) { // saginda olacak
+            this.hitKutusu.x = savaskar.hitKutusu.x + savaskar.hitKutusu.genislik;
         }
     }
 
@@ -167,11 +273,16 @@ class Sprite {
         return this;
     }
 
+    canCubuguGuncelle() {
+        document.getElementById(this.canCubuguID).style.width = this.can + '%';
+    }
+
     saldir() {
-        Sprite.ler.forEach((sprite) => {
-            if (sprite !== this && Dikdortgen.carpisir(this.silahKutusu, sprite.hitKutusu)) {
-                sprite.can--;
-                console.log(sprite.isim, sprite.can);
+        Savaskar.lar.forEach((savaskar) => {
+            if (savaskar !== this && Dikdortgen.carpisir(this.silahKutusu, savaskar.hitKutusu)) {
+                savaskar.can--;
+                savaskar.canCubuguGuncelle();
+                console.log(savaskar.isim, savaskar.can);
             }
         })
     }
@@ -183,23 +294,52 @@ class Sprite {
         if (this.basilanTuslar[this.solTusu]) {
             this.sagaBakiyor = false;
         }
-        this.hitKutusu.x += this.hiz.x + ((this.basilanTuslar[this.sagTusu] ? this.yurumeHizi : 0) +
-            (this.basilanTuslar[this.solTusu] ? -this.yurumeHizi : 0));
+        this.yuruyor = this.basilanTuslar[this.sagTusu] || this.basilanTuslar[this.solTusu];
+        if (this.basilanTuslar[this.sagTusu] && this.basilanTuslar[this.solTusu]) {
+            this.yuruyor = false;
+        }
+
+        if (this.yuruyor) {
+            if (this.sagaBakiyor) {
+                this.hitKutusu.x += this.yurumeHizi;
+            } else {
+                this.hitKutusu.x -= this.yurumeHizi;
+            }
+        }
+
+        this.hitKutusu.x += this.hiz.x;
         this.hitKutusu.y += this.hiz.y;
+
+
         if (this.hitKutusu.yerdedir()) {
-            this.hitKutusu.y = this.tuval.canvas.height - this.hitKutusu.yukseklik;
+            this.hitKutusu.y = this.tuval.yerKordinati - this.hitKutusu.yukseklik;
             this.hiz.y = 0;
         }
         this.hiz.y += this.ivme.y + this.yercekimiIvmesi + this.yurumeIvmesi.y;
         this.hiz.x += this.ivme.x + this.yurumeIvmesi.x;
+        this.sprite.pozisyon.y = this.hitKutusu.y;
+        this.sprite.pozisyon.x = this.hitKutusu.x;
 
         return this;
+    }
+
+    munasipSpriteAyarla() {
+        if (this.yuruyor) {
+            this.sprite.setResim(this.sagaBakiyor ? this.runResimSag : this.runResimSol);
+        } else {
+            this.sprite.setResim(this.sagaBakiyor ? this.idleResimSag : this.idleResimSol);
+        }
+
+        this.sprite.guncelle();
     }
 
     guncelle() {
         this.hitKutusu.ciz();
         this.hareketEt();
         this.silahYeriniAyarla();
+
+        this.munasipSpriteAyarla();
+
         if (this.basilanTuslar[this.saldiriTusu]) {
             this.silahKutusu.ciz();
         }
@@ -210,37 +350,46 @@ class Sprite {
         return this;
     }
 
+
 }
 
 function main() {
     const basilanTuslar = {}
 
-    const tuval = new Tuval(document.querySelector('canvas'), 800, 600);
-    const oyuncu = new Sprite(tuval, {
-        renk: '#ff0000',
+    const tuval = new Tuval(document.querySelector('canvas'), 800, 600, 480);
+    const arkaplan = new Sprite(tuval, {
+        pozisyon: {
+            x: 0,
+            y: 0,
+        },
+        resimKaynagi: './sprites/NightForest/Image without mist.png',
+        skala: 1.67,
+    });
+    const oyuncu = new Savaskar(tuval, {
+        renk: 'rgba(255,0,0,0)',
         pozisyon: { x: 32, y: tuval.canvas.height - 111 },
-        hiz: { x: 0, y: 0 },
-        ivme: { x: 0, y: 0 },
         solTusu: 'ArrowLeft',
         sagTusu: 'ArrowRight',
         saldiriTusu: 'ArrowDown',
-        genislik: 150,
-        yukseklik: 66,
+        genislik: 50,
+        yukseklik: 100,
         basilanTuslar,
-        isim: 'lutfullah'
+        isim: 'lutfullah',
+        canCubuguID: 'ic-can-cubugu-1',
+        canCubuguIsimID: 'can-cubugu-isim-1'
     });
-    const oyuncu2 = new Sprite(tuval, {
-        renk: 'purple',
+    const oyuncu2 = new Savaskar(tuval, {
+        renk: 'rgba(255,0,0,0)',
         pozisyon: { x: 320, y: 0 },
-        hiz: { x: 0, y: 0 },
-        ivme: { x: 0, y: 0 },
         solTusu: 'a',
         sagTusu: 'd',
         saldiriTusu: ' ',
         genislik: 50,
         yukseklik: 100,
         basilanTuslar,
-        isim: 'o'
+        isim: 'o',
+        canCubuguID: 'ic-can-cubugu-2',
+        canCubuguIsimID: 'can-cubugu-isim-2'
     });
 
     window.addEventListener('keydown', (event) => {
@@ -262,9 +411,10 @@ function main() {
     function canlandir() {
         window.requestAnimationFrame(canlandir);
         tuval.temizle();
+        arkaplan.guncelle();
         oyuncu.guncelle();
         oyuncu2.guncelle();
-        Sprite.carpismaEngelle();
+        Savaskar.carpismaEngelle();
     }
 
     canlandir();

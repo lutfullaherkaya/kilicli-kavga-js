@@ -1,8 +1,71 @@
+:root {
+    --zaman-genisligi: 10%;
+    --can-cubugu-yuksekligi: 15px;
+    --can-cubugu-kenar-kalinligi: 3px;
+}
+
+* {
+    image-rendering: pixelated;
+}
+
 body {
     background-color: #1c2323;
 }
-.canvas-container {
+.container {
     width: 100%;
     display: flex;
     justify-content: center;
+}
+.canvas-container {
+    position: relative;
+
+}
+
+.can-zaman-arayuzu {
+    box-sizing: border-box;
+    position: absolute;
+    top: 1%;
+    left: 1%;
+    right: 1%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.can-cubugu {
+    background-color: black;
+    height: 100%;
+    width: 100%;
+    padding: var(--can-cubugu-kenar-kalinligi);
+}
+#ic-can-cubugu-1 {
+    width: 100%;
+    height: var(--can-cubugu-yuksekligi);
+    box-sizing: border-box;
+    background-color: blue;
+}
+#ic-can-cubugu-2 {
+    width: 100%;
+    height: var(--can-cubugu-yuksekligi);
+    box-sizing: border-box;
+    background-color: yellow;
+    float: right;
+}
+.zaman-kutusu {
+    width: 50px;
+    height: calc(var(--can-cubugu-yuksekligi) * 5);
+    background-color: green;
+    text-align: center;
+}
+.can-cubugu-isim {
+    position: absolute;
+    top: 50%;
+
+    transform: translate(0, -50%);
+}
+#can-cubugu-isim-1 {
+    left: calc(var(--can-cubugu-kenar-kalinligi) * 2);
+}
+#can-cubugu-isim-2 {
+    right: calc(var(--can-cubugu-kenar-kalinligi) * 2);
 }
