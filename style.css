@@ -4,8 +4,10 @@
     --can-cubugu-kenar-kalinligi: 3px;
 }
 
-* {
+canvas, img {
     image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
 }
 
 body {
