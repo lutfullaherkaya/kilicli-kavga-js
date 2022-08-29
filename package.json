@@ -1,12 +1,23 @@
 {
+  "name": "kilicli-kavga-js",
+  "version": "1.0.0",
+  "description": "lütfullah erkaya oyun oynama platformu",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "Lütfullah Erkaya",
   "devDependencies": {
     "jest": "^29.0.1",
     "jest-canvas-mock": "^2.4.0",
     "jest-environment-jsdom": "^29.0.1"
   },
-  "scripts": {
-    "test": "jest"
-  },
+
   "jest": {
     "setupFiles": [
       "jest-canvas-mock"
