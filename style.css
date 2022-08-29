@@ -1,7 +1,8 @@
 :root {
     --zaman-genisligi: 10%;
     --can-cubugu-yuksekligi: 15px;
-    --can-cubugu-kenar-kalinligi: 3px;
+    --can-cubugu-kenar-kalinligi: 2px;
+    height: 100%;
 }
 
 canvas, img {
@@ -12,6 +13,10 @@ canvas, img {
 
 body {
     background-color: #1c2323;
+}
+
+* {
+    box-sizing: border-box;
 }
 .container {
     width: 100%;
@@ -24,14 +29,14 @@ body {
 }
 
 .can-zaman-arayuzu {
-    box-sizing: border-box;
+
     position: absolute;
     top: 1%;
     left: 1%;
     right: 1%;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: center;color: #e8e8e8;
 }
 
 .can-cubugu {
@@ -39,24 +44,32 @@ body {
     height: 100%;
     width: 100%;
     padding: var(--can-cubugu-kenar-kalinligi);
+
 }
-#ic-can-cubugu-1 {
+.can-cubugu-1 {
+    padding-right: 0;
+}
+.can-cubugu-2 {
+    padding-left: 0;
+}
+#ic-can-cubugu-1, #ic-can-cubugu-2 {
     width: 100%;
     height: var(--can-cubugu-yuksekligi);
-    box-sizing: border-box;
-    background-color: blue;
+    background-color: rgba(255, 84, 84, 0.82);
+    transition: width 0.2s ease-in-out;
+}
+
+#ic-can-cubugu-1 {
+
 }
 #ic-can-cubugu-2 {
-    width: 100%;
-    height: var(--can-cubugu-yuksekligi);
-    box-sizing: border-box;
-    background-color: yellow;
     float: right;
 }
 .zaman-kutusu {
-    width: 50px;
-    height: calc(var(--can-cubugu-yuksekligi) * 5);
-    background-color: green;
+    padding: 5px;
+    border-top: black solid var(--can-cubugu-kenar-kalinligi);
+    border: black solid var(--can-cubugu-kenar-kalinligi);
+    background-color: slategray;
     text-align: center;
 }
 .can-cubugu-isim {

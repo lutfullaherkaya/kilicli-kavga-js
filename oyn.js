@@ -3,6 +3,8 @@
  */
 /**
  * todo: oyun hızı fps'ye bağımlı olmasın
+ * todo: mouse ile de saldırılsın
+ * todo: hasar alınca kan çıksın rastgele ve ses çıksın vıcık vıcık
  */
 class Tuval {
     constructor(canvas, genislik, yukseklik, yerKordianti) {
@@ -12,7 +14,9 @@ class Tuval {
         this.yerKordinati = yerKordianti;
         this.context = this.canvas.getContext('2d');
         this.context.imageSmoothingEnabled = false;
+        this.zaman = 90;
         this.temizle();
+        this.fps = 60; // bu değer sürekli güncellenecek
 
     }
 
@@ -21,8 +25,21 @@ class Tuval {
         this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    setZamanKutucugu(sayi) {
-        document.getElementById('zaman').innerText = sayi;
+    setZamanKutucugu() {
+        document.getElementById('zaman').innerText = String(this.zaman--);
+
+    }
+
+    /**
+     *  Benim ekranım 144hz olduğu için 144hz'ye göre hesaplıyorum. Mesela 60 fps'de iki kat hızlı olması gerek bundan
+     *  dolayı animasyonların.
+     */
+    gercekHiz(hiz) {
+        return hiz * 144 / this.fps;
+    }
+
+    gercekSahneSayisi(sahneSayisi) {
+        return Math.max(1, Math.round(sahneSayisi * this.fps / 144));
     }
 }
 
@@ -93,7 +110,10 @@ class Sprite {
             skala = 1,
             resimSayisi = 1,
             sonsuzAnimasyon = true,
+            sonundaSonSahneyiTut = false,
             isim,
+            kacSahnedeResimDegisir = 10,
+            yonuSagdir,
         }) {
         this.tuval = tuval;
         this.pozisyon = pozisyon;
@@ -105,12 +125,20 @@ class Sprite {
         this.skala = skala;
         this.resim = new Image();
         this.resim.src = resimKaynagi;
-        this.resim.classList.add('pixel-art-image');
+        this.resim.classList;
         this.resimSayisi = resimSayisi;
+        this.yonuSagdir = yonuSagdir;
+        this.sonundaSonSahneyiTut = sonundaSonSahneyiTut;
 
-        this.kacSahnedeResimDegisir = 10;
+        this.kacSahnedeResimDegisir = kacSahnedeResimDegisir;
+        if (this.isim == 'donme') {
+            this.kacSahnedeResimDegisir = 20;
+        }
         this.suankiSahne = 0;
+        this.gercekKacSahnedeResimDegistir = this.tuval.gercekSahneSayisi(this.kacSahnedeResimDegisir);
+
         this.birKereTamAnimasyonOldu = false;
+
     }
 
     ciz() {
@@ -127,17 +155,28 @@ class Sprite {
         return this;
     }
 
+    animasyonBasaSar() {
+        this.suankiResim = 0;
+        this.suankiSahne = 0;
+        this.birKereTamAnimasyonOldu = false;
+        this.gercekKacSahnedeResimDegistir = this.tuval.gercekSahneSayisi(this.kacSahnedeResimDegisir);
+    }
+
     guncelle() {
         if (this.suankiResim === this.resimSayisi) {
             this.birKereTamAnimasyonOldu = true;
+            if (!this.sonsuzAnimasyon && this.birKereTamAnimasyonOldu && this.sonundaSonSahneyiTut) {
+                this.suankiResim = this.resimSayisi - 1;
+            }
         }
-        if (this.sonsuzAnimasyon || !this.birKereTamAnimasyonOldu) {
+        if (this.sonsuzAnimasyon || !this.birKereTamAnimasyonOldu || this.sonundaSonSahneyiTut) {
             this.ciz();
         }
         if (this.suankiSahne === 0) {
             this.suankiResim++;
+            this.gercekKacSahnedeResimDegistir = this.tuval.gercekSahneSayisi(this.kacSahnedeResimDegisir);
         }
-        this.suankiSahne = (this.suankiSahne + 1) % this.kacSahnedeResimDegisir;
+        this.suankiSahne = (this.suankiSahne + 1) % this.gercekKacSahnedeResimDegistir;
 
         return this;
     }
@@ -205,10 +244,7 @@ class Savasci {
             renk,
             pozisyon,
             sagaBakiyor,
-            solTusu,
-            sagTusu,
-            saldiriTusu,
-            basilanTuslar,
+            kontroller,
             genislik,
             yukseklik,
             isim,
@@ -221,17 +257,18 @@ class Savasci {
         this.hiz = { x: 0, y: 0 };
         this.ivme = { x: 0, y: 0 }; // yercekimi haric
         this.yurumeIvmesi = { x: 0, y: 0 };
-        this.solTusu = solTusu;
-        this.sagTusu = sagTusu;
-        this.saldiriTusu = saldiriTusu;
+        this.kontroller = kontroller;
+
         this.isim = isim;
         this.canCubuguID = canCubuguID;
         this.canCubuguIsimID = canCubuguIsimID;
         this.sagaBakiyor = sagaBakiyor;
+        this.taklaAtiyor = false;
+        this.taklayiSagaAtiyor = false;
+        this.sonHasarAlinanYonSagdir = false;
+        this.hitKutusuOludur = false;
 
         document.getElementById(this.canCubuguIsimID).innerText = this.isim;
-
-        this.basilanTuslar = basilanTuslar;
 
         this.yercekimiIvmesi = 0.098;
         this.ziplamaHizi = 6;
@@ -240,12 +277,24 @@ class Savasci {
 
         this.kosuyor = false;
         this.silahKutusu = new Dikdortgen(this.tuval, pozisyon.x, pozisyon.y, 193, 110, 'rgba(255,255,255,0.53)');
-        this.saldiriHasari = 10;
+        this.saldiriHasari = 40;
         this.spriteler = spriteler;
         this.sprite = null;
 
         this.sonluEylemler = ['zipla', 'taklaAt', 'saldiri1', 'saldiri2'];
         this.suanYapilanEylem = null;
+
+        this.kanSpritesi = new Sprite(this.tuval, {
+            resimKaynagi: './sprites/Blood FX Lite/JASONTOMLEE_BLOOD_GUSH_3.png',
+            pozisyon: { x: 32, y: tuval.canvas.height - 111 },
+            resimSayisi: 14,
+            pozisyonOffset: { x: -30, y: -115 },
+            skala: 1.5,
+            isim: 'kan',
+            kacSahnedeResimDegisir: 2,
+            sonsuzAnimasyon: false,
+        });
+        this.kanAkiyor = false;
 
         // surekli true false olur saldırdıkça
         this.alternatifSaldiri = true;
@@ -269,6 +318,10 @@ class Savasci {
         document.getElementById(this.canCubuguID).style.width = this.can + '%';
     }
 
+    oludur() {
+        return this.can <= 0;
+    }
+
     zipla() {
         if (this.hitKutusu.yerdedir()) {
             this.hiz.y += -this.ziplamaHizi;
@@ -278,6 +331,8 @@ class Savasci {
 
     taklaAt() {
         if (!this.suanYapilanEylem) {
+            this.taklaAtiyor = true;
+            this.taklayiSagaAtiyor = this.sagaBakiyor;
             this.suanYapilanEylem = {
                 eylem: 'taklaAt',
                 spriteAdi: 'taklaAt',
@@ -303,7 +358,9 @@ class Savasci {
             this.alternatifSaldiri = !this.alternatifSaldiri;
             Savasci.lar.forEach((savaskar) => {
                 if (savaskar !== this && Dikdortgen.carpisir(this.silahKutusu, savaskar.hitKutusu)) {
-                    savaskar.can -= this.saldiriHasari;
+                    savaskar.can = Math.max(0, savaskar.can - this.saldiriHasari);
+                    savaskar.kanAkiyor = true;
+                    savaskar.sonHasarAlinanYonSagdir = this.hitKutusu.merkezKordinat().x > savaskar.hitKutusu.x;
                     savaskar.canCubuguGuncelle();
                     console.log(savaskar.isim, savaskar.can);
                 }
@@ -313,35 +370,40 @@ class Savasci {
     }
 
     hareketEt() {
-        if (this.basilanTuslar[this.sagTusu]) {
+        if (this.kontroller.sagKosu && this.kontroller.sonKosulanYonSagdir) {
             this.sagaBakiyor = true;
         }
-        if (this.basilanTuslar[this.solTusu]) {
+        if (this.kontroller.solKosu && !this.kontroller.sonKosulanYonSagdir) {
             this.sagaBakiyor = false;
         }
-        this.kosuyor = this.basilanTuslar[this.sagTusu] || this.basilanTuslar[this.solTusu];
-        if (this.basilanTuslar[this.sagTusu] && this.basilanTuslar[this.solTusu]) {
-            this.yuruyor = false;
-        }
+        // 3. durum: ikisi de false, oldugu gibi kalır yönü
 
-        if (this.kosuyor) {
-            if (this.sagaBakiyor) {
-                this.hitKutusu.x += this.yurumeHizi;
+        if (this.taklaAtiyor) {
+            if (this.taklayiSagaAtiyor) {
+                this.hitKutusu.x += this.tuval.gercekHiz(this.yurumeHizi);
             }
             else {
-                this.hitKutusu.x -= this.yurumeHizi;
+                this.hitKutusu.x -= this.tuval.gercekHiz(this.yurumeHizi);
+            }
+        }
+        else {
+            if (this.sagaBakiyor && this.kontroller.sagKosu) {
+                this.hitKutusu.x += this.tuval.gercekHiz(this.yurumeHizi);
+            }
+            else if (!this.sagaBakiyor && this.kontroller.solKosu) {
+                this.hitKutusu.x -= this.tuval.gercekHiz(this.yurumeHizi);
             }
         }
 
-        this.hitKutusu.x += this.hiz.x;
-        this.hitKutusu.y += this.hiz.y;
+        this.hitKutusu.x += this.tuval.gercekHiz(this.hiz.x);
+        this.hitKutusu.y += this.tuval.gercekHiz(this.hiz.y);
 
         if (this.hitKutusu.yerdedir()) {
             this.hitKutusu.y = this.tuval.yerKordinati - this.hitKutusu.yukseklik;
             this.hiz.y = 0;
         }
-        this.hiz.y += this.ivme.y + this.yercekimiIvmesi + this.yurumeIvmesi.y;
-        this.hiz.x += this.ivme.x + this.yurumeIvmesi.x;
+        this.hiz.y += this.tuval.gercekHiz(this.ivme.y + this.yercekimiIvmesi + this.yurumeIvmesi.y);
+        this.hiz.x += this.tuval.gercekHiz(this.ivme.x + this.yurumeIvmesi.x);
 
         return this;
     }
@@ -349,76 +411,151 @@ class Savasci {
     munasipSpriteSec() {
         let yonluSpriteler = this.sagaBakiyor ? this.spriteler.sag : this.spriteler.sol;
 
-        /**
-         * sprite animasyonu bitimi burasıdır. mesela zıplarken peşisıra gelecek animasyon vs. burada seçilir.
-         */
-        if (this.sprite && this.sprite.birKereTamAnimasyonOldu && this.sonluEylemler.includes(this.sprite.isim)) {
-            if (this.sprite.isim == 'taklaAt') {
-                this.hitKutusu.carpisabilir = true;
+        if (this.oludur()) {
+            if (this.sprite.isim != 'oldu') {
+                if (this.sonHasarAlinanYonSagdir) {
+                    this.sprite = this.spriteler.sag.oldu;
+                }
+                else {
+                    this.sprite = this.spriteler.sol.oldu;
+                }
             }
-            this.suanYapilanEylem = null;
-            this.sprite.birKereTamAnimasyonOldu = false;
-        }
-
-        if (this.suanYapilanEylem) {
-            if (this.sprite.isim !== this.suanYapilanEylem.spriteAdi) {
-                this.sprite = yonluSpriteler[this.suanYapilanEylem.spriteAdi];
-                this.sprite.suankiResim = 0;
-                this.sprite.suankiSahne = 0;
-            }
-
         }
         else {
-            if (!this.hitKutusu.yerdedir()) {
-                if (this.hiz.y <= 0) {
-                    this.sprite = yonluSpriteler.zipla;
+            /**
+             * sprite animasyonu bitimi burasıdır. mesela zıplarken peşisıra gelecek animasyon vs. burada seçilir.
+             */
+            if (this.sprite && this.sprite.birKereTamAnimasyonOldu && this.sonluEylemler.includes(this.sprite.isim)) {
+                if (this.sprite.isim == 'taklaAt') {
+                    this.hitKutusu.carpisabilir = true;
+                    this.taklaAtiyor = false;
                 }
-                else {
-                    this.sprite = yonluSpriteler.dusus;
-
-                }
-            }
-            else {
-                if (this.kosuyor) {
-                    this.sprite = yonluSpriteler.kosu;
-                }
-                else {
-                    this.sprite = yonluSpriteler.rolanti;
-                }
+                this.suanYapilanEylem = null;
+                this.sprite.birKereTamAnimasyonOldu = false;
             }
 
+            if (this.suanYapilanEylem) {
+                if (this.sprite.isim !== this.suanYapilanEylem.spriteAdi) {
+                    this.sprite = yonluSpriteler[this.suanYapilanEylem.spriteAdi];
+                    this.sprite.animasyonBasaSar();
+                }
+
+            }
+            else { // pasif spriteler. eylem yapılınca bunlar gözükmez.
+                if (!this.hitKutusu.yerdedir()) {
+                    if (this.hiz.y <= 0) {
+                        this.sprite = yonluSpriteler.zipla;
+                    }
+                    else {
+                        this.sprite = yonluSpriteler.dusus;
+
+                    }
+                }
+                else {
+                    if (this.sagaBakiyor && this.kontroller.sagKosu || !this.sagaBakiyor && this.kontroller.solKosu) {
+                        if ((this.sprite.isim == 'kosu' && (this.sprite.yonuSagdir != this.sagaBakiyor)) ||
+                            this.sprite.isim == 'donme') {
+                            if (this.sprite.isim == 'donme' && this.sprite.birKereTamAnimasyonOldu) {
+                                this.spriteler.sol.donme.animasyonBasaSar();
+                                this.spriteler.sag.donme.animasyonBasaSar();
+                                this.sprite = yonluSpriteler.kosu;
+                            }
+                            else {
+                                if (this.sagaBakiyor) {
+                                    this.sprite = this.spriteler.sol.donme;
+                                }
+                                else {
+                                    this.sprite = this.spriteler.sag.donme;
+                                }
+                            }
+
+                        }
+                        else {
+                            this.sprite = yonluSpriteler.kosu;
+                        }
+
+                    }
+                    else {
+                        this.sprite = yonluSpriteler.rolanti;
+                    }
+                }
+
+            }
         }
 
         return this;
     }
 
-    spritePozisyonAyarlaHitKutusunaGore() {
-        this.sprite.pozisyon.y = this.hitKutusu.y;
-        this.sprite.pozisyon.x = this.hitKutusu.x;
+    spritePozisyonAyarlaHitKutusunaGore(sprite) {
+        sprite.pozisyon.y = this.hitKutusu.y;
+        sprite.pozisyon.x = this.hitKutusu.x;
         return this;
+    }
+
+    oluHitKutusuYap() {
+        const uzunKenar = this.hitKutusu.yukseklik;
+        const kisaKenar = this.hitKutusu.genislik;
+        this.hitKutusu.genislik = uzunKenar;
+        this.hitKutusu.yukseklik = kisaKenar / 2;
+        this.hitKutusu.y += uzunKenar - kisaKenar + this.hitKutusu.yukseklik;
+        if (this.sonHasarAlinanYonSagdir) {
+
+            this.hitKutusu.x -= kisaKenar * 1.5;
+            this.spriteler.sag.oldu.pozisyonOffset = { x: -47, y: -165 - this.hitKutusu.yukseklik };
+        }
+        else {
+            this.hitKutusu.x += kisaKenar;
+            this.spriteler.sol.oldu.pozisyonOffset = { x: -180, y: -165 - this.hitKutusu.yukseklik };
+        }
+        this.hitKutusuOludur = true;
     }
 
     guncelle() {
+        if (this.kanAkiyor) {
+            this.spritePozisyonAyarlaHitKutusunaGore(this.kanSpritesi);
+            this.kanSpritesi.guncelle();
+
+            if (this.kanSpritesi.birKereTamAnimasyonOldu) {
+                this.kanAkiyor = false;
+                this.kanSpritesi.animasyonBasaSar();
+            }
+        }
+        if (this.kontroller.zipla) {
+            this.zipla();
+        }
+        if (this.kontroller.taklaAt) {
+            this.taklaAt();
+        }
+
+        if (!this.oludur()) {
+            if (this.kontroller.saldiri && !this.saldirildi) {
+                this.saldir();
+            }
+            this.saldirildi = Boolean(this.kontroller.saldiri);
+        }
+
         this.hareketEt();
         this.silahYeriniAyarla();
 
-        this.munasipSpriteSec().spritePozisyonAyarlaHitKutusunaGore();
+        this.munasipSpriteSec();
+        this.spritePozisyonAyarlaHitKutusunaGore(this.sprite);
         this.sprite.guncelle();
 
-        if (this.basilanTuslar[this.saldiriTusu] && !this.saldirildi) {
-            this.saldir();
+        if (this.oludur() && this.sprite.isim == 'oldu' && this.sprite.birKereTamAnimasyonOldu && !this.hitKutusuOludur) {
+            this.oluHitKutusuYap();
         }
-        this.saldirildi = Boolean(this.basilanTuslar[this.saldiriTusu]);
-
         return this;
     }
 
 }
 
 function main() {
-    const basilanTuslar = {}
 
     const tuval = new Tuval(document.querySelector('canvas'), 800, 600, 480);
+
+    setInterval(() => {
+        tuval.setZamanKutucugu();
+    }, 1000)
     const arkaplan = new Sprite(tuval, {
         pozisyon: {
             x: 0,
@@ -427,294 +564,344 @@ function main() {
         resimKaynagi: './sprites/NightForest/Image without mist.png',
         skala: 1.67,
     });
+    const oyuncuKontroller = {
+        solKosu: false,
+        sagKosu: false,
+        sonKosulanYonSagdir: false,
+        saldiri: false,
+        taklaAt: false,
+        zipla: false,
+    };
+    const spriteler = {
+        sol: {
+            rolanti: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Idle.png',
+                resimSayisi: 10,
+                pozisyonOffset: { x: -130, y: -115 },
+                skala: 1,
+                isim: 'rolanti',
+                yonuSagdir: false,
+            }),
+            kosu: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Run.png',
+                resimSayisi: 10,
+                pozisyonOffset: { x: -140, y: -115 },
+                skala: 1,
+                isim: 'kosu',
+                yonuSagdir: false,
+            }),
+            donme: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_TurnAround.png',
+                resimSayisi: 3,
+                pozisyonOffset: { x: -140, y: -115 },
+                skala: 1,
+                isim: 'donme',
+                yonuSagdir: false,
+            }),
+            taklaAt: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Roll.png',
+                resimSayisi: 12,
+                pozisyonOffset: { x: -130, y: -115 },
+                skala: 1,
+
+                isim: 'taklaAt',
+                yonuSagdir: false,
+            }),
+            zipla: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Jump.png',
+                resimSayisi: 3,
+                pozisyonOffset: { x: -130, y: -115 },
+                skala: 1,
+                isim: 'zipla',
+                yonuSagdir: false,
+            }),
+
+            dusus: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Fall.png',
+                resimSayisi: 3,
+                pozisyonOffset: { x: -130, y: -115 },
+                skala: 1,
+                isim: 'dusus',
+                yonuSagdir: false,
+            }),
+            saldiri1: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_AttackNoMovement.png',
+                resimSayisi: 4,
+                pozisyonOffset: { x: -130, y: -115 },
+                skala: 1,
+                isim: 'saldiri1',
+                kacSahnedeResimDegisir: 7,
+                yonuSagdir: false,
+            }),
+            saldiri2: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Attack2NoMovement.png',
+                resimSayisi: 6,
+                pozisyonOffset: { x: -130, y: -115 },
+                skala: 1,
+                isim: 'saldiri2',
+                kacSahnedeResimDegisir: 7,
+                yonuSagdir: false,
+            }),
+            oldu: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Death.png',
+                resimSayisi: 10,
+                pozisyonOffset: { x: -130, y: -115 }, // pozisyonOffset: { x: -45, y: -165 },
+                skala: 1,
+                isim: 'oldu',
+                yonuSagdir: false,
+                sonsuzAnimasyon: false,
+                sonundaSonSahneyiTut: true,
+            }),
+
+        },
+        sag: {
+            rolanti: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Idle.png',
+                resimSayisi: 10,
+                pozisyonOffset: { x: -122, y: -115 },
+                skala: 1,
+                isim: 'rolanti',
+                yonuSagdir: true,
+            }),
+            kosu: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Run.png',
+                resimSayisi: 10,
+                pozisyonOffset: { x: -126, y: -115 },
+                skala: 1,
+                isim: 'kosu',
+                yonuSagdir: true,
+            }),
+            donme: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_TurnAround.png',
+                resimSayisi: 3,
+                pozisyonOffset: { x: -126, y: -115 },
+                skala: 1,
+                isim: 'donme',
+                yonuSagdir: true,
+            }),
+            taklaAt: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Roll.png',
+                resimSayisi: 12,
+                pozisyonOffset: { x: -122, y: -115 },
+                skala: 1,
+
+                isim: 'taklaAt',
+                yonuSagdir: true,
+            }),
+            zipla: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Jump.png',
+                resimSayisi: 3,
+                pozisyonOffset: { x: -122, y: -115 },
+                skala: 1,
+                isim: 'zipla',
+                yonuSagdir: true,
+            }),
+            dusus: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Fall.png',
+                resimSayisi: 3,
+                pozisyonOffset: { x: -122, y: -115 },
+                skala: 1,
+                isim: 'dusus',
+                yonuSagdir: true,
+            }),
+            saldiri1: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_AttackNoMovement.png',
+                resimSayisi: 4,
+                pozisyonOffset: { x: -122, y: -115 },
+                skala: 1,
+                isim: 'saldiri1',
+                kacSahnedeResimDegisir: 7,
+                yonuSagdir: true,
+            }),
+            saldiri2: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Attack2NoMovement.png',
+                resimSayisi: 6,
+                pozisyonOffset: { x: -122, y: -115 },
+                skala: 1,
+                isim: 'saldiri2',
+                kacSahnedeResimDegisir: 7,
+                yonuSagdir: true,
+            }),
+            oldu: new Sprite(tuval, {
+                resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Death.png',
+                resimSayisi: 10,
+                pozisyonOffset: { x: -122, y: -115 },  // pozisyonOffset: { x: -45, y: -165 },
+                skala: 1,
+                isim: 'oldu',
+                yonuSagdir: true,
+                sonsuzAnimasyon: false,
+                sonundaSonSahneyiTut: true,
+            }),
+        },
+    };
     const oyuncu = new Savasci(tuval, {
         renk: 'rgba(255,0,0,0.5)',
-        pozisyon: { x: 32, y: tuval.canvas.height - 111 },
+        pozisyon: { x: 150, y: tuval.canvas.height - 111 },
         sagaBakiyor: true,
-        solTusu: 'ArrowLeft',
-        sagTusu: 'ArrowRight',
-        saldiriTusu: 'ArrowDown',
+        kontroller: oyuncuKontroller,
+
         genislik: 50,
         yukseklik: 100,
-        basilanTuslar,
         isim: 'lutfullah',
         canCubuguID: 'ic-can-cubugu-1',
         canCubuguIsimID: 'can-cubugu-isim-1',
-        spriteler: {
-            sol: {
-                rolanti: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Idle.png',
-                    pozisyon: { x: 32, y: tuval.canvas.height - 111 },
-                    resimSayisi: 10,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'rolanti',
-                }),
-                kosu: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Run.png',
-                    pozisyon: { x: 32, y: tuval.canvas.height - 111 },
-                    resimSayisi: 10,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'kosu',
-                }),
-                taklaAt: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Roll.png',
-                    resimSayisi: 12,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    sonsuzAnimasyon: false,
-                    isim: 'taklaAt',
-                }),
-                zipla: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Jump.png',
-                    resimSayisi: 3,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'zipla',
-                }),
-
-                dusus: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Fall.png',
-                    resimSayisi: 3,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'dusus',
-                }),
-                saldiri1: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_AttackNoMovement.png',
-                    resimSayisi: 4,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'saldiri1',
-                }),
-                saldiri2: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Attack2NoMovement.png',
-                    resimSayisi: 6,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'saldiri2',
-                }),
-            },
-            sag: {
-                rolanti: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Idle.png',
-                    pozisyon: { x: 32, y: tuval.canvas.height - 111 },
-                    resimSayisi: 10,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'rolanti',
-                }),
-                kosu: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Run.png',
-                    pozisyon: { x: 32, y: tuval.canvas.height - 111 },
-                    resimSayisi: 10,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'kosu',
-                }),
-                taklaAt: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Roll.png',
-                    resimSayisi: 12,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    sonsuzAnimasyon: false,
-                    isim: 'taklaAt',
-                }),
-                zipla: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Jump.png',
-                    resimSayisi: 3,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    sonsuzAnimasyon: false,
-                    isim: 'zipla',
-                }),
-
-                dusus: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Fall.png',
-                    resimSayisi: 3,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'dusus',
-                }),
-                saldiri1: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_AttackNoMovement.png',
-                    resimSayisi: 4,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'saldiri1',
-                }),
-                saldiri2: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Attack2NoMovement.png',
-                    resimSayisi: 6,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'saldiri2',
-                }),
-            },
-        },
+        spriteler,
     });
+    const oyuncu2Kontroller = {
+        solKosu: false,
+        sagKosu: false,
+        sonKosulanYonSagdir: false,
+        saldiri: false,
+        taklaAt: false,
+        zipla: false,
+    };
     const oyuncu2 = new Savasci(tuval, {
         renk: 'rgba(255,0,0,0.5)',
-        pozisyon: { x: 320, y: 0 },
+        pozisyon: { x: 600, y: 0 },
         sagaBakiyor: false,
-        solTusu: 'a',
-        sagTusu: 'd',
-        saldiriTusu: ' ',
+        kontroller: oyuncu2Kontroller,
         genislik: 50,
         yukseklik: 100,
-        basilanTuslar,
         isim: 'o',
         canCubuguID: 'ic-can-cubugu-2',
         canCubuguIsimID: 'can-cubugu-isim-2',
-        spriteler: {
-            sol: {
-                rolanti: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Idle.png',
-                    resimSayisi: 10,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'rolanti',
-                }),
-                kosu: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Run.png',
-                    resimSayisi: 10,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'kosu',
-                }),
-                taklaAt: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Roll.png',
-                    resimSayisi: 12,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    sonsuzAnimasyon: false,
-                    isim: 'taklaAt',
-                }),
-                zipla: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Jump.png',
-                    resimSayisi: 3,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    sonsuzAnimasyon: false,
-                    isim: 'zipla',
-                }),
-
-                dusus: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Fall.png',
-                    resimSayisi: 3,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'dusus',
-                }),
-                saldiri1: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_AttackNoMovement.png',
-                    resimSayisi: 4,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'saldiri1',
-                }),
-                saldiri2: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Attack2NoMovement.png',
-                    resimSayisi: 6,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'saldiri2',
-                }),
-
-            },
-            sag: {
-                rolanti: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Idle.png',
-                    resimSayisi: 10,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'rolanti',
-                }),
-                kosu: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Run.png',
-                    resimSayisi: 10,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'kosu',
-                }),
-                taklaAt: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Roll.png',
-                    resimSayisi: 12,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    sonsuzAnimasyon: false,
-                    isim: 'taklaAt',
-                }),
-                zipla: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Jump.png',
-                    resimSayisi: 3,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    sonsuzAnimasyon: false,
-                    isim: 'zipla',
-                }),
-                dusus: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Fall.png',
-                    resimSayisi: 3,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'dusus',
-                }),
-                saldiri1: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_AttackNoMovement.png',
-                    resimSayisi: 4,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'saldiri1',
-                }),
-                saldiri2: new Sprite(tuval, {
-                    resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Attack2NoMovement.png',
-                    resimSayisi: 6,
-                    pozisyonOffset: { x: -122, y: -115 },
-                    skala: 1,
-                    isim: 'saldiri2',
-                }),
-            },
-        },
+        spriteler,
     });
 
     window.addEventListener('keydown', (event) => {
         switch (event.key) {
-            case 'w':
-                oyuncu2.zipla();
+            case 'ArrowLeft':
+                oyuncuKontroller.solKosu = true;
+                oyuncuKontroller.sonKosulanYonSagdir = false;
+                break;
+            case 'ArrowRight':
+                oyuncuKontroller.sagKosu = true;
+                oyuncuKontroller.sonKosulanYonSagdir = true;
                 break;
             case 'ArrowUp':
-                oyuncu.zipla();
+                oyuncuKontroller.zipla = true;
                 break;
-            case 'Shift':
-                oyuncu2.taklaAt();
+            case 'ArrowDown':
+                oyuncuKontroller.saldiri = true;
                 break;
             case 'ö':
-                oyuncu.taklaAt();
+            case 'Ö':
+                oyuncuKontroller.taklaAt = true;
                 break;
-            default:
-                basilanTuslar[event.key] = true;
+            case 'w':
+            case 'W':
+                oyuncu2Kontroller.zipla = true;
+                break;
+            case 'a':
+            case 'A':
+                oyuncu2Kontroller.solKosu = true;
+                oyuncu2Kontroller.sonKosulanYonSagdir = false;
+                break;
+            case 's':
+            case 'S':
+                break;
+            case 'd':
+            case 'D':
+                oyuncu2Kontroller.sagKosu = true;
+                oyuncu2Kontroller.sonKosulanYonSagdir = true;
+                break;
+            case 'Shift':
+                oyuncu2Kontroller.taklaAt = true;
+                break;
+            case ' ':
+                oyuncu2Kontroller.saldiri = true;
+                break;
         }
     });
     window.addEventListener('keyup', (event) => {
-        basilanTuslar[event.key] = false;
+        switch (event.key) {
+            case 'ArrowLeft':
+                oyuncuKontroller.solKosu = false;
+                oyuncuKontroller.sonKosulanYonSagdir = true;
+                break;
+            case 'ArrowRight':
+                oyuncuKontroller.sagKosu = false;
+                oyuncuKontroller.sonKosulanYonSagdir = false;
+                break;
+            case 'ArrowUp':
+                oyuncuKontroller.zipla = false;
+                break;
+            case 'ArrowDown':
+                oyuncuKontroller.saldiri = false;
+                break;
+            case 'ö':
+            case 'Ö':
+                oyuncuKontroller.taklaAt = false;
+                break;
+            case 'w':
+            case 'W':
+                oyuncu2Kontroller.zipla = false;
+                break;
+            case 'a':
+            case 'A':
+                oyuncu2Kontroller.solKosu = false;
+                oyuncu2Kontroller.sonKosulanYonSagdir = true;
+                break;
+            case 's':
+            case 'S':
+                break;
+            case 'd':
+            case 'D':
+                oyuncu2Kontroller.sagKosu = false;
+                oyuncu2Kontroller.sonKosulanYonSagdir = false;
+                break;
+            case 'Shift':
+                oyuncu2Kontroller.taklaAt = false;
+                break;
+            case ' ':
+                oyuncu2Kontroller.saldiri = false;
+                break;
+        }
     });
+    window.addEventListener('mousedown', () => {
+        oyuncu2Kontroller.saldiri = true;
+    })
+    window.addEventListener('mouseup', () => {
+        oyuncu2Kontroller.saldiri = false;
+    })
+    window.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+    })
+
+    // https://stackoverflow.com/questions/4787431/check-fps-in-js
+    // The higher this value, the less the fps will reflect temporary variations
+    // A value of 1 will only keep the last value
+    // 16.7ms yani 60 fps'den baslatiyoruz hesaplamaya.
+
+    const filterStrength = 5;
+    let frameTime = 16.7, lastLoop = performance.now(), thisLoop;
 
     function canlandir() {
         window.requestAnimationFrame(canlandir);
+        tuval.fps = 1000 / frameTime;
         tuval.temizle();
         arkaplan.guncelle();
         oyuncu.guncelle();
         oyuncu2.guncelle();
         SavasciCarpisma.engelle();
+
+        let thisFrameTime = (thisLoop = performance.now()) - lastLoop;
+        frameTime += (thisFrameTime - frameTime) / filterStrength;
+        lastLoop = thisLoop;
+
     }
+
+    let fpsOut = document.getElementById('fps');
+    setInterval(function () {
+        fpsOut.innerHTML = (1000 / frameTime).toFixed(1) + " fps";
+    }, 1000);
 
     canlandir();
 }
 
 if (typeof require === 'undefined') { // tarayicida calisacak, testte degil
     main();
+
 }
 else {
     module.exports = {
