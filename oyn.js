@@ -2,9 +2,7 @@
  * @jest-environment jsdom
  */
 /**
- * todo: oyun hızı fps'ye bağımlı olmasın
- * todo: mouse ile de saldırılsın
- * todo: hasar alınca kan çıksın rastgele ve ses çıksın vıcık vıcık
+ * todo: hasar alınca ses çıksın vıcık vıcık
  */
 class Tuval {
     constructor(canvas, genislik, yukseklik, yerKordianti) {
