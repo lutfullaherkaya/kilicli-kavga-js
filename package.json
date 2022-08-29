@@ -17,6 +17,7 @@
   "dependencies": {
     "core-js": "^3.8.3",
     "express": "^4.18.1",
+    "socket.io": "^4.5.1",
     "vue": "^2.6.14",
     "vue-router": "^3.5.1"
   },
@@ -51,7 +52,6 @@
       "ecmaVersion": 2020
     },
     "rules": {}
-
   },
   "browserslist": [
     "> 1%",
