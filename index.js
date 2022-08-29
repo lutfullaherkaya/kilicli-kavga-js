@@ -3,7 +3,7 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 
-app.use(express.static('public'))
+app.use(express.static('dist'))
 
 
 const PORT = process.env.PORT || 3000;
