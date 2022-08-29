@@ -7,9 +7,12 @@
   "scripts": {
     "test": "jest"
   },
-
   "jest": {
-    "setupFiles": ["jest-canvas-mock"]
+    "setupFiles": [
+      "jest-canvas-mock"
+    ]
+  },
+  "dependencies": {
+    "express": "^4.18.1"
   }
-
 }

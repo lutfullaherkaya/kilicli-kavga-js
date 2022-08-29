@@ -275,7 +275,7 @@ class Savasci {
 
         this.kosuyor = false;
         this.silahKutusu = new Dikdortgen(this.tuval, pozisyon.x, pozisyon.y, 193, 110, 'rgba(255,255,255,0.53)');
-        this.saldiriHasari = 40;
+        this.saldiriHasari = 10;
         this.spriteler = spriteler;
         this.sprite = null;
 
@@ -509,6 +509,8 @@ class Savasci {
     }
 
     guncelle() {
+        /*this.hitKutusu.ciz();
+        this.silahKutusu.ciz();*/
         if (this.kanAkiyor) {
             this.spritePozisyonAyarlaHitKutusunaGore(this.kanSpritesi);
             this.kanSpritesi.guncelle();
