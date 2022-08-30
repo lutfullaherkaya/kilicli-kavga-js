@@ -1,9 +1,8 @@
 <template>
-  <div id="app">
-    <nav>
-    </nav>
+  <v-app id="app">
+
     <router-view/>
-  </div>
+  </v-app>
 </template>
 
 <style lang="scss">
@@ -22,6 +21,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+    background-color: #1c2323;
 }
 
 nav {
