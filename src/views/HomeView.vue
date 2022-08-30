@@ -1,6 +1,17 @@
 <template>
     <div class="home">
-        <kilicli-kavga-oyunu/>
+        <v-container
+        >
+            <v-row
+                    no-gutters
+
+            >
+                <v-col>
+                    <kilicli-kavga-oyunu/>
+                </v-col>
+            </v-row>
+        </v-container>
+
     </div>
 </template>
 

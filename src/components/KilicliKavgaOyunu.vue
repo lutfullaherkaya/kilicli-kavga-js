@@ -1,31 +1,51 @@
 <template>
-    <div class="canvas-container">
-        <div id="fps" style="position: absolute; top: 1px; left: 1px; color: white; font-size: 0.5rem;"></div>
-        <canvas></canvas>
-        <div class="can-zaman-arayuzu">
-            <div class="can-cubugu can-cubugu-1">
-                <div id="ic-can-cubugu-1"></div>
-                <span id="can-cubugu-isim-1" class="can-cubugu-isim">oyncu1</span>
+    <div>
+        <div class="canvas-container" ref="canvas-container" style="width: 100%; height: 100%;">
+            <div id="fps" style="position: absolute; top: 1px; left: 1px; color: white; font-size: 0.5rem;"></div>
+            <div class="genislik-sinirlayici" :style="{width: genislikSinirlayiciGenisligi}">
+                <!-- bunun amaci tam ekran oldugunda kenarlara siyah cubuk koyabilmek -->
+                <v-responsive :aspect-ratio="16/9">
+                    <canvas style="width: 100%; height: 100%;"></canvas>
+                    <kilicli-kavga-oyunu-arayuz @tam-ekrani-ac="tamEkraniAc"
+                                                @tam-ekrani-kapat="tamEkraniKapat"
+                                                @kontroller-degisti="kontrolGuncelle(oyuncuKontroller, $event)"
+                                                :tam-ekrandir="tamEkrandir"
+                                                :mobil-kontrolleri-goster="mobilKontrolleriGoster"
+                                                :savasci-kontrolleri-mobil="oyuncuKontroller"
+
+                    ></kilicli-kavga-oyunu-arayuz>
+                </v-responsive>
             </div>
-            <div class="zaman-kutusu">
-                <span id="zaman">90</span>
-            </div>
-            <div class="can-cubugu can-cubugu-2">
-                <div id="ic-can-cubugu-2"></div>
-                <span id="can-cubugu-isim-2" class="can-cubugu-isim">oyncu2</span>
-            </div>
+
         </div>
+        <v-switch
+                v-model="mobilKontrolleriGoster"
+                inset
+                label="Mobil Kontrolleri Göster"
+        ></v-switch>
     </div>
+
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import {Sprite, Savasci, SavasciKontrolleri, Tuval, SavasciCarpisma} from '@/js/oyn.ts';
+import {Sprite, Savasci, SavasciKontrolleri, Tuval, SavasciCarpisma} from '@/js/oyn';
+import KilicliKavgaOyunuArayuz from '@/components/KilicliKavgaOyunuArayuz.vue';
+import {io} from "socket.io-client";
 
 export default Vue.extend({
     name: 'KilicliKavgaOyunu',
+    components: {KilicliKavgaOyunuArayuz},
+
+
     data() {
         return {
+            tamEkrandir: false,
+            mobildir: false,
+            mobilKontrolleriGoster: false,
+            ekranGenisligi: 100,
+            ekranYuksekligi: 100,
+            socket: io(),
             oyuncuKontroller: {
                 solKosu: false,
                 sagKosu: false,
@@ -44,10 +64,52 @@ export default Vue.extend({
             } as SavasciKontrolleri,
         }
     },
+    computed: {
+        genislikSinirlayiciGenisligi(): string {
+            if (this.tamEkrandir && this.ekranGenisligi / this.ekranYuksekligi >= 16 / 9) {
+                return this.ekranYuksekligi * 16 / 9 + 'px';
+            } else {
+                return '100%';
+            }
+        }
+    },
     methods: {
+        ekranBoyutuGuncelle(): void {
+            this.ekranGenisligi = window.outerWidth;
+            this.ekranYuksekligi = window.outerHeight;
+        },
+        tamEkranGuncelle(): void {
+            this.tamEkrandir = Boolean(document.fullscreenElement);
+        },
+        mobilMi(): boolean {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        },
+        tamEkraniAc(): void {
+            const elem = this.$refs["canvas-container"] as HTMLDivElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+        },
+        tamEkraniKapat() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) { /* Safari */
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) { /* IE11 */
+                document.msExitFullscreen();
+            }
+        },
+        kontrolGuncelle(hedefKontroller: SavasciKontrolleri, kaynakKontroller: SavasciKontrolleri): void {
+            Object.assign(hedefKontroller, kaynakKontroller);
+        },
         main() {
-
-            const tuval = new Tuval(document.querySelector('canvas')!, 800, 600, 480);
+            const tuvalYuksekligi = 768;
+            const tuvalGenisligi = 1366;
+            const tuval = new Tuval(document.querySelector('canvas')!, tuvalGenisligi, tuvalYuksekligi, (tuvalYuksekligi / 600) * 490);
 
             setInterval(() => {
                 tuval.setZamanKutucugu();
@@ -58,7 +120,7 @@ export default Vue.extend({
                     y: 0,
                 },
                 resimKaynagi: './sprites/NightForest/Image without mist.png',
-                skala: 1.67,
+                skala: 1.72 * tuvalYuksekligi / 600,
             });
 
             const spriteler = {
@@ -295,9 +357,9 @@ export default Vue.extend({
                         break;
                 }
                 if (birinciOyuncuTuslari.includes(event.key)) {
-                    this.$socket.emit('oyun bilgisi', this.oyuncuKontroller);
+                    this.socket.emit('oyun bilgisi', this.oyuncuKontroller);
                 } else {
-                    this.$socket.emit('oyun bilgisi', this.oyuncu2Kontroller);
+                    this.socket.emit('oyun bilgisi', this.oyuncu2Kontroller);
 
                 }
             });
@@ -347,9 +409,9 @@ export default Vue.extend({
                         break;
                 }
                 if (birinciOyuncuTuslari.includes(event.key)) {
-                    this.$socket.emit('oyun bilgisi', this.oyuncuKontroller);
+                    this.socket.emit('oyun bilgisi', this.oyuncuKontroller);
                 } else {
-                    this.$socket.emit('oyun bilgisi', this.oyuncu2Kontroller);
+                    this.socket.emit('oyun bilgisi', this.oyuncu2Kontroller);
 
                 }
             });
@@ -395,27 +457,41 @@ export default Vue.extend({
         }
     },
     mounted() {
+        window.addEventListener('resize', this.ekranBoyutuGuncelle);
+        window.addEventListener('fullscreenchange', this.tamEkranGuncelle);
+        window.addEventListener('mozfullscreenchange', this.tamEkranGuncelle);
+        window.addEventListener('webkitfullscreenchange', this.tamEkranGuncelle);
+        window.addEventListener('msfullscreenchange', this.tamEkranGuncelle);
+        this.mobildir = this.mobilMi();
+        this.mobilKontrolleriGoster = this.mobildir;
+
+
         this.main();
-        this.$socket.on('oyun bilgisi', (msg) => {
+        this.socket.on('oyun bilgisi', (msg) => {
             console.log(JSON.stringify(msg));
             if (msg.birinciOyuncudur) {
-                Object.assign(this.oyuncuKontroller, msg)
+                this.kontrolGuncelle(this.oyuncuKontroller, msg)
 
             } else {
-                Object.assign(this.oyuncu2Kontroller, msg)
+                this.kontrolGuncelle(this.oyuncu2Kontroller, msg)
             }
         })
+    },
+
+    destroyed() {
+        window.removeEventListener('resize', this.ekranBoyutuGuncelle);
+        window.removeEventListener('fullscreenchange', this.tamEkranGuncelle);
+        window.removeEventListener('mozfullscreenchange', this.tamEkranGuncelle);
+        window.removeEventListener('webkitfullscreenchange', this.tamEkranGuncelle);
+        window.removeEventListener('msfullscreenchange', this.tamEkranGuncelle);
+
     }
 })
-;
+
 </script>
 
 <style scoped lang="scss">
-* {
-    --zaman-genisligi: 10%;
-    --can-cubugu-yuksekligi: 15px;
-    --can-cubugu-kenar-kalinligi: 2px;
-}
+
 
 canvas, img {
     image-rendering: pixelated;
@@ -425,71 +501,20 @@ canvas, img {
 
 .canvas-container {
     position: relative;
-}
-
-.can-zaman-arayuzu {
-
-    position: absolute;
-    top: 1%;
-    left: 1%;
-    right: 1%;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    color: #e8e8e8;
+    justify-content: center;
+
 }
 
-.can-cubugu {
-    background-color: black;
+.genislik-sinirlayici {
+    width: 100%;
     height: 100%;
-    width: 100%;
-    padding: var(--can-cubugu-kenar-kalinligi);
-
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.can-cubugu-1 {
-    padding-right: 0;
-}
 
-.can-cubugu-2 {
-    padding-left: 0;
-}
-
-#ic-can-cubugu-1, #ic-can-cubugu-2 {
-    width: 100%;
-    height: var(--can-cubugu-yuksekligi);
-    background-color: rgba(255, 84, 84, 0.82);
-    transition: width 0.2s ease-in-out;
-}
-
-#ic-can-cubugu-1 {
-
-}
-
-#ic-can-cubugu-2 {
-    float: right;
-}
-
-.zaman-kutusu {
-    padding: 5px;
-    border-top: black solid var(--can-cubugu-kenar-kalinligi);
-    border: black solid var(--can-cubugu-kenar-kalinligi);
-    background-color: slategray;
-    text-align: center;
-}
-
-.can-cubugu-isim {
-    position: absolute;
-    top: 50%;
-
-    transform: translate(0, -50%);
-}
-
-#can-cubugu-isim-1 {
-    left: calc(var(--can-cubugu-kenar-kalinligi) * 2);
-}
-
-#can-cubugu-isim-2 {
-    right: calc(var(--can-cubugu-kenar-kalinligi) * 2);
-}
 </style>

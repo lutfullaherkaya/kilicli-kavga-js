@@ -5,26 +5,22 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 
 app.use(express.static('dist'))
-
-
+app.get('/ws', (req, res) => {
+    console.log('asdf');
+})
 
 
 const io = new Server(server);
-let birinciOyuncuSocket;
-let ikinciOyuncuSocket;
+
 
 io.on('connection', (socket) => {
     console.log('a user connected');
-    if (!birinciOyuncuSocket) {
-        birinciOyuncuSocket = socket;
-    } else if (ikinciOyuncuSocket) {
-        ikinciOyuncuSocket = socket;
-    }
 
     socket.on('oyun bilgisi', function(msg) {
         console.log('gonderiliyor', JSON.stringify(msg));
-        msg.birinciOyuncudur = (socket === birinciOyuncuSocket);
+/*
         socket.broadcast.emit('oyun bilgisi', msg)
+*/
     });
 
     socket.on('disconnect', () => {

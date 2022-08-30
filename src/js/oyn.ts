@@ -410,8 +410,16 @@ export class Savasci {
         }
     }
 
+    // play mp3 file
+    mp3Cal(fileName: string) {
+        const audio = new Audio(`/${fileName}.mp3`);
+        audio.play();
+    }
+
+
     saldir() {
         if (!this.suanYapilanEylem) {
+            this.mp3Cal('ahmet');
             if (this.alternatifSaldiri) {
                 this.suanYapilanEylem = {
                     spriteAdi: 'saldiri2',
