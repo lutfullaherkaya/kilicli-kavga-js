@@ -28,7 +28,7 @@
 import Vue from "vue";
 
 export default Vue.extend({
-    name: 'kilicli-kavga-oyunu-arayuz-can-zaman',
+    name: 'KilicliKavgaOyunuArayuzCanZaman',
     props: {
         tamEkrandir: Boolean,
     },

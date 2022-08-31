@@ -67,7 +67,7 @@ export default Vue.extend({
             this.joystickAyarlari.zone = this.$refs['joystick-menzili'];
             this.joystickAyarlari.color = this.butonRengi;
             this.joystick = nipplejs.create(this.joystickAyarlari);
-            this.joystick.on('dir:left', (evt, data) => {
+            this.joystick.on('dir:left', () => {
                 const yeniKontroller = {
                     solKosu: true,
                     sagKosu: false,
@@ -75,7 +75,7 @@ export default Vue.extend({
                 };
                 this.$emit('kontroller-degisti', yeniKontroller);
             });
-            this.joystick.on('dir:right', (evt, data) => {
+            this.joystick.on('dir:right', () => {
                 const yeniKontroller = {
                     solKosu: false,
                     sagKosu: true,
@@ -83,7 +83,7 @@ export default Vue.extend({
                 };
                 this.$emit('kontroller-degisti', yeniKontroller);
             });
-            this.joystick.on('dir:up dir:down', (evt, data) => {
+            this.joystick.on('dir:up dir:down', () => {
                 const yeniKontroller = {
                     solKosu: false,
                     sagKosu: false,
@@ -91,7 +91,7 @@ export default Vue.extend({
                 this.$emit('kontroller-degisti', yeniKontroller);
             });
 
-            this.joystick.on('move', (evt, data) => {
+            this.joystick.on('move', (evt: nipplejs.JoystickEventTypes, data: nipplejs.JoystickOutputData) => {
                 if (data.angle.degree > 30 && data.angle.degree < 150) {
                     if (!this.savasciKontrolleriMobil.zipla) {
                         const yeniKontroller = {
@@ -109,7 +109,7 @@ export default Vue.extend({
                 }
             })
 
-            this.joystick.on('end', (evt, data) => {
+            this.joystick.on('end', () => {
                 const yeniKontroller = {
                     solKosu: false,
                     sagKosu: false,
@@ -120,7 +120,7 @@ export default Vue.extend({
             });
         },
         joystickBoyutYenile() {
-            const yeniBoyut = Math.round(this.$refs['arayuz-mobil-komponenti'].clientWidth * this.joystickGenislikYuzdesi / 100);
+            const yeniBoyut = Math.round((this.$refs['arayuz-mobil-komponenti'] as HTMLDivElement)!.clientWidth * this.joystickGenislikYuzdesi / 100);
             if (this.joystickAyarlari.size !== yeniBoyut) {
                 this.joystickAyarlari.size = yeniBoyut;
                 if (this.joystick && this.joystick.length > 0) {

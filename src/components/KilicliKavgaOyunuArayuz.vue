@@ -13,8 +13,8 @@
 </template>
 
 <script lang="ts">
-import KilicliKavgaOyunuArayuzCanZaman from '@/components/KilicliKavgaOyunuArayuzCanZaman';
-import KilicliKavgaOyunuArayuzMobil from '@/components/KilicliKavgaOyunuArayuzMobil';
+import KilicliKavgaOyunuArayuzCanZaman from '@/components/KilicliKavgaOyunuArayuzCanZaman.vue';
+import KilicliKavgaOyunuArayuzMobil from '@/components/KilicliKavgaOyunuArayuzMobil.vue';
 import { SavasciKontrolleri } from '@/js/oyn';
 import Vue from "vue";
 

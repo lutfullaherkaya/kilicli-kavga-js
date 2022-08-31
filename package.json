@@ -3,26 +3,39 @@
   "version": "1.0.0",
   "private": true,
   "description": "lütfullah erkaya oyun oynama platformu",
+  "type": "module",
   "author": {
     "name": "Lütfullah Erkaya"
   },
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build && tsc -p tsconfig.backend.json",
+    "build-only-backend-and-start": "tsc -p tsconfig.backend.json && node backend-dist/index.js",
     "lint": "vue-cli-service lint",
     "postinstall": "npm run build",
-    "start": "node index.js"
+    "start": "node backend-dist/index.js"
   },
-  "main": "index.js",
+  "vue": {
+    "transpileDependencies": true,
+    "devServer": {
+      "proxy": "http://127.0.0.1:3000"
+    }
+  },
+  "main": "backend-dist/index.js",
+
   "dependencies": {
     "@types/socket.io": "^3.0.2",
+    "axios": "^0.27.2",
+    "body-parser": "^1.20.0",
     "core-js": "^3.8.3",
+    "cors": "^2.8.5",
     "express": "^4.18.1",
     "nipplejs": "^0.9.1",
     "socket.io": "^4.5.1",
     "socket.io-client": "^4.5.1",
     "vue": "^2.6.14",
     "vue-router": "^3.5.1",
+    "vue-snotify": "^3.2.1",
     "vuetify": "^2.6.9"
   },
   "devDependencies": {
@@ -55,7 +68,8 @@
     "parserOptions": {
       "ecmaVersion": 2020
     },
-    "rules": {}
+    "rules": {
+    }
   },
   "browserslist": [
     "> 1%",
