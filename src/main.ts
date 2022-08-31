@@ -12,6 +12,7 @@ Vue.config.productionTip = false
 new Vue({
     vuetify: new Vuetify({
         theme: { dark: true },
+
     }),
     router,
     render: h => h(App)

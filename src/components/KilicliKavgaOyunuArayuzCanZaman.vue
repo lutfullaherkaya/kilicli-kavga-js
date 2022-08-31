@@ -24,13 +24,15 @@
     </div>
 
 </template>
-<script>
-export default {
+<script lang="ts">
+import Vue from "vue";
+
+export default Vue.extend({
     name: 'kilicli-kavga-oyunu-arayuz-can-zaman',
     props: {
         tamEkrandir: Boolean,
     },
-}
+})
 </script>
 <style scoped>
 * {
@@ -116,7 +118,17 @@ export default {
 
 .tam-ekran-butonu {
     position: absolute;
-    right: 1rem;
-    bottom: 1rem;
+    right: 8px;
+    bottom: 8px;
+}
+.tam-ekran-butonu * {
+    font-size: min(5vw, 40px) !important;
+}
+.v-btn:before {
+    opacity: 0 !important;
+}
+
+.v-ripple__container {
+    opacity: 0 !important;
 }
 </style>

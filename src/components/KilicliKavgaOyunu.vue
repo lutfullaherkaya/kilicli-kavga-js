@@ -311,7 +311,7 @@ export default Vue.extend({
                 spriteler,
             });
 
-            window.addEventListener('keydown', (event) => {
+            window.addEventListener('keydown', (event: KeyboardEvent) => {
                 const birinciOyuncuTuslari = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'ö', 'Ö'];
                 switch (event.key) {
                     case 'ArrowLeft':
@@ -323,18 +323,28 @@ export default Vue.extend({
                         this.oyuncuKontroller.sonKosulanYonSagdir = true;
                         break;
                     case 'ArrowUp':
-                        this.oyuncuKontroller.zipla = true;
+                        if (!event.repeat) {
+                            this.oyuncuKontroller.zipla = true;
+                        }
+
                         break;
                     case 'ArrowDown':
-                        this.oyuncuKontroller.saldiri = true;
+                        if (!event.repeat) {
+                            this.oyuncuKontroller.saldiri = true;
+                        }
                         break;
                     case 'ö':
                     case 'Ö':
-                        this.oyuncuKontroller.taklaAt = true;
+                        if (!event.repeat) {
+                            this.oyuncuKontroller.taklaAt = true;
+                        }
                         break;
                     case 'w':
                     case 'W':
-                        this.oyuncu2Kontroller.zipla = true;
+                        if (!event.repeat) {
+                            this.oyuncu2Kontroller.zipla = true;
+                        }
+
                         break;
                     case 'a':
                     case 'A':
@@ -350,10 +360,16 @@ export default Vue.extend({
                         this.oyuncu2Kontroller.sonKosulanYonSagdir = true;
                         break;
                     case 'Shift':
-                        this.oyuncu2Kontroller.taklaAt = true;
+                        if (!event.repeat) {
+                            this.oyuncu2Kontroller.taklaAt = true;
+                        }
+
                         break;
                     case ' ':
-                        this.oyuncu2Kontroller.saldiri = true;
+                        if (!event.repeat) {
+                            this.oyuncu2Kontroller.saldiri = true;
+                        }
+
                         break;
                 }
                 if (birinciOyuncuTuslari.includes(event.key)) {
@@ -402,10 +418,8 @@ export default Vue.extend({
                         this.oyuncu2Kontroller.sonKosulanYonSagdir = false;
                         break;
                     case 'Shift':
-                        this.oyuncu2Kontroller.taklaAt = false;
                         break;
                     case ' ':
-                        this.oyuncu2Kontroller.saldiri = false;
                         break;
                 }
                 if (birinciOyuncuTuslari.includes(event.key)) {
@@ -417,10 +431,7 @@ export default Vue.extend({
             });
             window.addEventListener('mousedown', () => {
                 this.oyuncu2Kontroller.saldiri = true;
-            })
-            window.addEventListener('mouseup', () => {
-                this.oyuncu2Kontroller.saldiri = false;
-            })
+            });
             window.addEventListener('contextmenu', (event) => {
                 event.preventDefault();
             })

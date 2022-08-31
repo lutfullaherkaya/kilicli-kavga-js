@@ -1,91 +1,146 @@
 <template>
     <div class="arayuz-mobil-komponenti" ref="arayuz-mobil-komponenti">
         <div ref="joystick-menzili" class="joystick-menzili"></div>
+        <v-responsive class="sag-buton sag-saldiri-butonu" :aspect-ratio="1/1" @click="saldirt">
+            <div class="sag-buton-arkaplan" :style="{'background-color': butonRengi}">
+            </div>
+            <img src="/ikonlar/kilic.svg" class="sag-button-sembolu-kilic"
+                 style="filter: invert(100%); width: 80%; transform: rotate(-45deg);">
+
+
+        </v-responsive>
+        <v-responsive class="sag-buton sag-takla-at-butonu" :aspect-ratio="1/1" @click="taklaAttir">
+
+            <div class="sag-buton-arkaplan" :style="{'background-color': butonRengi}">
+            </div>
+            <img src="/ikonlar/jump-icon.svg" class="sag-button-sembolu-takla"
+                 style="filter: invert(100%); width: 55%; transform: rotate(120deg);">
+
+
+        </v-responsive>
+
     </div>
 </template>
 
-<script>
-import { SavasciKontrolleri } from '@/js/oyn';
+<script lang="ts">
+import {SavasciKontrolleri} from '@/js/oyn';
 import nipplejs from 'nipplejs';
+import Vue from "vue";
 
-export default {
+export default Vue.extend({
     name: "KilicliKavgaOyunuArayuzMobil",
     props: {
-        savasciKontrolleriMobil: SavasciKontrolleri,
+        savasciKontrolleriMobil: Object as () => SavasciKontrolleri,
     },
     data() {
         return {
-            joystick: null,
+            butonRengi: "white",
+            joystick: null as any,
+            joystickAyarlari: {
+                size: 200,
+                position: {
+                    left: '32.5%',
+                    bottom: '24.5%',
+                },
+                mode: 'static',
+                catchDistance: 150,
+            } as any,
+            joystickGenislikYuzdesi: 12.5,
         }
     },
-    mounted() {
-        const joystickAyarlari = {
-            zone: this.$refs['joystick-menzili'],
-            mode: 'static',
-            catchDistance: 150,
-            position: {
-                left: '20%',
-                bottom: '18%',
-            },
-        };
-        this.joystick = nipplejs.create(joystickAyarlari);
-        this.joystick.on('dir:left', (evt, data) => {
+    methods: {
+        taklaAttir() {
             const yeniKontroller = {
-                solKosu: true,
-                sagKosu: false,
-                sonKosulanYonSagdir: false,
-            };
-            this.$emit('kontroller-degisti', yeniKontroller);
-        });
-        this.joystick.on('dir:right', (evt, data) => {
-            const yeniKontroller = {
-                solKosu: false,
-                sagKosu: true,
-                sonKosulanYonSagdir: true,
-            };
-            this.$emit('kontroller-degisti', yeniKontroller);
-        });
-        this.joystick.on('dir:up dir:down', (evt, data) => {
-            const yeniKontroller = {
-                solKosu: false,
-                sagKosu: false,
-            };
-            this.$emit('kontroller-degisti', yeniKontroller);
-        });
-
-        this.joystick.on('move', (evt, data) => {
-            if (data.angle.degree > 30 && data.angle.degree < 150) {
-                if (!this.savasciKontrolleriMobil.zipla) {
-                    const yeniKontroller = {
-                        zipla: true,
-                    };
-                    this.$emit('kontroller-degisti', yeniKontroller);
-                }
-            }
-            else {
-                if (this.savasciKontrolleriMobil.zipla) {
-                    const yeniKontroller = {
-                        zipla: false,
-                    };
-                    this.$emit('kontroller-degisti', yeniKontroller);
-                }
-            }
-        })
-
-        this.joystick.on('end', (evt, data) => {
-            const yeniKontroller = {
-                solKosu: false,
-                sagKosu: false,
-                zipla: false,
+                taklaAt: true,
             };
             // sadece degisen kontrol anahtarları emitlenir.
             this.$emit('kontroller-degisti', yeniKontroller);
-        });
+        },
+        saldirt() {
+            const yeniKontroller = {
+                saldiri: true,
+            };
+            // sadece degisen kontrol anahtarları emitlenir.
+            this.$emit('kontroller-degisti', yeniKontroller);
+        },
+        joystickOlustur() {
+            this.joystickAyarlari.zone = this.$refs['joystick-menzili'];
+            this.joystickAyarlari.color = this.butonRengi;
+            this.joystick = nipplejs.create(this.joystickAyarlari);
+            this.joystick.on('dir:left', (evt, data) => {
+                const yeniKontroller = {
+                    solKosu: true,
+                    sagKosu: false,
+                    sonKosulanYonSagdir: false,
+                };
+                this.$emit('kontroller-degisti', yeniKontroller);
+            });
+            this.joystick.on('dir:right', (evt, data) => {
+                const yeniKontroller = {
+                    solKosu: false,
+                    sagKosu: true,
+                    sonKosulanYonSagdir: true,
+                };
+                this.$emit('kontroller-degisti', yeniKontroller);
+            });
+            this.joystick.on('dir:up dir:down', (evt, data) => {
+                const yeniKontroller = {
+                    solKosu: false,
+                    sagKosu: false,
+                };
+                this.$emit('kontroller-degisti', yeniKontroller);
+            });
+
+            this.joystick.on('move', (evt, data) => {
+                if (data.angle.degree > 30 && data.angle.degree < 150) {
+                    if (!this.savasciKontrolleriMobil.zipla) {
+                        const yeniKontroller = {
+                            zipla: true,
+                        };
+                        this.$emit('kontroller-degisti', yeniKontroller);
+                    }
+                } else {
+                    if (this.savasciKontrolleriMobil.zipla) {
+                        const yeniKontroller = {
+                            zipla: false,
+                        };
+                        this.$emit('kontroller-degisti', yeniKontroller);
+                    }
+                }
+            })
+
+            this.joystick.on('end', (evt, data) => {
+                const yeniKontroller = {
+                    solKosu: false,
+                    sagKosu: false,
+                    zipla: false,
+                };
+                // sadece degisen kontrol anahtarları emitlenir.
+                this.$emit('kontroller-degisti', yeniKontroller);
+            });
+        },
+        joystickBoyutYenile() {
+            const yeniBoyut = Math.round(this.$refs['arayuz-mobil-komponenti'].clientWidth * this.joystickGenislikYuzdesi / 100);
+            if (this.joystickAyarlari.size !== yeniBoyut) {
+                this.joystickAyarlari.size = yeniBoyut;
+                if (this.joystick && this.joystick.length > 0) {
+                    this.joystick.destroy();
+                }
+                this.joystickOlustur();
+            }
+
+        },
+    },
+
+    mounted() {
+        this.joystickBoyutYenile();
+        window.addEventListener('resize', this.joystickBoyutYenile);
     },
     destroyed() {
+        window.removeEventListener('resize', this.joystickBoyutYenile);
         this.joystick.destroy();
     },
-}
+})
 </script>
 
 <style scoped>
@@ -97,6 +152,7 @@ export default {
     height: 100%;
     pointer-events: none;
 }
+
 .arayuz-mobil-komponenti * {
     pointer-events: auto;
 }
@@ -108,5 +164,50 @@ export default {
     width: 50%;
     height: 100%;
 }
+
+.sag-buton {
+    position: absolute;
+
+}
+
+.sag-button-sembolu-takla {
+    position: absolute;
+    top: 22%;
+    left: 22%;
+    transform: translate(-50%, 50%);
+}
+
+.sag-button-sembolu-kilic {
+    position: absolute;
+    top: 25%;
+    left: 11%;
+    transform: translate(-50%, 50%);
+}
+
+.sag-buton-arkaplan {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    border-radius: 100%;
+    z-index: 1;
+    opacity: 0.25;
+
+}
+
+.sag-saldiri-butonu {
+    bottom: 20%;
+    right: 5%;
+    width: 8.5%;
+}
+
+.sag-takla-at-butonu {
+    bottom: 10%;
+    right: 15%;
+    width: 8.5%;
+}
+
 
 </style>

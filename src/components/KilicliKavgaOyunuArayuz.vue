@@ -12,23 +12,24 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import KilicliKavgaOyunuArayuzCanZaman from '@/components/KilicliKavgaOyunuArayuzCanZaman';
 import KilicliKavgaOyunuArayuzMobil from '@/components/KilicliKavgaOyunuArayuzMobil';
 import { SavasciKontrolleri } from '@/js/oyn';
+import Vue from "vue";
 
-export default {
+export default Vue.extend({
     name: "KilicliKavgaOyunuArayuz",
     components: { KilicliKavgaOyunuArayuzCanZaman, KilicliKavgaOyunuArayuzMobil },
     props: {
         tamEkrandir: Boolean,
         mobilKontrolleriGoster: Boolean,
-        savasciKontrolleriMobil: SavasciKontrolleri
+        savasciKontrolleriMobil: Object as () => SavasciKontrolleri
     },
     data() {
         return {}
     },
-}
+})
 </script>
 
 <style scoped>

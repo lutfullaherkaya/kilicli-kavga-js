@@ -278,7 +278,7 @@ export class SavasciCarpisma {
 }
 
 export class Savasci {
-    static lar : Savasci[] = [];
+    static lar: Savasci[] = [];
     tuval: Tuval;
     hitKutusu: Dikdortgen;
     hiz: { x: number; y: number };
@@ -307,7 +307,6 @@ export class Savasci {
     private kanSpritesi: Sprite;
     private kanAkiyor: boolean;
     private alternatifSaldiri: boolean;
-    private saldirildi: boolean;
 
     constructor(
         tuval: Tuval, {
@@ -348,7 +347,6 @@ export class Savasci {
         this.kosuyor = false;
         this.silahKutusu = new Dikdortgen(this.tuval, pozisyon.x, pozisyon.y, 193, 110, 'rgba(255,255,255,0.53)');
         this.saldiriHasari = 10;
-        this.saldirildi = false;
         this.spriteler = spriteler;
         this.sprite = this.sagaBakiyor ? this.spriteler.sag.rolanti : this.spriteler.sol.rolanti;
 
@@ -492,13 +490,25 @@ export class Savasci {
             }
         } else {
             /**
-             * sprite animasyonu bitimi burasıdır. mesela zıplarken peşisıra gelecek animasyon vs. burada seçilir.
+             * sprite animasyonu bitimi burasıdır.
              */
             if (this.sprite && this.sprite.birKereTamAnimasyonOldu && this.sonluEylemler.includes(this.sprite.isim)) {
-                if (this.sprite.isim == 'taklaAt') {
-                    this.hitKutusu.carpisabilir = true;
-                    this.taklaAtiyor = false;
+                switch (this.sprite.isim) {
+                    case 'saldiri1':
+                    case 'saldiri2':
+                        this.kontroller.saldiri = false;
+                        break;
+                    case 'taklaAt':
+                        this.hitKutusu.carpisabilir = true;
+                        this.taklaAtiyor = false;
+                        this.kontroller.taklaAt = false;
+                        break;
+                    case 'zipla':
+                        this.kontroller.zipla = false;
+                        break;
                 }
+
+
                 this.suanYapilanEylem = null;
                 this.sprite.birKereTamAnimasyonOldu = false;
             }
@@ -591,10 +601,10 @@ export class Savasci {
         }
 
         if (!this.oludur()) {
-            if (this.kontroller.saldiri && !this.saldirildi) {
+            if (this.kontroller.saldiri) {
                 this.saldir();
             }
-            this.saldirildi = Boolean(this.kontroller.saldiri);
+
         }
 
         this.hareketEt();
