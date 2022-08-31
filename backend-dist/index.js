@@ -33,9 +33,12 @@ io.on('connection', (socket) => {
     });
     socket.on('oyun bilgisi', function (msg) {
         console.log('gonderiliyor', JSON.stringify(msg));
-        /*
-                socket.broadcast.emit('oyun bilgisi', msg)
-        */
+        if (socketSahibiOyuncu) {
+            socket.broadcast.emit('oyun bilgisi', {
+                isim: socketSahibiOyuncu.isim,
+                kontroller: msg.kontroller,
+            });
+        }
     });
     socket.on('disconnect', () => {
         console.log('oyuncu cikti', socketSahibiOyuncu === null || socketSahibiOyuncu === void 0 ? void 0 : socketSahibiOyuncu.isim);

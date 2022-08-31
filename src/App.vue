@@ -8,6 +8,7 @@
 <style lang="scss">
 @import "~vue-snotify/styles/material";
 
+
 @font-face {
     font-family: "Minecraft";
     src: local("Minecraft"), url(./fonts/Minecraft/Minecraft-Regular.otf) format("truetype");

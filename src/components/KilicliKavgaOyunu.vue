@@ -1,27 +1,10 @@
 <template>
     <div>
-        <v-form
-                v-if="!oyuncuIsmiSecildi"
-                ref="girdi-formu"
-                v-model="girdiFormuUygun"
-                lazy-validation
-                class="mb-2"
-        >
-            <v-text-field
-
-                    v-model="yeniOyuncuAdi"
-                    :rules="[girdiKurallari.gerekli, girdiKurallari.counter, girdiKurallari.oyunculardaZatenOlmamali]"
-                    label="Yeni Oyuncu Adı"
-                    counter
-                    outlined
-                    maxlength="20"
-            ></v-text-field>
-            <v-btn
-                    :disabled="!girdiFormuUygun"
-                    color="success"
-                    class="mr-4"
-                    @click="oyuncuOlustur"
-            >
+        <v-form v-if="!oyuncuIsmiSecildi" ref="girdi-formu" v-model="girdiFormuUygun" lazy-validation class="mb-2">
+            <v-text-field v-model="yeniOyuncuAdi" label="Yeni Oyuncu Adı" counter outlined maxlength="20"
+                          :rules="[girdiKurallari.gerekli, girdiKurallari.counter, girdiKurallari.oyunculardaZatenOlmamali]">
+            </v-text-field>
+            <v-btn :disabled="!girdiFormuUygun" color="success" class="mr-4 text-capitalize" @click="oyuncuOlustur">
                 Oyuncu oluştur
             </v-btn>
         </v-form>
@@ -29,12 +12,12 @@
         <kilicli-kavga-oyunu-oyun
                 :mobil-kontrolleri-goster="mobilKontrolleriGoster"
                 :mobildir="mobildir"
+                :socket="socket"
+                :oyuncular="oyuncular"
         />
-        <v-switch
-                v-model="mobilKontrolleriGoster"
-                inset
-                label="Mobil Kontrolleri Göster"
-        ></v-switch>
+
+        <v-switch v-model="mobilKontrolleriGoster" inset label="Mobil Kontrolleri Göster"></v-switch>
+
         <v-simple-table>
             <template v-slot:default>
                 <thead>
@@ -45,10 +28,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr
-                        v-for="oyuncu in oyuncular"
-                        :key="oyuncu.isim"
-                >
+                <tr v-for="oyuncu in oyuncular" :key="oyuncu.isim">
                     <td>{{ oyuncu.isim }}</td>
                 </tr>
                 </tbody>
@@ -79,7 +59,7 @@ export default Vue.extend({
             mobildir: false,
             mobilKontrolleriGoster: false,
             socket: io(),
-
+            rakipIsmi: '',
             yeniOyuncuAdi: '',
             oyuncuIsmiSecildi: false,
             girdiFormuUygun: true,
@@ -113,9 +93,11 @@ export default Vue.extend({
                 this.socket.emit('oyuncuyu sockete bagla', {
                     isim: response.data.isim,
                 });
+
             }).catch(error => {
                 this.$snotify.error(error.response.data.message);
             });
+
         },
 
 
@@ -125,13 +107,12 @@ export default Vue.extend({
         this.mobilKontrolleriGoster = this.mobildir;
     },
     mounted() {
-        this.oyuncular = axios.get('/oyuncular').then(response => {
+        axios.get('/oyuncular').then(response => {
             this.oyuncular = Object.values(response.data);
         }).catch(error => {
             this.$snotify.error(error.response.data.message);
         });
-        this.socket.on('oyuncu guncel listesi', msg => {
-            console.log(msg);
+        this.socket.on('oyuncu guncel listesi', (msg)  => {
             this.oyuncular = Object.values(msg);
         })
 

@@ -277,43 +277,175 @@ export class SavasciCarpisma {
     }
 }
 
+// todo: yonetici ekle. bot veya klavyeOk veya klavyeWASD veya uzaktanOyuncu olabilir.
+export abstract class KontrolYoneticisi {
+    protected kontroller: SavasciKontrolleri | null = null;
+
+    abstract yonetmeyeBasla(kontroller: SavasciKontrolleri): void;
+
+    abstract yonetmeyiBirak(): void;
+}
+
+type SavasciKontrolTuslari = {
+    [Property in keyof SavasciKontrolleri]: string | string[];
+};
+
+export class KlavyeKontrolYoneticisi extends KontrolYoneticisi {
+    private wasdTuslari: SavasciKontrolTuslari = {
+        saldiri: ' ',
+        sagKosu: ["d", "D"],
+        solKosu: ['a', 'A'],
+        sonKosulanYonSagdir: ['d', 'D', 'a!', 'A!'],
+        taklaAt: "Shift",
+        zipla: ["w", "W"],
+    };
+    private okTuslari: SavasciKontrolTuslari = {
+        saldiri: 'ArrowDown',
+        sagKosu: "ArrowRight",
+        solKosu: "ArrowLeft",
+        sonKosulanYonSagdir: ["ArrowRight", 'ArrowLeft!'],
+        taklaAt: ".",
+        zipla: "ArrowUp",
+    };
+    private secilenTuslar: SavasciKontrolTuslari;
+    private secilenTuslarTersi: { [index: string]: Array<keyof SavasciKontrolleri> } = {};
+    private fareDeKullan: boolean;
+    private fareElementi: HTMLElement | null;
+    private keydownHalledici: any = null;
+    private keyupHalledici: any = null;
+    private mousedownHalledici: any = null;
+
+    constructor(wasdMi: boolean, fareDeKullan = false, fareElementi: HTMLElement | null = null) {
+        super();
+        this.fareDeKullan = fareDeKullan;
+        this.fareElementi = fareElementi;
+        if (wasdMi) {
+            this.secilenTuslar = this.wasdTuslari;
+        } else {
+            this.secilenTuslar = this.okTuslari;
+        }
+        for (const kontrol in this.secilenTuslar) {
+            let tuslar = this.secilenTuslar[kontrol as keyof SavasciKontrolleri];
+            if (typeof tuslar === 'string') {
+                tuslar = [tuslar];
+            }
+            for (const tus of tuslar) {
+                if (this.secilenTuslarTersi[tus]) {
+                    this.secilenTuslarTersi[tus].push(kontrol as keyof SavasciKontrolleri);
+                } else {
+                    this.secilenTuslarTersi[tus] = [kontrol as keyof SavasciKontrolleri];
+                }
+            }
+        }
+    }
+
+    yonetmeyeBasla(kontroller: SavasciKontrolleri): void {
+        this.kontroller = kontroller;
+        // böyle yapmanın sebebi hem thisi addeventlistenerde görmek hem de removeeventlistener yapabilmektir.
+        this.keydownHalledici = (event: KeyboardEvent) => {
+            if (this.kontroller && !event.repeat) {
+                if (event.key in this.secilenTuslarTersi) {
+                    this.secilenTuslarTersi[event.key].forEach(kontrol => {
+                        this.kontroller![kontrol] = true;
+                    });
+                }
+                if (event.key + '!' in this.secilenTuslarTersi) {
+                    this.secilenTuslarTersi[event.key + '!'].forEach(kontrol => {
+                        this.kontroller![kontrol] = false;
+                    });
+                }
+
+            }
+        }
+
+        this.keyupHalledici = (event: KeyboardEvent) => {
+            if (this.kontroller && !event.repeat) {
+                if (event.key in this.secilenTuslarTersi) {
+                    this.secilenTuslarTersi[event.key].forEach(kontrol => {
+                        this.kontroller![kontrol] = false;
+                    });
+                }
+                if (event.key + '!' in this.secilenTuslarTersi) {
+                    this.secilenTuslarTersi[event.key + '!'].forEach(kontrol => {
+                        this.kontroller![kontrol] = true;
+                    });
+                }
+
+            }
+        }
+
+        this.mousedownHalledici = () => {
+            if (this.kontroller) {
+                this.kontroller.saldiri = true;
+            }
+        }
+
+
+        window.addEventListener('keydown', this.keydownHalledici);
+        window.addEventListener('keyup', this.keyupHalledici);
+        if (this.fareDeKullan && this.fareElementi) {
+            this.fareElementi.addEventListener('mousedown', this.mousedownHalledici);
+        }
+    }
+
+    yonetmeyiBirak(): void {
+        window.removeEventListener('keydown', this.keydownHalledici);
+        window.removeEventListener('keyup', this.keyupHalledici);
+        if (this.fareDeKullan && this.fareElementi) {
+            this.fareElementi.removeEventListener('mousedown', this.mousedownHalledici);
+        }
+    }
+
+
+}
+
+
 export class Savasci {
-    static lar: Savasci[] = [];
-    tuval: Tuval;
-    hitKutusu: Dikdortgen;
-    hiz: { x: number; y: number };
-    ivme: { x: number; y: number };
-    private yurumeIvmesi: { x: number; y: number };
+    public static lar: Savasci[] = [];
+    public tuval: Tuval;
+    public hitKutusu: Dikdortgen;
+    public hiz = {x: 0, y: 0};
+    public ivme = {x: 0, y: 0};
+    private yurumeIvmesi = {x: 0, y: 0};
     private kontroller: SavasciKontrolleri;
     private isim: string;
     private canCubuguID: string;
     private canCubuguIsimID: string;
     private sagaBakiyor: boolean;
-    private taklaAtiyor: boolean;
-    private taklayiSagaAtiyor: boolean;
-    private sonHasarAlinanYonSagdir: boolean;
-    private hitKutusuOludur: boolean;
-    private yercekimiIvmesi: number;
-    private ziplamaHizi: number;
-    private yurumeHizi: number;
-    private can: number;
-    private kosuyor: boolean;
+    private taklaAtiyor = false;
+    private taklayiSagaAtiyor = false;
+    private sonHasarAlinanYonSagdir = false;
+    private hitKutusuOludur = false;
+    private yercekimiIvmesi = 0.098;
+    private ziplamaHizi = 6;
+    private yurumeHizi = 2;
+    private can = 100;
+    private kosuyor = false;
     private silahKutusu: Dikdortgen;
-    private saldiriHasari: number;
+    private saldiriHasari = 10;
     private spriteler: any; // todo: bunu dynamic typeli yap
     private sprite: Sprite;
     private sonluEylemler: string[];
-    private suanYapilanEylem: null | { spriteAdi: string };
+    private suanYapilanEylem: null | { spriteAdi: string } = null;
     private kanSpritesi: Sprite;
-    private kanAkiyor: boolean;
-    private alternatifSaldiri: boolean;
+    private kanAkiyor = false;
+    private alternatifSaldiri = true;  // surekli true false olur saldırdıkça
+    private kontrolYoneticisi: null | KontrolYoneticisi;
 
     constructor(
         tuval: Tuval, {
             renk = '',
             pozisyon = {x: 0, y: 0} as Kordinat,
             sagaBakiyor = false,
-            kontroller,
+            kontroller = {
+                saldiri: false,
+                taklaAt: false,
+                solKosu: false,
+                sonKosulanYonSagdir: false,
+                sagKosu: false,
+                zipla: false
+            } as SavasciKontrolleri,
+            kontrolYoneticisi = null as null | KontrolYoneticisi,
             genislik,
             yukseklik,
             isim,
@@ -323,36 +455,24 @@ export class Savasci {
         }: any) {
         this.tuval = tuval;
         this.hitKutusu = new Dikdortgen(this.tuval, pozisyon.x, pozisyon.y, genislik, yukseklik, renk);
-        this.hiz = {x: 0, y: 0};
-        this.ivme = {x: 0, y: 0}; // yercekimi haric
-        this.yurumeIvmesi = {x: 0, y: 0};
-        this.kontroller = kontroller;
 
+        this.kontroller = kontroller;
+        this.kontrolYoneticisi = kontrolYoneticisi;
+        if (this.kontrolYoneticisi) {
+            this.kontrolYoneticisi.yonetmeyeBasla(this.kontroller);
+        }
         this.isim = isim;
         this.canCubuguID = canCubuguID;
         this.canCubuguIsimID = canCubuguIsimID;
         this.sagaBakiyor = sagaBakiyor;
-        this.taklaAtiyor = false;
-        this.taklayiSagaAtiyor = false;
-        this.sonHasarAlinanYonSagdir = false;
-        this.hitKutusuOludur = false;
 
         document.getElementById(this.canCubuguIsimID)!.innerText = this.isim;
-        this.yercekimiIvmesi = 0.098;
 
-        this.ziplamaHizi = 6;
-        this.yurumeHizi = 2;
-        this.can = 100;
-
-        this.kosuyor = false;
         this.silahKutusu = new Dikdortgen(this.tuval, pozisyon.x, pozisyon.y, 193, 110, 'rgba(255,255,255,0.53)');
-        this.saldiriHasari = 10;
         this.spriteler = spriteler;
         this.sprite = this.sagaBakiyor ? this.spriteler.sag.rolanti : this.spriteler.sol.rolanti;
 
         this.sonluEylemler = ['zipla', 'taklaAt', 'saldiri1', 'saldiri2'];
-        this.suanYapilanEylem = null;
-
         this.kanSpritesi = new Sprite(this.tuval, {
             resimKaynagi: './sprites/Blood FX Lite/JASONTOMLEE_BLOOD_GUSH_3.png',
             pozisyon: {x: 32, y: tuval.canvas.height - 111},
@@ -363,10 +483,7 @@ export class Savasci {
             kacSahnedeResimDegisir: 2,
             sonsuzAnimasyon: false,
         });
-        this.kanAkiyor = false;
 
-        // surekli true false olur saldırdıkça
-        this.alternatifSaldiri = true;
 
         Savasci.lar.push(this);
     }

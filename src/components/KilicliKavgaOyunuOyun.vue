@@ -7,7 +7,7 @@
                 <canvas style="width: 100%; height: 100%;"></canvas>
                 <kilicli-kavga-oyunu-arayuz @tam-ekrani-ac="tamEkraniAc"
                                             @tam-ekrani-kapat="tamEkraniKapat"
-                                            @kontroller-degisti="kontrolGuncelle(oyuncuKontroller, $event)"
+                                            @kontroller-degisti="kontrolGuncelle($event)"
                                             :tam-ekrandir="tamEkrandir"
                                             :mobil-kontrolleri-goster="mobilKontrolleriGoster"
                                             :savasci-kontrolleri-mobil="oyuncuKontroller"
@@ -21,9 +21,22 @@
 <script lang="ts">
 import KilicliKavgaOyunuArayuz from '@/components/KilicliKavgaOyunuArayuz.vue'
 import {io} from "socket.io-client";
-import {Savasci, SavasciCarpisma, SavasciKontrolleri, Sprite, Tuval} from "@/js/oyn";
+import {
+    Savasci,
+    SavasciCarpisma,
+    SavasciKontrolleri,
+    Sprite,
+    Tuval,
+    KlavyeKontrolYoneticisi,
+    KontrolYoneticisi
+} from "@/js/oyn";
 import axios from "axios";
 import Vue from "vue";
+
+type SavasciAdi = string;
+
+const tuvalYuksekligi = 768;
+const tuvalGenisligi = 1366;
 
 export default Vue.extend({
     name: 'KilicliKavgaOyunuOyun',
@@ -31,30 +44,17 @@ export default Vue.extend({
     props: {
         mobildir: Boolean,
         mobilKontrolleriGoster: Boolean,
+        socket: Object,
+        oyuncular: Array as () => Array<{ isim: SavasciAdi }>,
     },
     data() {
         return {
-            oyuncular: [] as any[],
+            savascilar: {} as { [key: SavasciAdi]: Savasci },
             tamEkrandir: false,
             ekranGenisligi: 100,
             ekranYuksekligi: 100,
-            socket: io(),
-            oyuncuKontroller: {
-                solKosu: false,
-                sagKosu: false,
-                sonKosulanYonSagdir: false,
-                saldiri: false,
-                taklaAt: false,
-                zipla: false,
-            } as SavasciKontrolleri,
-            oyuncu2Kontroller: {
-                solKosu: false,
-                sagKosu: false,
-                sonKosulanYonSagdir: false,
-                saldiri: false,
-                taklaAt: false,
-                zipla: false,
-            } as SavasciKontrolleri,
+            darkSoulsaBenzeyenElemanSpriteleri: null as any,
+            tuval: null as null | Tuval,
         }
     },
     computed: {
@@ -66,8 +66,6 @@ export default Vue.extend({
             }
         }
     },
-
-
     methods: {
         ekranBoyutuGuncelle(): void {
             this.ekranGenisligi = window.outerWidth;
@@ -78,7 +76,8 @@ export default Vue.extend({
         },
         tamEkraniAc(): void {
             const elem = this.$refs["canvas-container"] as HTMLDivElement;
-            if (elem.requestFullscreen) {
+            if (elem.requestFullscreen
+            ) {
                 elem.requestFullscreen();
             } else if (elem.webkitRequestFullscreen) { /* Safari */
                 elem.webkitRequestFullscreen();
@@ -95,18 +94,65 @@ export default Vue.extend({
                 document.msExitFullscreen();
             }
         },
-        kontrolGuncelle(hedefKontroller: SavasciKontrolleri, kaynakKontroller: SavasciKontrolleri): void {
-            Object.assign(hedefKontroller, kaynakKontroller);
+        kontrolGuncelle(kaynakKontroller: SavasciKontrolleri): void {
+            // todo
+            /*if (this.oyuncuIsmi == 'lutfullah') {
+                Object.assign(this.oyuncuKontroller, kaynakKontroller);
+            } else {
+                Object.assign(this.oyuncu2Kontroller, kaynakKontroller);
+            }*/
+
+            /*this.socket.emit('oyun bilgisi', {
+                isim: this.oyuncuIsmi,
+                kontroller: kaynakKontroller,
+            });*/
+        },
+        savasciEkle(tuval: Tuval, isim: SavasciAdi, spriteler: Sprite[], kontrolYoneticisi: KontrolYoneticisi | null = null): void {
+            const savasciSayisi = Object.keys(this.savascilar).length;
+            let pozisyon = {x: 150, y: tuval.canvas.height - 111};
+            let canCubuguID;
+            let canCubuguIsimID;
+            if (savasciSayisi == 0) {
+                pozisyon = {x: tuval.canvas.width - 150, y: tuval.canvas.height - 111};
+                canCubuguID = 'can-cubugu-1';
+                canCubuguIsimID = 'can-cubugu-isim-1';
+            } else if (savasciSayisi == 1) {
+                pozisyon = {x: 600, y: tuval.canvas.height - 111};
+                canCubuguID = 'can-cubugu-2';
+                canCubuguIsimID = 'can-cubugu-isim-2';
+            } else { // üçüncüden sonraki savaşçılar orta yukarıdan düşer.
+                pozisyon = {x: 350, y: -100};
+                canCubuguID = 'can-cubugu-2';
+                canCubuguIsimID = 'can-cubugu-isim-2';
+                // todo: üçüncü ve sonrası karakterlere can çubuğu ekle
+            }
+            let sagaBakiyor = savasciSayisi == 0; // ilk savasci saga bakar, diğerleri sola
+            console.log(isim);
+            this.savascilar[isim] = new Savasci(tuval, {
+                renk: 'rgba(255,0,0,0.5)',
+                pozisyon,
+                sagaBakiyor,
+                kontrolYoneticisi,
+                genislik: 50,
+                yukseklik: 100,
+                isim: isim,
+                canCubuguID,
+                canCubuguIsimID,
+                spriteler,
+            });
         },
         main() {
-            const tuvalYuksekligi = 768;
-            const tuvalGenisligi = 1366;
-            const tuval = new Tuval(document.querySelector('canvas')!, tuvalGenisligi, tuvalYuksekligi, (tuvalYuksekligi / 600) * 490);
+            this.tuval = new Tuval(document.querySelector('canvas')!, tuvalGenisligi, tuvalYuksekligi, (tuvalYuksekligi / 600) * 490);
+            this.$watch('oyuncular', () => {
+                for (const oyuncu of this.oyuncular) {
+                    if (!(oyuncu.isim in this.savascilar)) {
+                        this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri,
+                                new KlavyeKontrolYoneticisi(true, true, this.$refs['canvas-container'] as HTMLElement));
+                    }
+                }
+            })
 
-            setInterval(() => {
-                tuval.setZamanKutucugu();
-            }, 1000)
-            const arkaplan = new Sprite(tuval, {
+            const arkaplan = new Sprite(this.tuval, {
                 pozisyon: {
                     x: 0,
                     y: 0,
@@ -115,9 +161,9 @@ export default Vue.extend({
                 skala: 1.72 * tuvalYuksekligi / 600,
             });
 
-            const spriteler = {
+            this.darkSoulsaBenzeyenElemanSpriteleri = {
                 sol: {
-                    rolanti: new Sprite(tuval, {
+                    rolanti: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Idle.png',
                         resimSayisi: 10,
                         pozisyonOffset: {x: -130, y: -115},
@@ -125,7 +171,7 @@ export default Vue.extend({
                         isim: 'rolanti',
                         yonuSagdir: false,
                     }),
-                    kosu: new Sprite(tuval, {
+                    kosu: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Run.png',
                         resimSayisi: 10,
                         pozisyonOffset: {x: -140, y: -115},
@@ -133,7 +179,7 @@ export default Vue.extend({
                         isim: 'kosu',
                         yonuSagdir: false,
                     }),
-                    donme: new Sprite(tuval, {
+                    donme: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_TurnAround.png',
                         resimSayisi: 3,
                         pozisyonOffset: {x: -140, y: -115},
@@ -141,7 +187,7 @@ export default Vue.extend({
                         isim: 'donme',
                         yonuSagdir: false,
                     }),
-                    taklaAt: new Sprite(tuval, {
+                    taklaAt: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Roll.png',
                         resimSayisi: 12,
                         pozisyonOffset: {x: -130, y: -115},
@@ -150,7 +196,7 @@ export default Vue.extend({
                         isim: 'taklaAt',
                         yonuSagdir: false,
                     }),
-                    zipla: new Sprite(tuval, {
+                    zipla: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Jump.png',
                         resimSayisi: 3,
                         pozisyonOffset: {x: -130, y: -115},
@@ -159,7 +205,7 @@ export default Vue.extend({
                         yonuSagdir: false,
                     }),
 
-                    dusus: new Sprite(tuval, {
+                    dusus: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Fall.png',
                         resimSayisi: 3,
                         pozisyonOffset: {x: -130, y: -115},
@@ -167,7 +213,7 @@ export default Vue.extend({
                         isim: 'dusus',
                         yonuSagdir: false,
                     }),
-                    saldiri1: new Sprite(tuval, {
+                    saldiri1: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_AttackNoMovement.png',
                         resimSayisi: 4,
                         pozisyonOffset: {x: -130, y: -115},
@@ -176,7 +222,7 @@ export default Vue.extend({
                         kacSahnedeResimDegisir: 7,
                         yonuSagdir: false,
                     }),
-                    saldiri2: new Sprite(tuval, {
+                    saldiri2: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Attack2NoMovement.png',
                         resimSayisi: 6,
                         pozisyonOffset: {x: -130, y: -115},
@@ -185,7 +231,7 @@ export default Vue.extend({
                         kacSahnedeResimDegisir: 7,
                         yonuSagdir: false,
                     }),
-                    oldu: new Sprite(tuval, {
+                    oldu: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_left/_Death.png',
                         resimSayisi: 10,
                         pozisyonOffset: {x: -130, y: -115}, // pozisyonOffset: { x: -45, y: -165 },
@@ -198,7 +244,7 @@ export default Vue.extend({
 
                 },
                 sag: {
-                    rolanti: new Sprite(tuval, {
+                    rolanti: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Idle.png',
                         resimSayisi: 10,
                         pozisyonOffset: {x: -122, y: -115},
@@ -206,7 +252,7 @@ export default Vue.extend({
                         isim: 'rolanti',
                         yonuSagdir: true,
                     }),
-                    kosu: new Sprite(tuval, {
+                    kosu: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Run.png',
                         resimSayisi: 10,
                         pozisyonOffset: {x: -126, y: -115},
@@ -214,7 +260,7 @@ export default Vue.extend({
                         isim: 'kosu',
                         yonuSagdir: true,
                     }),
-                    donme: new Sprite(tuval, {
+                    donme: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_TurnAround.png',
                         resimSayisi: 3,
                         pozisyonOffset: {x: -126, y: -115},
@@ -222,7 +268,7 @@ export default Vue.extend({
                         isim: 'donme',
                         yonuSagdir: true,
                     }),
-                    taklaAt: new Sprite(tuval, {
+                    taklaAt: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Roll.png',
                         resimSayisi: 12,
                         pozisyonOffset: {x: -122, y: -115},
@@ -231,7 +277,7 @@ export default Vue.extend({
                         isim: 'taklaAt',
                         yonuSagdir: true,
                     }),
-                    zipla: new Sprite(tuval, {
+                    zipla: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Jump.png',
                         resimSayisi: 3,
                         pozisyonOffset: {x: -122, y: -115},
@@ -239,7 +285,7 @@ export default Vue.extend({
                         isim: 'zipla',
                         yonuSagdir: true,
                     }),
-                    dusus: new Sprite(tuval, {
+                    dusus: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Fall.png',
                         resimSayisi: 3,
                         pozisyonOffset: {x: -122, y: -115},
@@ -247,7 +293,7 @@ export default Vue.extend({
                         isim: 'dusus',
                         yonuSagdir: true,
                     }),
-                    saldiri1: new Sprite(tuval, {
+                    saldiri1: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_AttackNoMovement.png',
                         resimSayisi: 4,
                         pozisyonOffset: {x: -122, y: -115},
@@ -256,7 +302,7 @@ export default Vue.extend({
                         kacSahnedeResimDegisir: 7,
                         yonuSagdir: true,
                     }),
-                    saldiri2: new Sprite(tuval, {
+                    saldiri2: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Attack2NoMovement.png',
                         resimSayisi: 6,
                         pozisyonOffset: {x: -122, y: -115},
@@ -265,7 +311,7 @@ export default Vue.extend({
                         kacSahnedeResimDegisir: 7,
                         yonuSagdir: true,
                     }),
-                    oldu: new Sprite(tuval, {
+                    oldu: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/PNGSheets_right/_Death.png',
                         resimSayisi: 10,
                         pozisyonOffset: {x: -122, y: -115},  // pozisyonOffset: { x: -45, y: -165 },
@@ -277,150 +323,9 @@ export default Vue.extend({
                     }),
                 },
             };
-            const oyuncu = new Savasci(tuval, {
-                renk: 'rgba(255,0,0,0.5)',
-                pozisyon: {x: 150, y: tuval.canvas.height - 111},
-                sagaBakiyor: true,
-                kontroller: this.oyuncuKontroller,
-
-                genislik: 50,
-                yukseklik: 100,
-                isim: 'lutfullah',
-                canCubuguID: 'ic-can-cubugu-1',
-                canCubuguIsimID: 'can-cubugu-isim-1',
-                spriteler,
-            });
-            const oyuncu2 = new Savasci(tuval, {
-                renk: 'rgba(255,0,0,0.5)',
-                pozisyon: {x: 600, y: 0},
-                sagaBakiyor: false,
-                kontroller: this.oyuncu2Kontroller,
-                genislik: 50,
-                yukseklik: 100,
-                isim: 'o',
-                canCubuguID: 'ic-can-cubugu-2',
-                canCubuguIsimID: 'can-cubugu-isim-2',
-                spriteler,
-            });
-
-            window.addEventListener('keydown', (event: KeyboardEvent) => {
-                const birinciOyuncuTuslari = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'ö', 'Ö'];
-                switch (event.key) {
-                    case 'ArrowLeft':
-                        this.oyuncuKontroller.solKosu = true;
-                        this.oyuncuKontroller.sonKosulanYonSagdir = false;
-                        break;
-                    case 'ArrowRight':
-                        this.oyuncuKontroller.sagKosu = true;
-                        this.oyuncuKontroller.sonKosulanYonSagdir = true;
-                        break;
-                    case 'ArrowUp':
-                        if (!event.repeat) {
-                            this.oyuncuKontroller.zipla = true;
-                        }
-
-                        break;
-                    case 'ArrowDown':
-                        if (!event.repeat) {
-                            this.oyuncuKontroller.saldiri = true;
-                        }
-                        break;
-                    case 'ö':
-                    case 'Ö':
-                        if (!event.repeat) {
-                            this.oyuncuKontroller.taklaAt = true;
-                        }
-                        break;
-                    case 'w':
-                    case 'W':
-                        if (!event.repeat) {
-                            this.oyuncu2Kontroller.zipla = true;
-                        }
-
-                        break;
-                    case 'a':
-                    case 'A':
-                        this.oyuncu2Kontroller.solKosu = true;
-                        this.oyuncu2Kontroller.sonKosulanYonSagdir = false;
-                        break;
-                    case 's':
-                    case 'S':
-                        break;
-                    case 'd':
-                    case 'D':
-                        this.oyuncu2Kontroller.sagKosu = true;
-                        this.oyuncu2Kontroller.sonKosulanYonSagdir = true;
-                        break;
-                    case 'Shift':
-                        if (!event.repeat) {
-                            this.oyuncu2Kontroller.taklaAt = true;
-                        }
-
-                        break;
-                    case ' ':
-                        if (!event.repeat) {
-                            this.oyuncu2Kontroller.saldiri = true;
-                        }
-
-                        break;
-                }
-
-            });
-            window.addEventListener('keyup', (event) => {
-                const birinciOyuncuTuslari = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'ö', 'Ö'];
-                switch (event.key) {
-                    case 'ArrowLeft':
-                        this.oyuncuKontroller.solKosu = false;
-                        this.oyuncuKontroller.sonKosulanYonSagdir = true;
-                        break;
-                    case 'ArrowRight':
-                        this.oyuncuKontroller.sagKosu = false;
-                        this.oyuncuKontroller.sonKosulanYonSagdir = false;
-                        break;
-                    case 'ArrowUp':
-                        this.oyuncuKontroller.zipla = false;
-                        break;
-                    case 'ArrowDown':
-                        this.oyuncuKontroller.saldiri = false;
-                        break;
-                    case 'ö':
-                    case 'Ö':
-                        this.oyuncuKontroller.taklaAt = false;
-                        break;
-                    case 'w':
-                    case 'W':
-                        this.oyuncu2Kontroller.zipla = false;
-                        break;
-                    case 'a':
-                    case 'A':
-                        this.oyuncu2Kontroller.solKosu = false;
-                        this.oyuncu2Kontroller.sonKosulanYonSagdir = true;
-                        break;
-                    case 's':
-                    case 'S':
-                        break;
-                    case 'd':
-                    case 'D':
-                        this.oyuncu2Kontroller.sagKosu = false;
-                        this.oyuncu2Kontroller.sonKosulanYonSagdir = false;
-                        break;
-                    case 'Shift':
-                        break;
-                    case ' ':
-                        break;
-                }
-                if (birinciOyuncuTuslari.includes(event.key)) {
-                    this.socket.emit('oyun bilgisi', this.oyuncuKontroller);
-                } else {
-                    this.socket.emit('oyun bilgisi', this.oyuncu2Kontroller);
-
-                }
-            });
-            if (!this.mobildir) {
-                (this.$refs["canvas-container"] as HTMLDivElement).addEventListener('mousedown', () => {
-                    this.oyuncu2Kontroller.saldiri = true;
-                });
-            }
+            setInterval(() => {
+                this.tuval.setZamanKutucugu();
+            }, 1000);
             (this.$refs["canvas-container"] as HTMLDivElement).addEventListener('contextmenu', (event) => {
                 event.preventDefault();
             });
@@ -434,13 +339,14 @@ export default Vue.extend({
             const filterStrength = 5;
             let frameTime = 16.7, lastLoop = performance.now(), thisLoop;
 
-            function canlandir() {
+            const canlandir = () => {
                 window.requestAnimationFrame(canlandir);
-                tuval.fps = 1000 / frameTime;
-                tuval.temizle();
+                this.tuval.fps = 1000 / frameTime;
+                this.tuval.temizle();
                 arkaplan.guncelle();
-                oyuncu.guncelle();
-                oyuncu2.guncelle();
+                for (const savasciAdi in this.savascilar) {
+                    this.savascilar[savasciAdi as SavasciAdi].guncelle();
+                }
                 SavasciCarpisma.engelle();
 
                 const thisFrameTime = (thisLoop = performance.now()) - lastLoop;
@@ -448,22 +354,17 @@ export default Vue.extend({
                 lastLoop = thisLoop;
 
             }
-
             const fpsOut = document.getElementById('fps');
+
             setInterval(function () {
                 fpsOut!.innerHTML = (1000 / frameTime).toFixed(1) + " fps";
             }, 1000);
 
             canlandir();
         }
-    },
+    }
+    ,
     mounted() {
-        this.oyuncular = axios.get('/oyuncular').then(response => {
-            this.oyuncular = response.data;
-        }).catch(error => {
-            console.log(error);
-        });
-
         window.addEventListener('resize', this.ekranBoyutuGuncelle);
         window.addEventListener('fullscreenchange', this.tamEkranGuncelle);
         window.addEventListener('mozfullscreenchange', this.tamEkranGuncelle);
@@ -471,18 +372,17 @@ export default Vue.extend({
         window.addEventListener('msfullscreenchange', this.tamEkranGuncelle);
 
 
-
         this.main();
         this.socket.on('oyun bilgisi', (msg) => {
-            console.log(JSON.stringify(msg));
-            if (msg.birinciOyuncudur) {
-                this.kontrolGuncelle(this.oyuncuKontroller, msg)
-
+            /*console.log(JSON.stringify(msg));
+            if (msg.isim == 'lutfullah') {
+                this.kontrolGuncelle(this.oyuncuKontroller, msg.kontroller)
             } else {
-                this.kontrolGuncelle(this.oyuncu2Kontroller, msg)
-            }
-        })
-    },
+                this.kontrolGuncelle(this.oyuncu2Kontroller, msg.kontroller)
+            }*/
+        });
+    }
+    ,
 
     destroyed() {
         window.removeEventListener('resize', this.ekranBoyutuGuncelle);
@@ -492,7 +392,8 @@ export default Vue.extend({
         window.removeEventListener('msfullscreenchange', this.tamEkranGuncelle);
 
     }
-});
+})
+;
 
 </script>
 <style scoped lang="scss">
