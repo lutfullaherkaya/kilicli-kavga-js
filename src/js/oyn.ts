@@ -417,7 +417,7 @@ export class Savasci {
 
     saldir() {
         if (!this.suanYapilanEylem) {
-            this.mp3Cal('ahmet');
+            /*this.mp3Cal('ahmet');*/
             if (this.alternatifSaldiri) {
                 this.suanYapilanEylem = {
                     spriteAdi: 'saldiri2',

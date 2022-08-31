@@ -1,7 +1,7 @@
 <template>
     <div class="arayuz-mobil-komponenti" ref="arayuz-mobil-komponenti">
         <div ref="joystick-menzili" class="joystick-menzili"></div>
-        <v-responsive class="sag-buton sag-saldiri-butonu" :aspect-ratio="1/1" @click="saldirt">
+        <v-responsive class="sag-buton sag-saldiri-butonu" :aspect-ratio="1/1" @mousedown="saldirt" @touchstart="saldirt">
             <div class="sag-buton-arkaplan" :style="{'background-color': butonRengi}">
             </div>
             <img src="/ikonlar/kilic.svg" class="sag-button-sembolu-kilic"
@@ -9,7 +9,7 @@
 
 
         </v-responsive>
-        <v-responsive class="sag-buton sag-takla-at-butonu" :aspect-ratio="1/1" @click="taklaAttir">
+        <v-responsive class="sag-buton sag-takla-at-butonu" :aspect-ratio="1/1" @mousedown="taklaAttir" @touchstart="taklaAttir">
 
             <div class="sag-buton-arkaplan" :style="{'background-color': butonRengi}">
             </div>
