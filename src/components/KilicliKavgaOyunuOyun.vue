@@ -49,7 +49,7 @@ export default Vue.extend({
     },
     data() {
         return {
-            savascilar: {} as { [key: SavasciAdi]: Savasci }, // bundan dolayı bir isimli tek savaşçı olabilir.
+            savascilar: [] as Savasci[], // bundan dolayı bir isimli tek savaşçı olabilir.
             tamEkrandir: false,
             ekranGenisligi: 100,
             ekranYuksekligi: 100,
@@ -110,17 +110,17 @@ export default Vue.extend({
             });*/
         },
         savasciEkle(tuval: Tuval, isim: SavasciAdi, spriteler: Sprite[], kontrolYoneticisi: KontrolYoneticisi | null = null): void {
-            const savasciSayisi = Object.keys(this.savascilar).length;
+
             let pozisyon = {x: 150, y: tuval.canvas.height - 111};
             let canCubuguID;
             let canCubuguIsimID;
             let sagaBakiyor;
-            if (savasciSayisi == 0) {
+            if (this.savascilar.length == 0) {
                 pozisyon = {x: 150, y: tuval.canvas.height - 111};
                 canCubuguID = 'ic-can-cubugu-1';
                 canCubuguIsimID = 'can-cubugu-isim-1';
                 sagaBakiyor = true;
-            } else if (savasciSayisi == 1) {
+            } else if (this.savascilar.length == 1) {
                 pozisyon = {x: tuval.canvas.width - 200, y: tuval.canvas.height - 111};
                 canCubuguID = 'ic-can-cubugu-2';
                 canCubuguIsimID = 'can-cubugu-isim-2';
@@ -132,7 +132,6 @@ export default Vue.extend({
                 sagaBakiyor = false;
                 // todo: üçüncü ve sonrası karakterlere can çubuğu ekle
             }
-            console.log(isim);
             const yeniSavasci = new Savasci(tuval, {
                 renk: 'rgba(255,0,0,0.5)',
                 pozisyon,
@@ -145,19 +144,23 @@ export default Vue.extend({
                 canCubuguIsimID,
                 spriteler,
             });
-            this.$set(this.savascilar, yeniSavasci.isim, yeniSavasci);
+            this.savascilar.push(yeniSavasci);
+            setTimeout(() => {
+                console.log(Savasci.lar)
+            }, 1000);
         },
         main() {
             this.tuval = new Tuval(document.querySelector('canvas')!, tuvalGenisligi, tuvalYuksekligi, (tuvalYuksekligi / 600) * 490);
             this.$watch('oyuncular', () => {
                 for (const oyuncu of this.oyuncular) {
-                    if (!(oyuncu.isim in this.savascilar)) {
+                    let savasciIsimleri = this.savascilar.map((savasci) => savasci.isim);
+                    if (!savasciIsimleri.includes(oyuncu.isim)) {
                         if (this.buOyuncuIsmi != "" && oyuncu.isim == this.buOyuncuIsmi) {
-                            let kontrolYoneticisi : KontrolYoneticisi | null = null;
+                            let kontrolYoneticisi: KontrolYoneticisi | null = null;
                             if (this.mobildir) {
                                 kontrolYoneticisi = this.mobilKontrolYoneticisi;
                             } else {
-                                kontrolYoneticisi = new KlavyeKontrolYoneticisi(oyuncu.isim, this.socket, true, true, this.$refs['canvas-container'] as HTMLElement)
+                                kontrolYoneticisi = new KlavyeKontrolYoneticisi(oyuncu.isim, this.socket, true, null, true, this.$refs['canvas-container'] as HTMLElement)
                             }
                             this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, kontrolYoneticisi);
                         } else {
@@ -172,13 +175,15 @@ export default Vue.extend({
                         */
                     }
                 }
-                const savasciIsimleri = Object.values(this.savascilar).map((savasci) => savasci.isim);
-                for (const savasciIsmi of savasciIsimleri) {
-                    if (this.oyuncular.map((oyuncu) => oyuncu.isim).indexOf(savasciIsmi) == -1) {
-                        Savasci.savasciCikar(this.savascilar[savasciIsmi]);
-                        this.$delete(this.savascilar, savasciIsmi);
+                const oyuncuIsimleri = this.oyuncular.map((oyuncu) => oyuncu.isim);
+                this.savascilar = this.savascilar.filter((savasci) => {
+                    if (!oyuncuIsimleri.includes(savasci.isim)) {
+                        Savasci.savasciCikar(savasci);
+                        return false;
                     }
-                }
+                    return true;
+                });
+
             })
 
             const arkaplan = new Sprite(this.tuval, {
@@ -353,7 +358,7 @@ export default Vue.extend({
                 },
             };
             setInterval(() => {
-                this.tuval.setZamanKutucugu();
+                this.tuval!.setZamanKutucugu();
             }, 1000);
             (this.$refs["canvas-container"] as HTMLDivElement).addEventListener('contextmenu', (event) => {
                 event.preventDefault();
@@ -370,13 +375,13 @@ export default Vue.extend({
 
             const canlandir = () => {
                 window.requestAnimationFrame(canlandir);
-                this.tuval.fps = 1000 / frameTime;
-                this.tuval.temizle();
+                this.tuval!.fps = 1000 / frameTime;
+                this.tuval!.temizle();
                 arkaplan.guncelle();
-                for (const savasciAdi in this.savascilar) {
-                    this.savascilar[savasciAdi as SavasciAdi].guncelle();
+                for (const savasci of this.savascilar) {
+                    savasci.guncelle();
                 }
-                SavasciCarpisma.engelle();
+                //SavasciCarpisma.engelle();
 
                 const thisFrameTime = (thisLoop = performance.now()) - lastLoop;
                 frameTime += (thisFrameTime - frameTime) / filterStrength;
