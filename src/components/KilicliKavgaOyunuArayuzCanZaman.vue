@@ -2,17 +2,18 @@
     <div>
         <div class="can-zaman-arayuzu">
             <div class="can-cubugu can-cubugu-1">
-                <div id="ic-can-cubugu-1"></div>
-                <span id="can-cubugu-isim-1" class="can-cubugu-isim">oyncu1</span>
+                <div class="ic-can-cubugu-1" :style="{width: (savascilar[0]?.can ?? 0) + '%'}"></div>
+                <span class="can-cubugu-isim can-cubugu-isim-1">{{ savascilar[0]?.isim ?? '' }}</span>
             </div>
             <div class="zaman-kutusu">
-                <span id="zaman">90</span>
+                <span id="zaman" class="zaman">90</span>
             </div>
-            <div class="can-cubugu can-cubugu-2">
-                <div id="ic-can-cubugu-2"></div>
-                <span id="can-cubugu-isim-2" class="can-cubugu-isim">oyncu2</span>
+            <div class="can-cubugu can-cubugu-2" >
+                <div class="ic-can-cubugu-2" :style="{width: (savascilar[1]?.can ?? 0) + '%'}"></div>
+                <span class="can-cubugu-isim can-cubugu-isim-2">{{ savascilar[1]?.isim ?? '' }}</span>
             </div>
         </div>
+
         <div class="tam-ekran-butonu">
             <v-icon v-if="!tamEkrandir" dark right large @click="$emit('tam-ekrani-ac')">
                 mdi-fullscreen
@@ -31,13 +32,15 @@ export default Vue.extend({
     name: 'KilicliKavgaOyunuArayuzCanZaman',
     props: {
         tamEkrandir: Boolean,
+        savascilar: Array
     },
 })
 </script>
 <style scoped>
 * {
     --zaman-genisligi: 10%;
-    --can-cubugu-yuksekligi: 1.5rem;
+    --can-cubugu-yuksekligi: min(4vw, 2rem);
+    --font-boyutu: var(--can-cubugu-yuksekligi);
     --can-cubugu-kenar-kalinligi: 3px;
 }
 
@@ -51,7 +54,7 @@ export default Vue.extend({
     align-items: center;
     color: #e8e8e8;
     font-family: "Minecraft", Avenir, Helvetica, Arial, sans-serif;
-    font-size: 1.5rem;
+    font-size: var(--font-boyutu);
 }
 
 .can-cubugu {
@@ -70,34 +73,30 @@ export default Vue.extend({
     padding-left: 0;
 }
 
-#ic-can-cubugu-1, #ic-can-cubugu-2 {
+.ic-can-cubugu-1, .ic-can-cubugu-2 {
     width: 100%;
     height: var(--can-cubugu-yuksekligi);
     background-color: rgba(255, 84, 84, 0.82);
     transition: width 0.2s ease-in-out;
 }
 
-#ic-can-cubugu-1 {
+.ic-can-cubugu-1 {
 
 }
 
-#ic-can-cubugu-2 {
+.ic-can-cubugu-2 {
     float: right;
 }
 
 .zaman-kutusu {
-    padding-left: 5px;
-    padding-right: 5px;
-    padding-top: 2px;
-    padding-bottom: 2px;
+    padding: calc(var(--can-cubugu-yuksekligi) / 4);
 
-    border-top: black solid var(--can-cubugu-kenar-kalinligi);
     border: black solid var(--can-cubugu-kenar-kalinligi);
     background-color: slategray;
     text-align: center;
 }
 
-#zaman {
+.zaman {
     position: relative;
     top: 0.05rem;
 }
@@ -108,11 +107,11 @@ export default Vue.extend({
     transform: translate(0, -50%);
 }
 
-#can-cubugu-isim-1 {
+.can-cubugu-isim-1 {
     left: calc(var(--can-cubugu-kenar-kalinligi) * 2);
 }
 
-#can-cubugu-isim-2 {
+.can-cubugu-isim-2 {
     right: calc(var(--can-cubugu-kenar-kalinligi) * 2);
 }
 
@@ -121,9 +120,11 @@ export default Vue.extend({
     right: 8px;
     bottom: 8px;
 }
+
 .tam-ekran-butonu * {
     font-size: min(5vw, 40px) !important;
 }
+
 .v-btn:before {
     opacity: 0 !important;
 }

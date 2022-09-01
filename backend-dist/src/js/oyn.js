@@ -384,11 +384,11 @@ export class Savasci {
         this.ziplamaHizi = 6;
         this.yurumeHizi = 2;
         this.can = 100;
-        this.kosuyor = false;
         this.saldiriHasari = 10;
         this.suanYapilanEylem = null;
         this.kanAkiyor = false;
         this.alternatifSaldiri = true; // surekli true false olur saldırdıkça
+        this.isimGoster = true;
         this.tuval = tuval;
         this.hitKutusu = new Dikdortgen(this.tuval, pozisyon.x, pozisyon.y, genislik, yukseklik, renk);
         this.kontroller = kontroller;
@@ -650,6 +650,15 @@ export class Savasci {
         this.sprite.guncelle();
         if (this.oludur() && this.sprite.isim == 'oldu' && this.sprite.birKereTamAnimasyonOldu && !this.hitKutusuOludur) {
             this.oluHitKutusuYap();
+        }
+        if (this.isimGoster) {
+            this.tuval.context.font = "0.5em 'arial' ";
+            this.tuval.context.textAlign = 'center';
+            this.tuval.context.fillStyle = 'white';
+            this.tuval.context.imageSmoothingEnabled = true;
+            this.tuval.context.imageSmoothingQuality = 'high';
+            this.tuval.context.fillText(this.isim, this.hitKutusu.x + this.hitKutusu.genislik / 2, this.hitKutusu.y - 6, this.hitKutusu.genislik);
+            this.tuval.context.imageSmoothingEnabled = false;
         }
         return this;
     }

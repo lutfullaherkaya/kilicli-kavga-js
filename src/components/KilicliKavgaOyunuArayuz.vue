@@ -4,6 +4,7 @@
                                               :mobil-kontrolleri-goster="mobilKontrolleriGoster"
                                               @tam-ekrani-ac="$emit('tam-ekrani-ac')"
                                               @tam-ekrani-kapat="$emit('tam-ekrani-kapat')"
+                                              :savascilar="savascilar"
         />
         <kilicli-kavga-oyunu-arayuz-mobil v-if="mobilKontrolleriGoster"
                                           @mobil-kontroller-degisti="$emit('mobil-kontroller-degisti', $event)"
@@ -24,6 +25,7 @@ export default Vue.extend({
     props: {
         tamEkrandir: Boolean,
         mobilKontrolleriGoster: Boolean,
+        savascilar: Array
     },
     data() {
         return {}

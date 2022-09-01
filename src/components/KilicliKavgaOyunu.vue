@@ -17,7 +17,7 @@
                 :bu-oyuncu-ismi="yeniOyuncuAdi"
         />
 
-        <v-switch v-model="mobilKontrolleriGoster" inset label="Mobil Kontrolleri Göster"></v-switch>
+<!--        <v-switch v-model="mobilKontrolleriGoster" inset label="Mobil Kontrolleri Göster"></v-switch>-->
 
         <v-simple-table>
             <template v-slot:default>

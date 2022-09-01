@@ -41,6 +41,7 @@ export class Tuval {
         this.yerKordinati = yerKordianti;
         this.context = this.canvas.getContext('2d');
         this.context!.imageSmoothingEnabled = false;
+        this.context!.font = "0.8rem 'arial' ";
         this.zaman = 90;
         this.temizle();
         this.fps = 60; // bu değer sürekli güncellenecek
@@ -176,7 +177,6 @@ export class Sprite {
         this.skala = skala;
         this.resim = new Image();
         this.resim.src = resimKaynagi;
-        this.resim.classList;
         this.resimSayisi = resimSayisi;
         this.yonuSagdir = yonuSagdir;
         this.sonundaSonSahneyiTut = sonundaSonSahneyiTut;
@@ -290,7 +290,7 @@ export abstract class KontrolYoneticisi {
     protected yonetiliyor = false;
     public galeAlinacakIsim: string;
 
-    constructor(galeAlinacakIsim: string) {
+    protected constructor(galeAlinacakIsim: string) {
         this.galeAlinacakIsim = galeAlinacakIsim;
     }
 
@@ -308,7 +308,7 @@ export abstract class KontrolYoneticisi {
 export abstract class YayinciKontrolYoneticisi extends KontrolYoneticisi {
     private socket: Socket;
 
-    constructor(galeAlinacakIsim: string, socket: Socket) {
+    protected constructor(galeAlinacakIsim: string, socket: Socket) {
         super(galeAlinacakIsim);
         this.socket = socket;
     }
@@ -353,6 +353,7 @@ export class KlavyeKontrolYoneticisi extends YayinciKontrolYoneticisi {
     private keydownHalledici: any = null;
     private keyupHalledici: any = null;
     private mousedownHalledici: any = null;
+    private contextMenuPreventer: any = null;
 
     constructor(galeAlinacakIsim: string, socket: Socket, wasdMi: boolean, fareDeKullan = false, fareElementi: HTMLElement | null = null) {
         super(galeAlinacakIsim, socket);
@@ -427,11 +428,16 @@ export class KlavyeKontrolYoneticisi extends YayinciKontrolYoneticisi {
                 this.kontrolGuncelle(baziKontroller);
             }
 
+            this.contextMenuPreventer = (event: MouseEvent) => {
+                event.preventDefault();
+            }
+
 
             window.addEventListener('keydown', this.keydownHalledici);
             window.addEventListener('keyup', this.keyupHalledici);
             if (this.fareDeKullan && this.fareElementi) {
                 this.fareElementi.addEventListener('mousedown', this.mousedownHalledici);
+                this.fareElementi.addEventListener('contextmenu', this.contextMenuPreventer);
             }
         }
 
@@ -445,6 +451,7 @@ export class KlavyeKontrolYoneticisi extends YayinciKontrolYoneticisi {
             window.removeEventListener('keyup', this.keyupHalledici);
             if (this.fareDeKullan && this.fareElementi) {
                 this.fareElementi.removeEventListener('mousedown', this.mousedownHalledici);
+                this.fareElementi.removeEventListener('contextmenu', this.contextMenuPreventer);
             }
         }
 
@@ -524,8 +531,6 @@ export class Savasci {
     private yurumeIvmesi = {x: 0, y: 0};
     private kontroller: SavasciKontrolleri;
     isim: string;
-    private canCubuguID: string;
-    private canCubuguIsimID: string;
     private sagaBakiyor: boolean;
     private taklaAtiyor = false;
     private taklayiSagaAtiyor = false;
@@ -546,6 +551,13 @@ export class Savasci {
     private alternatifSaldiri = true;  // surekli true false olur saldırdıkça
     private kontrolYoneticisi: null | KontrolYoneticisi;
     public isimGoster = true;
+    public kalpGoster = true;
+    public doluKalpResmi: HTMLImageElement;
+    public bosKalpResmi: HTMLImageElement;
+    public kalpGenisligi: number;
+    public kalpYuksekligi: number;
+    public kalpSayisi = 4;
+
 
     constructor(
         tuval: Tuval, {
@@ -564,8 +576,6 @@ export class Savasci {
             genislik,
             yukseklik,
             isim,
-            canCubuguID,
-            canCubuguIsimID,
             spriteler,
         }: any) {
         this.tuval = tuval;
@@ -577,12 +587,7 @@ export class Savasci {
             this.kontrolYoneticisi.yonetmeyeBasla(this.kontroller);
         }
         this.isim = isim;
-        this.canCubuguID = canCubuguID;
-        this.canCubuguIsimID = canCubuguIsimID;
         this.sagaBakiyor = sagaBakiyor;
-
-        document.getElementById(this.canCubuguIsimID)!.innerText = this.isim;
-
         this.silahKutusu = new Dikdortgen(this.tuval, pozisyon.x, pozisyon.y, 193, 110, 'rgba(255,255,255,0.53)');
         this.spriteler = spriteler;
         this.sprite = this.sagaBakiyor ? this.spriteler.sag.rolanti : this.spriteler.sol.rolanti;
@@ -599,6 +604,12 @@ export class Savasci {
             sonsuzAnimasyon: false,
         });
 
+        this.doluKalpResmi = new Image();
+        this.doluKalpResmi.src = './sprites/minecraft-kalp-dolu.png';
+        this.bosKalpResmi = new Image();
+        this.bosKalpResmi.src = './sprites/minecraft-kalp-bos.png';
+        this.kalpGenisligi = this.hitKutusu.genislik / this.kalpSayisi;
+        this.kalpYuksekligi = this.kalpGenisligi;
 
         Savasci.lar.push(this);
     }
@@ -620,10 +631,6 @@ export class Savasci {
         } else {
             this.silahKutusu.x += -this.silahKutusu.genislik + this.silahKutusu.genislik * 0.56;
         }
-    }
-
-    canCubuguGuncelle() {
-        document.getElementById(this.canCubuguID)!.style.width = this.can + '%';
     }
 
     oludur() {
@@ -673,7 +680,6 @@ export class Savasci {
                     savaskar.can = Math.max(0, savaskar.can - this.saldiriHasari);
                     savaskar.kanAkiyor = true;
                     savaskar.sonHasarAlinanYonSagdir = this.hitKutusu.merkezKordinat().x > savaskar.hitKutusu.x;
-                    savaskar.canCubuguGuncelle();
                     console.log(savaskar.isim, savaskar.can);
                 }
             })
@@ -860,14 +866,27 @@ export class Savasci {
         }
 
         if (this.isimGoster) {
-            this.tuval.context!.font = "0.5em 'arial' " ;
             this.tuval.context!.textAlign = 'center';
             this.tuval.context!.fillStyle = 'white';
             this.tuval.context!.imageSmoothingEnabled = true;
-            this.tuval.context!.imageSmoothingQuality = 'high';
             this.tuval.context!.fillText(this.isim, this.hitKutusu.x + this.hitKutusu.genislik / 2, this.hitKutusu.y - 6, this.hitKutusu.genislik);
             this.tuval.context!.imageSmoothingEnabled = false;
+        }
 
+        if (this.kalpGoster) {
+            const canGenisligi = this.hitKutusu.genislik / 5;
+            for (let i = 0; i < this.kalpSayisi; ++i) {
+                const kalpResmi = (i < this.can / (100 / this.kalpSayisi)) ? this.doluKalpResmi : this.bosKalpResmi;
+                this.tuval.context!.drawImage(
+                    kalpResmi,
+                    (this.hitKutusu.genislik - this.kalpSayisi * this.kalpGenisligi) / 2 + (this.hitKutusu.x + this.kalpGenisligi * i),
+                    this.hitKutusu.y - this.kalpYuksekligi - 19,
+                    this.kalpGenisligi,
+                    this.kalpYuksekligi
+                )
+            }
+
+            return this;
         }
 
         return this;

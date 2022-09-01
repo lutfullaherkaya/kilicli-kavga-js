@@ -1,6 +1,7 @@
 <template>
     <div class="canvas-container" ref="canvas-container" style="width: 100%; height: 100%;">
-        <div id="fps" style="position: absolute; top: 1px; left: 1px; color: white; font-size: 0.5rem;"></div>
+        <div id="fps"
+             style="position: absolute; top: 1px; left: 1px; color: white; font-size: 1rem; z-index: 111;"></div>
         <div class="genislik-sinirlayici" :style="{width: genislikSinirlayiciGenisligi}">
             <!-- bunun amaci tam ekran oldugunda kenarlara siyah cubuk koyabilmek -->
             <v-responsive :aspect-ratio="16/9">
@@ -10,6 +11,7 @@
                                             @mobil-kontroller-degisti="mobilKontrollerDegisince"
                                             :tam-ekrandir="tamEkrandir"
                                             :mobil-kontrolleri-goster="mobilKontrolleriGoster"
+                                            :savascilar="savascilar"
 
                 ></kilicli-kavga-oyunu-arayuz>
             </v-responsive>
@@ -110,27 +112,17 @@ export default Vue.extend({
             this.mobilKontrolYoneticisi.kontrolGuncelle(baziKontroller);
         },
         savasciEkle(tuval: Tuval, isim: SavasciAdi, spriteler: Sprite[], kontrolYoneticisi: KontrolYoneticisi | null = null): void {
-
             let pozisyon = {x: 150, y: tuval.canvas.height - 111};
-            let canCubuguID;
-            let canCubuguIsimID;
             let sagaBakiyor;
             if (this.savascilar.length == 0) {
                 pozisyon = {x: 150, y: tuval.canvas.height - 111};
-                canCubuguID = 'ic-can-cubugu-1';
-                canCubuguIsimID = 'can-cubugu-isim-1';
                 sagaBakiyor = true;
             } else if (this.savascilar.length == 1) {
                 pozisyon = {x: tuval.canvas.width - 200, y: tuval.canvas.height - 111};
-                canCubuguID = 'ic-can-cubugu-2';
-                canCubuguIsimID = 'can-cubugu-isim-2';
                 sagaBakiyor = false;
             } else { // üçüncüden sonraki savaşçılar orta yukarıdan düşer.
                 pozisyon = {x: 1920 / 2 + 25, y: -100};
-                canCubuguID = 'ic-can-cubugu-2';
-                canCubuguIsimID = 'can-cubugu-isim-2';
                 sagaBakiyor = false;
-                // todo: üçüncü ve sonrası karakterlere can çubuğu ekle
             }
             const yeniSavasci = new Savasci(tuval, {
                 renk: 'rgba(255,0,0,0.5)',
@@ -140,8 +132,6 @@ export default Vue.extend({
                 genislik: 50,
                 yukseklik: 100,
                 isim: isim,
-                canCubuguID,
-                canCubuguIsimID,
                 spriteler,
             });
             this.savascilar.push(yeniSavasci);
@@ -360,9 +350,6 @@ export default Vue.extend({
             setInterval(() => {
                 this.tuval!.setZamanKutucugu();
             }, 1000);
-            (this.$refs["canvas-container"] as HTMLDivElement).addEventListener('contextmenu', (event) => {
-                event.preventDefault();
-            });
 
 
             // https://stackoverflow.com/questions/4787431/check-fps-in-js
