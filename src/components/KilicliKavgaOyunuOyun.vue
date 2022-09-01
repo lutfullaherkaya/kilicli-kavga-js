@@ -7,10 +7,9 @@
                 <canvas style="width: 100%; height: 100%;"></canvas>
                 <kilicli-kavga-oyunu-arayuz @tam-ekrani-ac="tamEkraniAc"
                                             @tam-ekrani-kapat="tamEkraniKapat"
-                                            @kontroller-degisti="kontrolGuncelle($event)"
+                                            @mobil-kontroller-degisti="mobilKontrollerDegisince"
                                             :tam-ekrandir="tamEkrandir"
                                             :mobil-kontrolleri-goster="mobilKontrolleriGoster"
-                                            :savasci-kontrolleri-mobil="oyuncuKontroller"
 
                 ></kilicli-kavga-oyunu-arayuz>
             </v-responsive>
@@ -28,7 +27,7 @@ import {
     Sprite,
     Tuval,
     KlavyeKontrolYoneticisi,
-    KontrolYoneticisi
+    KontrolYoneticisi, MobilKontrolYoneticisi, UzaktanKontrolYoneticisi
 } from "@/js/oyn";
 import axios from "axios";
 import Vue from "vue";
@@ -46,15 +45,17 @@ export default Vue.extend({
         mobilKontrolleriGoster: Boolean,
         socket: Object,
         oyuncular: Array as () => Array<{ isim: SavasciAdi }>,
+        buOyuncuIsmi: String,
     },
     data() {
         return {
-            savascilar: {} as { [key: SavasciAdi]: Savasci },
+            savascilar: {} as { [key: SavasciAdi]: Savasci }, // bundan dolayı bir isimli tek savaşçı olabilir.
             tamEkrandir: false,
             ekranGenisligi: 100,
             ekranYuksekligi: 100,
             darkSoulsaBenzeyenElemanSpriteleri: null as any,
             tuval: null as null | Tuval,
+            mobilKontrolYoneticisi: new MobilKontrolYoneticisi(),
         }
     },
     computed: {
@@ -85,7 +86,7 @@ export default Vue.extend({
                 elem.msRequestFullscreen();
             }
         },
-        tamEkraniKapat() {
+        tamEkraniKapat(): void {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
             } else if (document.webkitExitFullscreen) { /* Safari */
@@ -94,14 +95,10 @@ export default Vue.extend({
                 document.msExitFullscreen();
             }
         },
+        mobilKontrollerDegisince(baziKontroller: Partial<SavasciKontrolleri>): void {
+            this.mobilKontrolYoneticisi.kontrolGuncelle(baziKontroller);
+        },
         kontrolGuncelle(kaynakKontroller: SavasciKontrolleri): void {
-            // todo
-            /*if (this.oyuncuIsmi == 'lutfullah') {
-                Object.assign(this.oyuncuKontroller, kaynakKontroller);
-            } else {
-                Object.assign(this.oyuncu2Kontroller, kaynakKontroller);
-            }*/
-
             /*this.socket.emit('oyun bilgisi', {
                 isim: this.oyuncuIsmi,
                 kontroller: kaynakKontroller,
@@ -112,23 +109,26 @@ export default Vue.extend({
             let pozisyon = {x: 150, y: tuval.canvas.height - 111};
             let canCubuguID;
             let canCubuguIsimID;
+            let sagaBakiyor;
             if (savasciSayisi == 0) {
-                pozisyon = {x: tuval.canvas.width - 150, y: tuval.canvas.height - 111};
-                canCubuguID = 'can-cubugu-1';
+                pozisyon = {x: 150, y: tuval.canvas.height - 111};
+                canCubuguID = 'ic-can-cubugu-1';
                 canCubuguIsimID = 'can-cubugu-isim-1';
+                sagaBakiyor = true;
             } else if (savasciSayisi == 1) {
-                pozisyon = {x: 600, y: tuval.canvas.height - 111};
-                canCubuguID = 'can-cubugu-2';
+                pozisyon = {x: tuval.canvas.width - 200, y: tuval.canvas.height - 111};
+                canCubuguID = 'ic-can-cubugu-2';
                 canCubuguIsimID = 'can-cubugu-isim-2';
+                sagaBakiyor = false;
             } else { // üçüncüden sonraki savaşçılar orta yukarıdan düşer.
-                pozisyon = {x: 350, y: -100};
-                canCubuguID = 'can-cubugu-2';
+                pozisyon = {x: 1920 / 2 + 25, y: -100};
+                canCubuguID = 'ic-can-cubugu-2';
                 canCubuguIsimID = 'can-cubugu-isim-2';
+                sagaBakiyor = false;
                 // todo: üçüncü ve sonrası karakterlere can çubuğu ekle
             }
-            let sagaBakiyor = savasciSayisi == 0; // ilk savasci saga bakar, diğerleri sola
             console.log(isim);
-            this.savascilar[isim] = new Savasci(tuval, {
+            const yeniSavasci = new Savasci(tuval, {
                 renk: 'rgba(255,0,0,0.5)',
                 pozisyon,
                 sagaBakiyor,
@@ -140,14 +140,38 @@ export default Vue.extend({
                 canCubuguIsimID,
                 spriteler,
             });
+            this.$set(this.savascilar, yeniSavasci.isim, yeniSavasci);
         },
         main() {
             this.tuval = new Tuval(document.querySelector('canvas')!, tuvalGenisligi, tuvalYuksekligi, (tuvalYuksekligi / 600) * 490);
             this.$watch('oyuncular', () => {
                 for (const oyuncu of this.oyuncular) {
                     if (!(oyuncu.isim in this.savascilar)) {
-                        this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri,
-                                new KlavyeKontrolYoneticisi(true, true, this.$refs['canvas-container'] as HTMLElement));
+                        if (this.buOyuncuIsmi != "" && oyuncu.isim == this.buOyuncuIsmi) {
+                            let kontrolYoneticisi : KontrolYoneticisi | null = null;
+                            if (this.mobildir) {
+                                kontrolYoneticisi = this.mobilKontrolYoneticisi;
+                            } else {
+                                kontrolYoneticisi = new KlavyeKontrolYoneticisi(oyuncu.isim, this.socket, true, true, this.$refs['canvas-container'] as HTMLElement)
+                            }
+                            this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, kontrolYoneticisi);
+                        } else {
+                            this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, new UzaktanKontrolYoneticisi(this.socket, oyuncu.isim));
+                        }
+
+                        /*this.savasciEkle(this.tuval!, 'as', this.darkSoulsaBenzeyenElemanSpriteleri,
+                                new KlavyeKontrolYoneticisi(false
+                                ));*/
+                        /*
+                                                this.savasciEkle(this.tuval!, 'sa', this.darkSoulsaBenzeyenElemanSpriteleri, this.mobilKontrolYoneticisi);
+                        */
+                    }
+                }
+                const savasciIsimleri = Object.values(this.savascilar).map((savasci) => savasci.isim);
+                for (const savasciIsmi of savasciIsimleri) {
+                    if (this.oyuncular.map((oyuncu) => oyuncu.isim).indexOf(savasciIsmi) == -1) {
+                        Savasci.savasciCikar(this.savascilar[savasciIsmi]);
+                        this.$delete(this.savascilar, savasciIsmi);
                     }
                 }
             })
@@ -371,18 +395,8 @@ export default Vue.extend({
         window.addEventListener('webkitfullscreenchange', this.tamEkranGuncelle);
         window.addEventListener('msfullscreenchange', this.tamEkranGuncelle);
 
-
         this.main();
-        this.socket.on('oyun bilgisi', (msg) => {
-            /*console.log(JSON.stringify(msg));
-            if (msg.isim == 'lutfullah') {
-                this.kontrolGuncelle(this.oyuncuKontroller, msg.kontroller)
-            } else {
-                this.kontrolGuncelle(this.oyuncu2Kontroller, msg.kontroller)
-            }*/
-        });
-    }
-    ,
+    },
 
     destroyed() {
         window.removeEventListener('resize', this.ekranBoyutuGuncelle);

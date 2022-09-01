@@ -14,6 +14,7 @@
                 :mobildir="mobildir"
                 :socket="socket"
                 :oyuncular="oyuncular"
+                :bu-oyuncu-ismi="yeniOyuncuAdi"
         />
 
         <v-switch v-model="mobilKontrolleriGoster" inset label="Mobil Kontrolleri Göster"></v-switch>
@@ -114,6 +115,7 @@ export default Vue.extend({
         });
         this.socket.on('oyuncu guncel listesi', (msg)  => {
             this.oyuncular = Object.values(msg);
+
         })
 
 

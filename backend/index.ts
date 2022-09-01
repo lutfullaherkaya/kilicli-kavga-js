@@ -1,10 +1,11 @@
 import express from "express";
 import http from "http";
-import { Server } from "socket.io";
+import {Server} from "socket.io";
 import Router from "./routes/routes.js";
 import cors from 'cors';
 import bodyParser from 'body-parser'; // todo: ne ise yarar
 import Oyuncu from "./controllers/oyuncu.js";
+import {OyunBilgisi} from "../src/js/oyn";
 
 const app = express();
 const server = http.createServer(app);
@@ -16,11 +17,10 @@ app.use(express.json());
 app.use(cors());
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true })); // todo: ne ise yarar
+app.use(bodyParser.urlencoded({extended: true})); // todo: ne ise yarar
 
 // use router
 app.use(Router);
-
 
 
 app.use(express.static('dist'))
@@ -31,24 +31,28 @@ app.use(express.static('dist'))
 const io = new Server(server);
 Oyuncu.io = io;
 
+
 io.on('connection', (socket) => {
     console.log('a user connected');
-    let socketSahibiOyuncu : null | Oyuncu = null;
+    let socketSahibiOyuncu: null | Oyuncu = null;
+
     socket.on('oyuncuyu sockete bagla', (msg) => {
-        console.log(msg);
+        console.log('oyuncu sokete baglandi', msg);
         if (Oyuncu.lar[msg.isim]) {
             Oyuncu.lar[msg.isim].socket = socket;
             socketSahibiOyuncu = Oyuncu.lar[msg.isim];
+            console.log('yollaniyor');
+
+
         }
+
     });
+
 
     socket.on('oyun bilgisi', function (msg) {
         console.log('gonderiliyor', JSON.stringify(msg));
         if (socketSahibiOyuncu) {
-            socket.broadcast.emit('oyun bilgisi', {
-                isim: socketSahibiOyuncu.isim,
-                kontroller: msg.kontroller,
-            })
+            socket.broadcast.emit('oyun bilgisi', msg as OyunBilgisi)
         }
     });
 

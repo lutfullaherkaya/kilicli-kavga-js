@@ -30,7 +30,6 @@ import Vue from "vue";
 export default Vue.extend({
     name: "KilicliKavgaOyunuArayuzMobil",
     props: {
-        savasciKontrolleriMobil: Object as () => SavasciKontrolleri,
     },
     data() {
         return {
@@ -45,6 +44,7 @@ export default Vue.extend({
                 mode: 'static',
                 catchDistance: 150,
             } as any,
+            joystickZiplamaYerinde: false,
             joystickGenislikYuzdesi: 12.5,
         }
     },
@@ -54,14 +54,14 @@ export default Vue.extend({
                 taklaAt: true,
             };
             // sadece degisen kontrol anahtarları emitlenir.
-            this.$emit('kontroller-degisti', yeniKontroller);
+            this.$emit('mobil-kontroller-degisti', yeniKontroller);
         },
         saldirt() {
             const yeniKontroller = {
                 saldiri: true,
             };
             // sadece degisen kontrol anahtarları emitlenir.
-            this.$emit('kontroller-degisti', yeniKontroller);
+            this.$emit('mobil-kontroller-degisti', yeniKontroller);
         },
         joystickOlustur() {
             this.joystickAyarlari.zone = this.$refs['joystick-menzili'];
@@ -73,7 +73,7 @@ export default Vue.extend({
                     sagKosu: false,
                     sonKosulanYonSagdir: false,
                 };
-                this.$emit('kontroller-degisti', yeniKontroller);
+                this.$emit('mobil-kontroller-degisti', yeniKontroller);
             });
             this.joystick.on('dir:right', () => {
                 const yeniKontroller = {
@@ -81,30 +81,32 @@ export default Vue.extend({
                     sagKosu: true,
                     sonKosulanYonSagdir: true,
                 };
-                this.$emit('kontroller-degisti', yeniKontroller);
+                this.$emit('mobil-kontroller-degisti', yeniKontroller);
             });
             this.joystick.on('dir:up dir:down', () => {
                 const yeniKontroller = {
                     solKosu: false,
                     sagKosu: false,
                 };
-                this.$emit('kontroller-degisti', yeniKontroller);
+                this.$emit('mobil-kontroller-degisti', yeniKontroller);
             });
 
             this.joystick.on('move', (evt: nipplejs.JoystickEventTypes, data: nipplejs.JoystickOutputData) => {
                 if (data.angle.degree > 30 && data.angle.degree < 150) {
-                    if (!this.savasciKontrolleriMobil.zipla) {
+                    if (!this.joystickZiplamaYerinde) {
                         const yeniKontroller = {
                             zipla: true,
                         };
-                        this.$emit('kontroller-degisti', yeniKontroller);
+                        this.$emit('mobil-kontroller-degisti', yeniKontroller);
+                        this.joystickZiplamaYerinde = true;
                     }
                 } else {
-                    if (this.savasciKontrolleriMobil.zipla) {
+                    if (this.joystickZiplamaYerinde) {
                         const yeniKontroller = {
                             zipla: false,
                         };
-                        this.$emit('kontroller-degisti', yeniKontroller);
+                        this.$emit('mobil-kontroller-degisti', yeniKontroller);
+                        this.joystickZiplamaYerinde = false;
                     }
                 }
             })
@@ -116,7 +118,8 @@ export default Vue.extend({
                     zipla: false,
                 };
                 // sadece degisen kontrol anahtarları emitlenir.
-                this.$emit('kontroller-degisti', yeniKontroller);
+                this.$emit('mobil-kontroller-degisti', yeniKontroller);
+                this.joystickZiplamaYerinde = false;
             });
         },
         joystickBoyutYenile() {

@@ -25,19 +25,17 @@ io.on('connection', (socket) => {
     console.log('a user connected');
     let socketSahibiOyuncu = null;
     socket.on('oyuncuyu sockete bagla', (msg) => {
-        console.log(msg);
+        console.log('oyuncu sokete baglandi', msg);
         if (Oyuncu.lar[msg.isim]) {
             Oyuncu.lar[msg.isim].socket = socket;
             socketSahibiOyuncu = Oyuncu.lar[msg.isim];
+            console.log('yollaniyor');
         }
     });
     socket.on('oyun bilgisi', function (msg) {
         console.log('gonderiliyor', JSON.stringify(msg));
         if (socketSahibiOyuncu) {
-            socket.broadcast.emit('oyun bilgisi', {
-                isim: socketSahibiOyuncu.isim,
-                kontroller: msg.kontroller,
-            });
+            socket.broadcast.emit('oyun bilgisi', msg);
         }
     });
     socket.on('disconnect', () => {

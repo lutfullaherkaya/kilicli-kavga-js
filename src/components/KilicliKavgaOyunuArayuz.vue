@@ -6,7 +6,7 @@
                                               @tam-ekrani-kapat="$emit('tam-ekrani-kapat')"
         />
         <kilicli-kavga-oyunu-arayuz-mobil v-if="mobilKontrolleriGoster"
-                                          @kontroller-degisti="$emit('kontroller-degisti', $event)"
+                                          @mobil-kontroller-degisti="$emit('mobil-kontroller-degisti', $event)"
                                           :savasci-kontrolleri-mobil="savasciKontrolleriMobil"
         />
     </div>
@@ -24,7 +24,6 @@ export default Vue.extend({
     props: {
         tamEkrandir: Boolean,
         mobilKontrolleriGoster: Boolean,
-        savasciKontrolleriMobil: Object as () => SavasciKontrolleri
     },
     data() {
         return {}
