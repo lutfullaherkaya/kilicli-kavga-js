@@ -55,7 +55,12 @@ export default Vue.extend({
             ekranYuksekligi: 100,
             darkSoulsaBenzeyenElemanSpriteleri: null as any,
             tuval: null as null | Tuval,
-            mobilKontrolYoneticisi: new MobilKontrolYoneticisi(),
+            mobilKontrolYoneticisi: new MobilKontrolYoneticisi(this.buOyuncuIsmi, this.socket),
+        }
+    },
+    watch: {
+        buOyuncuIsmi() {
+            this.mobilKontrolYoneticisi.galeAlinacakIsim = this.buOyuncuIsmi;
         }
     },
     computed: {

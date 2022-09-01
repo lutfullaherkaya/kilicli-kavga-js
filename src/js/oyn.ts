@@ -288,7 +288,7 @@ export class SavasciCarpisma {
 export abstract class KontrolYoneticisi {
     protected kontroller: SavasciKontrolleri | null = null;
     protected yonetiliyor = false;
-    protected galeAlinacakIsim: string;
+    public galeAlinacakIsim: string;
 
     constructor(galeAlinacakIsim: string) {
         this.galeAlinacakIsim = galeAlinacakIsim;
