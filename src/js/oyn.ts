@@ -535,7 +535,6 @@ export class Savasci {
     private ziplamaHizi = 6;
     private yurumeHizi = 2;
     private can = 100;
-    private kosuyor = false;
     private silahKutusu: Dikdortgen;
     private saldiriHasari = 10;
     private spriteler: any; // todo: bunu dynamic typeli yap

@@ -19,7 +19,6 @@
 </template>
 <script lang="ts">
 import KilicliKavgaOyunuArayuz from '@/components/KilicliKavgaOyunuArayuz.vue'
-import {io} from "socket.io-client";
 import {
     Savasci,
     SavasciCarpisma,
@@ -29,7 +28,6 @@ import {
     KlavyeKontrolYoneticisi,
     KontrolYoneticisi, MobilKontrolYoneticisi, UzaktanKontrolYoneticisi
 } from "@/js/oyn";
-import axios from "axios";
 import Vue from "vue";
 
 type SavasciAdi = string;
@@ -81,9 +79,12 @@ export default Vue.extend({
             this.tamEkrandir = Boolean(document.fullscreenElement);
         },
         tamEkraniAc(): void {
-            const elem = this.$refs["canvas-container"] as HTMLDivElement;
-            if (elem.requestFullscreen
-            ) {
+            const elem = this.$refs["canvas-container"] as HTMLElement & {
+                mozRequestFullScreen(): Promise<void>;
+                webkitRequestFullscreen(): Promise<void>;
+                msRequestFullscreen(): Promise<void>;
+            };
+            if (elem.requestFullscreen) {
                 elem.requestFullscreen();
             } else if (elem.webkitRequestFullscreen) { /* Safari */
                 elem.webkitRequestFullscreen();
@@ -92,22 +93,21 @@ export default Vue.extend({
             }
         },
         tamEkraniKapat(): void {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) { /* Safari */
-                document.webkitExitFullscreen();
-            } else if (document.msExitFullscreen) { /* IE11 */
-                document.msExitFullscreen();
+            const docWithBrowsersExitFunctions = document as Document & {
+                mozCancelFullScreen(): Promise<void>;
+                webkitExitFullscreen(): Promise<void>;
+                msExitFullscreen(): Promise<void>;
+            };
+            if (docWithBrowsersExitFunctions.exitFullscreen) {
+                docWithBrowsersExitFunctions.exitFullscreen();
+            } else if (docWithBrowsersExitFunctions.webkitExitFullscreen) { /* Safari */
+                docWithBrowsersExitFunctions.webkitExitFullscreen();
+            } else if (docWithBrowsersExitFunctions.msExitFullscreen) { /* IE11 */
+                docWithBrowsersExitFunctions.msExitFullscreen();
             }
         },
         mobilKontrollerDegisince(baziKontroller: Partial<SavasciKontrolleri>): void {
             this.mobilKontrolYoneticisi.kontrolGuncelle(baziKontroller);
-        },
-        kontrolGuncelle(kaynakKontroller: SavasciKontrolleri): void {
-            /*this.socket.emit('oyun bilgisi', {
-                isim: this.oyuncuIsmi,
-                kontroller: kaynakKontroller,
-            });*/
         },
         savasciEkle(tuval: Tuval, isim: SavasciAdi, spriteler: Sprite[], kontrolYoneticisi: KontrolYoneticisi | null = null): void {
 
@@ -381,7 +381,7 @@ export default Vue.extend({
                 for (const savasci of this.savascilar) {
                     savasci.guncelle();
                 }
-                //SavasciCarpisma.engelle();
+                SavasciCarpisma.engelle();
 
                 const thisFrameTime = (thisLoop = performance.now()) - lastLoop;
                 frameTime += (thisFrameTime - frameTime) / filterStrength;

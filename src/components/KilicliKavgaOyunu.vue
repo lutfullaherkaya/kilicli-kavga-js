@@ -42,12 +42,9 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import {Savasci, SavasciCarpisma, SavasciKontrolleri, Sprite, Tuval} from '@/js/oyn';
 import {io} from "socket.io-client";
 import axios from "axios";
 import KilicliKavgaOyunuOyun from "@/components/KilicliKavgaOyunuOyun.vue";
-import Oyuncu from "../../backend/controllers/oyuncu";
-
 
 export default Vue.extend({
     name: 'KilicliKavgaOyunu',
@@ -68,7 +65,7 @@ export default Vue.extend({
                 gerekli: (value: any) => !!value || 'Gereklidir.',
                 oyunculardaZatenOlmamali: (value: any) => {
                     if (value) {
-                        for (let oyuncu of this.oyuncular) {
+                        for (let oyuncu of (this as any).oyuncular) {
                             if (oyuncu.isim == value) {
                                 return 'Bu isimde bir oyuncu zaten var.';
                             }
@@ -76,7 +73,7 @@ export default Vue.extend({
                     }
                     return true;
                 },
-                counter: value => value.length <= 20 || 'En fazla 20 karakter giriniz.',
+                counter: (value: any) => value.length <= 20 || 'En fazla 20 karakter giriniz.',
             },
         }
     },
@@ -89,14 +86,14 @@ export default Vue.extend({
             axios.post('/oyuncular', {
                 isim: this.yeniOyuncuAdi,
             }).then(response => {
-                this.$snotify.success(response.data.isim + ' oyuncusu oluşturuldu.');
+                (this as any).$snotify.success(response.data.isim + ' oyuncusu oluşturuldu.');
                 this.oyuncuIsmiSecildi = true;
                 this.socket.emit('oyuncuyu sockete bagla', {
                     isim: response.data.isim,
                 });
 
             }).catch(error => {
-                this.$snotify.error(error.response.data.message);
+                (this as any).$snotify.error(error.response.data.message);
             });
 
         },
@@ -111,7 +108,7 @@ export default Vue.extend({
         axios.get('/oyuncular').then(response => {
             this.oyuncular = Object.values(response.data);
         }).catch(error => {
-            this.$snotify.error(error.response.data.message);
+            (this as any).$snotify.error(error.response.data.message);
         });
         this.socket.on('oyuncu guncel listesi', (msg)  => {
             this.oyuncular = Object.values(msg);
