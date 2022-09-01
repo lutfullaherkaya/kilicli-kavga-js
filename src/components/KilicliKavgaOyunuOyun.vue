@@ -160,7 +160,7 @@ export default Vue.extend({
                             if (this.mobildir) {
                                 kontrolYoneticisi = this.mobilKontrolYoneticisi;
                             } else {
-                                kontrolYoneticisi = new KlavyeKontrolYoneticisi(oyuncu.isim, this.socket, true, null, true, this.$refs['canvas-container'] as HTMLElement)
+                                kontrolYoneticisi = new KlavyeKontrolYoneticisi(oyuncu.isim, this.socket, true, true, this.$refs['canvas-container'] as HTMLElement)
                             }
                             this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, kontrolYoneticisi);
                         } else {

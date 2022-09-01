@@ -30,7 +30,7 @@ export interface OyunBilgisi {
 export class Tuval {
     canvas: HTMLCanvasElement;
     yerKordinati: number;
-    readonly context: CanvasRenderingContext2D | null;
+    context: CanvasRenderingContext2D | null;
     private zaman: number;
     fps: number;
 
@@ -387,7 +387,7 @@ export class KlavyeKontrolYoneticisi extends YayinciKontrolYoneticisi {
             // böyle yapmanın sebebi hem thisi addeventlistenerde görmek hem de removeeventlistener yapabilmektir.
             this.keydownHalledici = (event: KeyboardEvent) => {
                 if (this.kontroller && !event.repeat) {
-                    const baziKontroller : Partial<SavasciKontrolleri> = {};
+                    const baziKontroller: Partial<SavasciKontrolleri> = {};
                     if (event.key in this.secilenTuslarTersi) {
                         this.secilenTuslarTersi[event.key].forEach(kontrol => {
                             baziKontroller[kontrol] = true;
@@ -405,7 +405,7 @@ export class KlavyeKontrolYoneticisi extends YayinciKontrolYoneticisi {
 
             this.keyupHalledici = (event: KeyboardEvent) => {
                 if (this.kontroller && !event.repeat) {
-                    const baziKontroller : Partial<SavasciKontrolleri> = {};
+                    const baziKontroller: Partial<SavasciKontrolleri> = {};
                     if (event.key in this.secilenTuslarTersi) {
                         this.secilenTuslarTersi[event.key].forEach(kontrol => {
                             baziKontroller[kontrol] = false;
@@ -422,7 +422,7 @@ export class KlavyeKontrolYoneticisi extends YayinciKontrolYoneticisi {
             }
 
             this.mousedownHalledici = () => {
-                const baziKontroller : Partial<SavasciKontrolleri> = {};
+                const baziKontroller: Partial<SavasciKontrolleri> = {};
                 baziKontroller.saldiri = true;
                 this.kontrolGuncelle(baziKontroller);
             }
@@ -546,6 +546,7 @@ export class Savasci {
     private kanAkiyor = false;
     private alternatifSaldiri = true;  // surekli true false olur saldırdıkça
     private kontrolYoneticisi: null | KontrolYoneticisi;
+    public isimGoster = true;
 
     constructor(
         tuval: Tuval, {
@@ -858,6 +859,18 @@ export class Savasci {
         if (this.oludur() && this.sprite.isim == 'oldu' && this.sprite.birKereTamAnimasyonOldu && !this.hitKutusuOludur) {
             this.oluHitKutusuYap();
         }
+
+        if (this.isimGoster) {
+            this.tuval.context!.font = "0.5em 'arial' " ;
+            this.tuval.context!.textAlign = 'center';
+            this.tuval.context!.fillStyle = 'white';
+            this.tuval.context!.imageSmoothingEnabled = true;
+            this.tuval.context!.imageSmoothingQuality = 'high';
+            this.tuval.context!.fillText(this.isim, this.hitKutusu.x + this.hitKutusu.genislik / 2, this.hitKutusu.y - 6, this.hitKutusu.genislik);
+            this.tuval.context!.imageSmoothingEnabled = false;
+
+        }
+
         return this;
     }
 
