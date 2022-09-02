@@ -11,12 +11,17 @@
     "paths": {
       "*": [
         "node_modules/*"
+      ],
+      "@/*": [
+        "src/*"
       ]
     }
   },
   "include": [
     "backend/**/*.ts",
-    "backend/**/*.tsx"
+    "backend/**/*.tsx",
+    "src/js/**/*.ts",
+    "src/js/**/*.tsx"
   ],
   "exclude": [
     "node_modules"

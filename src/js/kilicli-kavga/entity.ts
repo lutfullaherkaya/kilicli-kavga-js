@@ -15,7 +15,7 @@ export class Entity {
     groundY: number;
     hitbox: Dikdortgen;
     sprite?: Sprite;
-
+    canGoBeyondScreenBorders = false;
 
     constructor(id: number | string,
                 tuval: Tuval,
@@ -45,6 +45,17 @@ export class Entity {
             this.velocity.y = 0;
             this.acceleration.y = 0;
             this.position.y = this.hitbox.ayagininAlti();
+        }
+        if (!this.canGoBeyondScreenBorders) {
+            if (this.position.x < 0) {
+                this.position.x = 0;
+            }
+            if (this.position.x + this.hitbox.genislik > this.tuval.canvas.width) {
+                this.position.x = this.tuval.canvas.width - this.hitbox.genislik;
+            }
+            if (this.position.y < 0) {
+                this.position.y = 0;
+            }
         }
 
         this.velocity.set(this.velocity.add(this.acceleration.divide(this.tuval.speedOfTime())));
