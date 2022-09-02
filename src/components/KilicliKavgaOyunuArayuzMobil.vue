@@ -23,9 +23,9 @@
 </template>
 
 <script lang="ts">
-import {SavasciKontrolleri} from '@/js/oyn';
 import nipplejs from 'nipplejs';
 import Vue from "vue";
+import {SavasciKontrolleri} from "@/js/kilicli-kavga/interfaces";
 
 export default Vue.extend({
     name: "KilicliKavgaOyunuArayuzMobil",

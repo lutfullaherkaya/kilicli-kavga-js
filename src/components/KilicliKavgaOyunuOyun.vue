@@ -21,21 +21,21 @@
 </template>
 <script lang="ts">
 import KilicliKavgaOyunuArayuz from '@/components/KilicliKavgaOyunuArayuz.vue'
-import {
-    Savasci,
-    SavasciCarpisma,
-    SavasciKontrolleri,
-    Sprite,
-    Tuval,
-    KlavyeKontrolYoneticisi,
-    KontrolYoneticisi, MobilKontrolYoneticisi, UzaktanKontrolYoneticisi
-} from "@/js/oyn";
 import Vue from "vue";
+import {SavasciKontrolleri} from "@/js/kilicli-kavga/interfaces";
+import {Tuval} from "@/js/kilicli-kavga/tuval";
+import {Sprite} from "@/js/kilicli-kavga/sprite";
+import {SavasciCarpisma} from "@/js/kilicli-kavga/savasciCarpisma";
+import {KontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/kontrolYoneticisi";
+import {KlavyeKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/klavyeKontrolYoneticisi";
+import {MobilKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/mobilKontrolYoneticisi";
+import {UzaktanKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/uzaktanKontrolYoneticisi";
+import {Savasci} from "@/js/kilicli-kavga/savasci";
 
 type SavasciAdi = string;
 
-const tuvalYuksekligi = 768;
-const tuvalGenisligi = 1366;
+const tuvalYuksekligi = 720;
+const tuvalGenisligi = tuvalYuksekligi * 16 / 9;
 
 export default Vue.extend({
     name: 'KilicliKavgaOyunuOyun',
@@ -49,7 +49,7 @@ export default Vue.extend({
     },
     data() {
         return {
-            savascilar: [] as Savasci[], // bundan dolayı bir isimli tek savaşçı olabilir.
+            savascilar: [] as Savasci[],
             tamEkrandir: false,
             ekranGenisligi: 100,
             ekranYuksekligi: 100,

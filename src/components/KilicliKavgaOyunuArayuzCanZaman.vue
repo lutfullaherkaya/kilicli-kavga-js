@@ -39,7 +39,7 @@ export default Vue.extend({
 <style scoped>
 * {
     --zaman-genisligi: 10%;
-    --can-cubugu-yuksekligi: min(4vw, 2rem);
+    --can-cubugu-yuksekligi: min(2.8vw, 2rem);
     --font-boyutu: var(--can-cubugu-yuksekligi);
     --can-cubugu-kenar-kalinligi: 3px;
 }
