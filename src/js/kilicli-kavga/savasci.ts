@@ -18,8 +18,8 @@ export class Savasci {
     public hiz = {x: 0, y: 0};
     public ivme = {x: 0, y: 0};
     private yurumeIvmesi = {x: 0, y: 0};
-    kontroller: SavasciKontrolleri;
-    isim: string;
+    public kontroller: SavasciKontrolleri;
+    public isim: string;
     private sagaBakiyor: boolean;
     private taklaAtiyor = false;
     private taklayiSagaAtiyor = false;
@@ -38,7 +38,7 @@ export class Savasci {
     private kanSpritesi: Sprite;
     private kanAkiyor = false;
     private alternatifSaldiri = true;  // surekli true false olur saldırdıkça
-    private kontrolYoneticisi: null | SavasciKontrolYoneticisi;
+    public kontrolYoneticisi: null | SavasciKontrolYoneticisi;
     public isimGoster = true;
     public kalpGoster = true;
     public doluKalpResmi: HTMLImageElement;

@@ -31,6 +31,7 @@ import {KlavyeKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/kl
 import {MobilKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/mobilKontrolYoneticisi";
 import {UzaktanKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/uzaktanKontrolYoneticisi";
 import {Savasci} from "@/js/kilicli-kavga/savasci";
+import {YayinciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/yayinciKontrolYoneticisi";
 
 type SavasciAdi = string;
 
@@ -56,6 +57,7 @@ export default Vue.extend({
             darkSoulsaBenzeyenElemanSpriteleri: null as any,
             tuval: null as null | Tuval,
             mobilKontrolYoneticisi: new MobilKontrolYoneticisi(this.socket),
+            buSavasci: null as null | Savasci,
         }
     },
     watch: {
@@ -135,6 +137,9 @@ export default Vue.extend({
             if (this.mobilKontrolYoneticisi === kontrolYoneticisi) {
                 this.mobilKontrolYoneticisi.savasci = yeniSavasci;
             }
+            if (this.buOyuncuIsmi != "" && isim == this.buOyuncuIsmi) {
+                this.buSavasci = yeniSavasci;
+            }
             setTimeout(() => {
                 console.log(Savasci.lar)
             }, 1000);
@@ -156,13 +161,6 @@ export default Vue.extend({
                         } else {
                             this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, new UzaktanKontrolYoneticisi(this.socket));
                         }
-
-                        /*this.savasciEkle(this.tuval!, 'as', this.darkSoulsaBenzeyenElemanSpriteleri,
-                                new KlavyeKontrolYoneticisi(false
-                                ));*/
-                        /*
-                                                this.savasciEkle(this.tuval!, 'sa', this.darkSoulsaBenzeyenElemanSpriteleri, this.mobilKontrolYoneticisi);
-                        */
                     }
                 }
                 const oyuncuIsimleri = this.oyuncular.map((oyuncu) => oyuncu.isim);
@@ -173,7 +171,7 @@ export default Vue.extend({
                     }
                     return true;
                 });
-
+                (this.buSavasci?.kontrolYoneticisi as YayinciKontrolYoneticisi).sendWarriorInformation();
             })
 
             const arkaplan = new Sprite(this.tuval, {

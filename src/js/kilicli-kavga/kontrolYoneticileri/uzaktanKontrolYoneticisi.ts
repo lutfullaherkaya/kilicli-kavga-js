@@ -15,7 +15,9 @@ export class UzaktanKontrolYoneticisi extends SavasciKontrolYoneticisi {
     yonetirken(): void {
         this.oyunBilgisiHalledici = (warriorInformation: WarriorInformation) => {
             if (warriorInformation.isim === this.savasci!.isim) {
-                this.kontrolGuncelle(warriorInformation.kontroller);
+                if (warriorInformation.kontroller) {
+                    this.kontrolGuncelle(warriorInformation.kontroller);
+                }
                 if (warriorInformation.position) {
                     this.savasci!.updatePositionFromServer(warriorInformation.position);
                 }

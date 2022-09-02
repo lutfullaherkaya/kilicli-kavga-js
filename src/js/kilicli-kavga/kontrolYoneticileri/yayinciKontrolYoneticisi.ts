@@ -19,6 +19,17 @@ export abstract class YayinciKontrolYoneticisi extends SavasciKontrolYoneticisi 
                 position: this.savasci.position,
             } as WarriorInformation);
         }
+    }
+
+    sendWarriorInformation(): void {
+        if (this.savasci && this.yonetiliyor) {
+            console.log('sending warrior information');
+            this.socket.emit('oyun bilgisi', {
+                isim: this.savasci.isim,
+                kontroller: this.savasci.kontroller,
+                position: this.savasci.position,
+            } as WarriorInformation);
+        }
 
     }
 }
