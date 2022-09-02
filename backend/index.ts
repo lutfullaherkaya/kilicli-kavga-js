@@ -5,7 +5,7 @@ import Router from "./routes/routes.js";
 import cors from 'cors';
 import bodyParser from 'body-parser'; // todo: ne ise yarar
 import Oyuncu from "./controllers/oyuncu.js";
-import {OyunBilgisi} from "../src/js/kilicli-kavga/interfaces";
+import {WarriorInformation} from "../src/js/kilicli-kavga/interfaces";
 
 const app = express();
 const server = http.createServer(app);
@@ -52,7 +52,7 @@ io.on('connection', (socket) => {
     socket.on('oyun bilgisi', function (msg) {
         console.log('gonderiliyor', JSON.stringify(msg));
         if (socketSahibiOyuncu) {
-            socket.broadcast.emit('oyun bilgisi', msg as OyunBilgisi)
+            socket.broadcast.emit('oyun bilgisi', msg as WarriorInformation)
         }
     });
 

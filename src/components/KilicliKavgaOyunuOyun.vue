@@ -26,7 +26,7 @@ import {SavasciKontrolleri} from "@/js/kilicli-kavga/interfaces";
 import {Tuval} from "@/js/kilicli-kavga/tuval";
 import {Sprite} from "@/js/kilicli-kavga/sprite";
 import {SavasciCarpisma} from "@/js/kilicli-kavga/savasciCarpisma";
-import {KontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/kontrolYoneticisi";
+import {SavasciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/savasciKontrolYoneticisi";
 import {KlavyeKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/klavyeKontrolYoneticisi";
 import {MobilKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/mobilKontrolYoneticisi";
 import {UzaktanKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/uzaktanKontrolYoneticisi";
@@ -55,13 +55,10 @@ export default Vue.extend({
             ekranYuksekligi: 100,
             darkSoulsaBenzeyenElemanSpriteleri: null as any,
             tuval: null as null | Tuval,
-            mobilKontrolYoneticisi: new MobilKontrolYoneticisi(this.buOyuncuIsmi, this.socket),
+            mobilKontrolYoneticisi: new MobilKontrolYoneticisi(this.socket),
         }
     },
     watch: {
-        buOyuncuIsmi() {
-            this.mobilKontrolYoneticisi.galeAlinacakIsim = this.buOyuncuIsmi;
-        }
     },
     computed: {
         genislikSinirlayiciGenisligi(): string {
@@ -111,22 +108,22 @@ export default Vue.extend({
         mobilKontrollerDegisince(baziKontroller: Partial<SavasciKontrolleri>): void {
             this.mobilKontrolYoneticisi.kontrolGuncelle(baziKontroller);
         },
-        savasciEkle(tuval: Tuval, isim: SavasciAdi, spriteler: Sprite[], kontrolYoneticisi: KontrolYoneticisi | null = null): void {
-            let pozisyon = {x: 150, y: tuval.canvas.height - 111};
+        savasciEkle(tuval: Tuval, isim: SavasciAdi, spriteler: Sprite[], kontrolYoneticisi: SavasciKontrolYoneticisi | null = null): void {
+            let position = {x: 150, y: tuval.canvas.height - 111};
             let sagaBakiyor;
             if (this.savascilar.length == 0) {
-                pozisyon = {x: 150, y: tuval.canvas.height - 111};
+                position = {x: 150, y: tuval.canvas.height - 111};
                 sagaBakiyor = true;
             } else if (this.savascilar.length == 1) {
-                pozisyon = {x: tuval.canvas.width - 200, y: tuval.canvas.height - 111};
+                position = {x: tuval.canvas.width - 200, y: tuval.canvas.height - 111};
                 sagaBakiyor = false;
             } else { // üçüncüden sonraki savaşçılar orta yukarıdan düşer.
-                pozisyon = {x: 1920 / 2 + 25, y: -100};
+                position = {x: 1920 / 2 + 25, y: -100};
                 sagaBakiyor = false;
             }
             const yeniSavasci = new Savasci(tuval, {
                 renk: 'rgba(255,0,0,0.5)',
-                pozisyon,
+                position,
                 sagaBakiyor,
                 kontrolYoneticisi,
                 genislik: 50,
@@ -135,6 +132,9 @@ export default Vue.extend({
                 spriteler,
             });
             this.savascilar.push(yeniSavasci);
+            if (this.mobilKontrolYoneticisi === kontrolYoneticisi) {
+                this.mobilKontrolYoneticisi.savasci = yeniSavasci;
+            }
             setTimeout(() => {
                 console.log(Savasci.lar)
             }, 1000);
@@ -146,15 +146,15 @@ export default Vue.extend({
                     let savasciIsimleri = this.savascilar.map((savasci) => savasci.isim);
                     if (!savasciIsimleri.includes(oyuncu.isim)) {
                         if (this.buOyuncuIsmi != "" && oyuncu.isim == this.buOyuncuIsmi) {
-                            let kontrolYoneticisi: KontrolYoneticisi | null = null;
+                            let kontrolYoneticisi: SavasciKontrolYoneticisi | null = null;
                             if (this.mobildir) {
                                 kontrolYoneticisi = this.mobilKontrolYoneticisi;
                             } else {
-                                kontrolYoneticisi = new KlavyeKontrolYoneticisi(oyuncu.isim, this.socket, true, true, this.$refs['canvas-container'] as HTMLElement)
+                                kontrolYoneticisi = new KlavyeKontrolYoneticisi(this.socket, true, true, this.$refs['canvas-container'] as HTMLElement)
                             }
                             this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, kontrolYoneticisi);
                         } else {
-                            this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, new UzaktanKontrolYoneticisi(this.socket, oyuncu.isim));
+                            this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, new UzaktanKontrolYoneticisi(this.socket));
                         }
 
                         /*this.savasciEkle(this.tuval!, 'as', this.darkSoulsaBenzeyenElemanSpriteleri,

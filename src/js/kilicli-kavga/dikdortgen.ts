@@ -3,17 +3,18 @@ import {Kordinat} from "@/js/kilicli-kavga/interfaces";
 
 export class Dikdortgen {
     private tuval: Tuval;
-    x: number;
-    y: number;
-    genislik: number;
-    yukseklik: number;
+    /**
+     * Position is pass by reference and can be changed by the caller thus it must not be reassigned.
+     */
+    public position: Kordinat;
+    public genislik: number;
+    public yukseklik: number;
     private renk: string;
-    carpisabilir: boolean;
+    public carpisabilir: boolean;
 
-    constructor(tuval: Tuval, x: number, y: number, genislik: number, yukseklik: number, renk: string, carpisabilir = true) {
+    constructor(tuval: Tuval, position: Kordinat, genislik: number, yukseklik: number, renk: string, carpisabilir = true) {
         this.tuval = tuval;
-        this.x = x;
-        this.y = y;
+        this.position = position;
         this.genislik = genislik;
         this.yukseklik = yukseklik;
         this.renk = renk;
@@ -22,11 +23,11 @@ export class Dikdortgen {
 
     ciz() {
         this.tuval.context!.fillStyle = this.renk;
-        this.tuval.context!.fillRect(this.x, this.y, this.genislik, this.yukseklik);
+        this.tuval.context!.fillRect(this.position.x, this.position.y, this.genislik, this.yukseklik);
     }
 
     yerdedir(): boolean {
-        return this.y + this.yukseklik >= this.tuval.yerKordinati;
+        return this.position.y + this.yukseklik >= this.tuval.yerKordinati;
     }
 
     static carpisir(dikdortgen1: Dikdortgen, dikdortgen2: Dikdortgen) {
@@ -38,25 +39,25 @@ export class Dikdortgen {
     }
 
     solundadir(dikdortgen: Dikdortgen): boolean {
-        return this.x + this.genislik <= dikdortgen.x;
+        return this.position.x + this.genislik <= dikdortgen.position.x;
     }
 
     sagindadir(dikdortgen: Dikdortgen): boolean {
-        return this.x >= dikdortgen.x + dikdortgen.genislik;
+        return this.position.x >= dikdortgen.position.x + dikdortgen.genislik;
     }
 
     yukarisindadir(dikdortgen: Dikdortgen): boolean {
-        return this.y + this.yukseklik <= dikdortgen.y;
+        return this.position.y + this.yukseklik <= dikdortgen.position.y;
     }
 
     asagisindadir(dikdortgen: Dikdortgen): boolean {
-        return this.y >= dikdortgen.y + dikdortgen.yukseklik;
+        return this.position.y >= dikdortgen.position.y + dikdortgen.yukseklik;
     }
 
     merkezKordinat(): Kordinat {
         return {
-            x: this.x + this.genislik / 2,
-            y: this.y + this.yukseklik / 2,
+            x: this.position.x + this.genislik / 2,
+            y: this.position.y + this.yukseklik / 2,
         }
     }
 

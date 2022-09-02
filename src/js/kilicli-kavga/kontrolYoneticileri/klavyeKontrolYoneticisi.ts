@@ -5,6 +5,7 @@ import {Socket} from "socket.io-client";
 type SavasciKontrolTuslari = {
     [Property in keyof SavasciKontrolleri]: string | string[];
 };
+
 export class KlavyeKontrolYoneticisi extends YayinciKontrolYoneticisi {
     private wasdTuslari: SavasciKontrolTuslari = {
         saldiri: ' ',
@@ -31,8 +32,8 @@ export class KlavyeKontrolYoneticisi extends YayinciKontrolYoneticisi {
     private mousedownHalledici: any = null;
     private contextMenuPreventer: any = null;
 
-    constructor(galeAlinacakIsim: string, socket: Socket, wasdMi: boolean, fareDeKullan = false, fareElementi: HTMLElement | null = null) {
-        super(galeAlinacakIsim, socket);
+    constructor(socket: Socket, wasdMi: boolean, fareDeKullan = false, fareElementi: HTMLElement | null = null) {
+        super(socket);
         this.fareDeKullan = fareDeKullan;
         this.fareElementi = fareElementi;
         if (wasdMi) {
@@ -55,83 +56,72 @@ export class KlavyeKontrolYoneticisi extends YayinciKontrolYoneticisi {
         }
     }
 
-    yonetmeyeBasla(kontroller?: SavasciKontrolleri): void {
-        if (!this.yonetiliyor) {
-            this.yonetiliyor = true;
-            if (kontroller) {
-                this.kontroller = kontroller;
-            }
-            // böyle yapmanın sebebi hem thisi addeventlistenerde görmek hem de removeeventlistener yapabilmektir.
-            this.keydownHalledici = (event: KeyboardEvent) => {
-                if (this.kontroller && !event.repeat) {
-                    const baziKontroller: Partial<SavasciKontrolleri> = {};
-                    if (event.key in this.secilenTuslarTersi) {
-                        this.secilenTuslarTersi[event.key].forEach(kontrol => {
-                            baziKontroller[kontrol] = true;
-                        });
-                    }
-                    if (event.key + '!' in this.secilenTuslarTersi) {
-                        this.secilenTuslarTersi[event.key + '!'].forEach(kontrol => {
-                            baziKontroller[kontrol] = false;
-                        });
-                    }
-                    this.kontrolGuncelle(baziKontroller);
-
-                }
-            }
-
-            this.keyupHalledici = (event: KeyboardEvent) => {
-                if (this.kontroller && !event.repeat) {
-                    const baziKontroller: Partial<SavasciKontrolleri> = {};
-                    if (event.key in this.secilenTuslarTersi) {
-                        this.secilenTuslarTersi[event.key].forEach(kontrol => {
-                            baziKontroller[kontrol] = false;
-                        });
-                    }
-                    if (event.key + '!' in this.secilenTuslarTersi) {
-                        this.secilenTuslarTersi[event.key + '!'].forEach(kontrol => {
-                            baziKontroller[kontrol] = true;
-                        });
-                    }
-                    this.kontrolGuncelle(baziKontroller);
-
-                }
-            }
-
-            this.mousedownHalledici = () => {
+    yonetirken(kontroller?: SavasciKontrolleri): void {
+        // böyle yapmanın sebebi hem thisi addeventlistenerde görmek hem de removeeventlistener yapabilmektir.
+        this.keydownHalledici = (event: KeyboardEvent) => {
+            if (this.savasci!.kontroller && !event.repeat) {
                 const baziKontroller: Partial<SavasciKontrolleri> = {};
-                baziKontroller.saldiri = true;
+                if (event.key in this.secilenTuslarTersi) {
+                    this.secilenTuslarTersi[event.key].forEach(kontrol => {
+                        baziKontroller[kontrol] = true;
+                    });
+                }
+                if (event.key + '!' in this.secilenTuslarTersi) {
+                    this.secilenTuslarTersi[event.key + '!'].forEach(kontrol => {
+                        baziKontroller[kontrol] = false;
+                    });
+                }
                 this.kontrolGuncelle(baziKontroller);
-            }
 
-            this.contextMenuPreventer = (event: MouseEvent) => {
-                event.preventDefault();
             }
+        }
+
+        this.keyupHalledici = (event: KeyboardEvent) => {
+            if (this.savasci!.kontroller && !event.repeat) {
+                const baziKontroller: Partial<SavasciKontrolleri> = {};
+                if (event.key in this.secilenTuslarTersi) {
+                    this.secilenTuslarTersi[event.key].forEach(kontrol => {
+                        baziKontroller[kontrol] = false;
+                    });
+                }
+                if (event.key + '!' in this.secilenTuslarTersi) {
+                    this.secilenTuslarTersi[event.key + '!'].forEach(kontrol => {
+                        baziKontroller[kontrol] = true;
+                    });
+                }
+                this.kontrolGuncelle(baziKontroller);
+
+            }
+        }
+
+        this.mousedownHalledici = () => {
+            const baziKontroller: Partial<SavasciKontrolleri> = {};
+            baziKontroller.saldiri = true;
+            this.kontrolGuncelle(baziKontroller);
+        }
+
+        this.contextMenuPreventer = (event: MouseEvent) => {
+            event.preventDefault();
+        }
 
 
-            window.addEventListener('keydown', this.keydownHalledici);
-            window.addEventListener('keyup', this.keyupHalledici);
-            if (this.fareDeKullan && this.fareElementi) {
-                this.fareElementi.addEventListener('mousedown', this.mousedownHalledici);
-                this.fareElementi.addEventListener('contextmenu', this.contextMenuPreventer);
-            }
+        window.addEventListener('keydown', this.keydownHalledici);
+        window.addEventListener('keyup', this.keyupHalledici);
+        if (this.fareDeKullan && this.fareElementi) {
+            this.fareElementi.addEventListener('mousedown', this.mousedownHalledici);
+            this.fareElementi.addEventListener('contextmenu', this.contextMenuPreventer);
         }
 
 
     }
 
-    yonetmeyiBirak(): void {
-        if (this.yonetiliyor) {
-            this.yonetiliyor = false;
-            window.removeEventListener('keydown', this.keydownHalledici);
-            window.removeEventListener('keyup', this.keyupHalledici);
-            if (this.fareDeKullan && this.fareElementi) {
-                this.fareElementi.removeEventListener('mousedown', this.mousedownHalledici);
-                this.fareElementi.removeEventListener('contextmenu', this.contextMenuPreventer);
-            }
+    yonetmeyiBirakirken(): void {
+        window.removeEventListener('keydown', this.keydownHalledici);
+        window.removeEventListener('keyup', this.keyupHalledici);
+        if (this.fareDeKullan && this.fareElementi) {
+            this.fareElementi.removeEventListener('mousedown', this.mousedownHalledici);
+            this.fareElementi.removeEventListener('contextmenu', this.contextMenuPreventer);
         }
-
     }
-
 
 }

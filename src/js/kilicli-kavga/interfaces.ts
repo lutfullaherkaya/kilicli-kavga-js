@@ -17,7 +17,8 @@ export interface SavasciKontrolleri {
     zipla: boolean
 }
 
-export interface OyunBilgisi {
+export interface WarriorInformation {
     isim: string;
-    kontroller: Partial<SavasciKontrolleri>;
+    kontroller?: Partial<SavasciKontrolleri>;
+    position?: Kordinat;
 }

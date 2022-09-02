@@ -2,7 +2,7 @@ import {Tuval} from "@/js/kilicli-kavga/tuval";
 import {Dikdortgen} from "@/js/kilicli-kavga/dikdortgen";
 import {Kordinat, SavasciKontrolleri} from "@/js/kilicli-kavga/interfaces";
 import {Sprite} from "@/js/kilicli-kavga/sprite";
-import {KontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/kontrolYoneticisi";
+import {SavasciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/savasciKontrolYoneticisi";
 
 interface Score {
     kill: number;
@@ -14,10 +14,11 @@ export class Savasci {
     public static lar: Savasci[] = [];
     public tuval: Tuval;
     public hitKutusu: Dikdortgen;
+    public position: Kordinat = {x: 0, y: 0};
     public hiz = {x: 0, y: 0};
     public ivme = {x: 0, y: 0};
     private yurumeIvmesi = {x: 0, y: 0};
-    private kontroller: SavasciKontrolleri;
+    kontroller: SavasciKontrolleri;
     isim: string;
     private sagaBakiyor: boolean;
     private taklaAtiyor = false;
@@ -37,7 +38,7 @@ export class Savasci {
     private kanSpritesi: Sprite;
     private kanAkiyor = false;
     private alternatifSaldiri = true;  // surekli true false olur saldırdıkça
-    private kontrolYoneticisi: null | KontrolYoneticisi;
+    private kontrolYoneticisi: null | SavasciKontrolYoneticisi;
     public isimGoster = true;
     public kalpGoster = true;
     public doluKalpResmi: HTMLImageElement;
@@ -56,7 +57,7 @@ export class Savasci {
     constructor(
         tuval: Tuval, {
             renk = '',
-            pozisyon = {x: 0, y: 0} as Kordinat,
+            position = {x: 0, y: 0} as Kordinat,
             sagaBakiyor = false,
             kontroller = {
                 saldiri: false,
@@ -66,23 +67,27 @@ export class Savasci {
                 sagKosu: false,
                 zipla: false
             } as SavasciKontrolleri,
-            kontrolYoneticisi = null as null | KontrolYoneticisi,
+            kontrolYoneticisi = null as null | SavasciKontrolYoneticisi,
             genislik,
             yukseklik,
             isim,
             spriteler,
         }: any) {
         this.tuval = tuval;
-        this.hitKutusu = new Dikdortgen(this.tuval, pozisyon.x, pozisyon.y, genislik, yukseklik, renk);
+        this.position = position;
+        this.hitKutusu = new Dikdortgen(this.tuval, this.position, genislik, yukseklik, renk);
 
         this.kontroller = kontroller;
         this.kontrolYoneticisi = kontrolYoneticisi;
         if (this.kontrolYoneticisi) {
-            this.kontrolYoneticisi.yonetmeyeBasla(this.kontroller);
+            this.kontrolYoneticisi.yonetmeyeBasla(this);
         }
         this.isim = isim;
         this.sagaBakiyor = sagaBakiyor;
-        this.silahKutusu = new Dikdortgen(this.tuval, pozisyon.x, pozisyon.y, 193, 110, 'rgba(255,255,255,0.53)');
+        this.silahKutusu = new Dikdortgen(this.tuval, {
+            x: this.position.x,
+            y: this.position.y
+        }, 193, 110, 'rgba(255,255,255,0.53)');
         this.spriteler = spriteler;
         this.sprite = this.sagaBakiyor ? this.spriteler.sag.rolanti : this.spriteler.sol.rolanti;
 
@@ -122,13 +127,13 @@ export class Savasci {
     }
 
     silahYeriniAyarla() {
-        this.silahKutusu.x = this.hitKutusu.x;
-        this.silahKutusu.y = this.hitKutusu.y - 10;
+        this.silahKutusu.position.x = this.hitKutusu.position.x;
+        this.silahKutusu.position.y = this.hitKutusu.position.y - 10;
 
         if (this.sagaBakiyor) {
-            this.silahKutusu.x += this.hitKutusu.genislik - this.silahKutusu.genislik * 0.44;
+            this.silahKutusu.position.x += this.hitKutusu.genislik - this.silahKutusu.genislik * 0.44;
         } else {
-            this.silahKutusu.x += -this.silahKutusu.genislik + this.silahKutusu.genislik * 0.56;
+            this.silahKutusu.position.x += -this.silahKutusu.genislik + this.silahKutusu.genislik * 0.56;
         }
     }
 
@@ -178,7 +183,7 @@ export class Savasci {
                 if (savaskar !== this && Dikdortgen.carpisir(this.silahKutusu, savaskar.hitKutusu)) {
                     savaskar.can = Math.max(0, savaskar.can - this.saldiriHasari);
                     savaskar.kanAkiyor = true;
-                    savaskar.sonHasarAlinanYonSagdir = this.hitKutusu.merkezKordinat().x > savaskar.hitKutusu.x;
+                    savaskar.sonHasarAlinanYonSagdir = this.hitKutusu.merkezKordinat().x > savaskar.hitKutusu.position.x;
                     if (savaskar.can <= 0) {
                         this.score.kill++;
                     }
@@ -199,23 +204,23 @@ export class Savasci {
 
         if (this.taklaAtiyor) {
             if (this.taklayiSagaAtiyor) {
-                this.hitKutusu.x += this.tuval.gercekHiz(this.yurumeHizi);
+                this.position.x += this.tuval.gercekHiz(this.yurumeHizi);
             } else {
-                this.hitKutusu.x -= this.tuval.gercekHiz(this.yurumeHizi);
+                this.position.x -= this.tuval.gercekHiz(this.yurumeHizi);
             }
         } else {
             if (this.sagaBakiyor && this.kontroller.sagKosu) {
-                this.hitKutusu.x += this.tuval.gercekHiz(this.yurumeHizi);
+                this.position.x += this.tuval.gercekHiz(this.yurumeHizi);
             } else if (!this.sagaBakiyor && this.kontroller.solKosu) {
-                this.hitKutusu.x -= this.tuval.gercekHiz(this.yurumeHizi);
+                this.position.x -= this.tuval.gercekHiz(this.yurumeHizi);
             }
         }
 
-        this.hitKutusu.x += this.tuval.gercekHiz(this.hiz.x);
-        this.hitKutusu.y += this.tuval.gercekHiz(this.hiz.y);
+        this.position.x += this.tuval.gercekHiz(this.hiz.x);
+        this.position.y += this.tuval.gercekHiz(this.hiz.y);
 
         if (this.hitKutusu.yerdedir()) {
-            this.hitKutusu.y = this.tuval.yerKordinati - this.hitKutusu.yukseklik;
+            this.position.y = this.tuval.yerKordinati - this.hitKutusu.yukseklik;
             this.hiz.y = 0;
         }
         this.hiz.y += this.tuval.gercekHiz(this.ivme.y + this.yercekimiIvmesi + this.yurumeIvmesi.y);
@@ -307,8 +312,8 @@ export class Savasci {
     }
 
     spritePozisyonAyarlaHitKutusunaGore(sprite: Sprite) {
-        sprite.pozisyon.y = this.hitKutusu.y;
-        sprite.pozisyon.x = this.hitKutusu.x;
+        sprite.pozisyon.y = this.hitKutusu.position.y;
+        sprite.pozisyon.x = this.hitKutusu.position.x;
         return this;
     }
 
@@ -317,13 +322,12 @@ export class Savasci {
         const kisaKenar = this.hitKutusu.genislik;
         this.hitKutusu.genislik = uzunKenar;
         this.hitKutusu.yukseklik = kisaKenar / 2;
-        this.hitKutusu.y += uzunKenar - kisaKenar + this.hitKutusu.yukseklik;
+        this.hitKutusu.position.y += uzunKenar - kisaKenar + this.hitKutusu.yukseklik;
         if (this.sonHasarAlinanYonSagdir) {
-
-            this.hitKutusu.x -= kisaKenar * 1.5;
+            this.hitKutusu.position.x -= kisaKenar * 1.5;
             this.spriteler.sag.oldu.pozisyonOffset = {x: -47, y: -165 - this.hitKutusu.yukseklik};
         } else {
-            this.hitKutusu.x += kisaKenar;
+            this.hitKutusu.position.x += kisaKenar;
             this.spriteler.sol.oldu.pozisyonOffset = {x: -180, y: -165 - this.hitKutusu.yukseklik};
         }
         this.hitKutusuOludur = true;
@@ -334,10 +338,16 @@ export class Savasci {
         const kisaKenar = 2 * Math.min(this.hitKutusu.yukseklik, this.hitKutusu.genislik);
         this.hitKutusu.genislik = kisaKenar;
         this.hitKutusu.yukseklik = uzunKenar;
-        this.hitKutusu.y = 0;
-        this.hitKutusu.x = this.tuval.canvas.width / 2 - this.hitKutusu.genislik / 2;
+        this.hitKutusu.position.y = 0;
+        this.hitKutusu.position.x = this.tuval.canvas.width / 2 - this.hitKutusu.genislik / 2;
 
         this.hitKutusuOludur = false;
+    }
+
+    updatePositionFromServer(serverPosition: Kordinat) {
+        this.position.x = serverPosition.x;
+        this.position.y = serverPosition.y;
+        return this;
     }
 
     guncelle() {
@@ -381,7 +391,7 @@ export class Savasci {
             this.tuval.context!.textAlign = 'center';
             this.tuval.context!.fillStyle = 'white';
             this.tuval.context!.imageSmoothingEnabled = true;
-            this.tuval.context!.fillText(this.isim, this.hitKutusu.x + this.hitKutusu.genislik / 2, this.hitKutusu.y - 6, this.hitKutusu.genislik);
+            this.tuval.context!.fillText(this.isim, this.hitKutusu.position.x + this.hitKutusu.genislik / 2, this.hitKutusu.position.y - 6, this.hitKutusu.genislik);
             this.tuval.context!.imageSmoothingEnabled = false;
         }
         if (this.kalpGoster) {
@@ -390,8 +400,8 @@ export class Savasci {
                 const kalpResmi = (i < this.can / (100 / this.kalpSayisi)) ? this.doluKalpResmi : this.bosKalpResmi;
                 this.tuval.context!.drawImage(
                     kalpResmi,
-                    (this.hitKutusu.genislik - this.kalpSayisi * this.kalpGenisligi) / 2 + (this.hitKutusu.x + this.kalpGenisligi * i),
-                    this.hitKutusu.y - this.kalpYuksekligi - 19,
+                    (this.hitKutusu.genislik - this.kalpSayisi * this.kalpGenisligi) / 2 + (this.hitKutusu.position.x + this.kalpGenisligi * i),
+                    this.hitKutusu.position.y - this.kalpYuksekligi - 19,
                     this.kalpGenisligi,
                     this.kalpYuksekligi
                 )
@@ -401,7 +411,7 @@ export class Savasci {
             this.tuval.context!.textAlign = 'center';
             this.tuval.context!.fillStyle = 'white';
             this.tuval.context!.imageSmoothingEnabled = true;
-            this.tuval.context!.fillText(`L:${this.score.kill} Ö:${this.score.death}`, this.hitKutusu.x + this.hitKutusu.genislik / 2, this.hitKutusu.y - 36, this.hitKutusu.genislik);
+            this.tuval.context!.fillText(`L:${this.score.kill} Ö:${this.score.death}`, this.hitKutusu.position.x + this.hitKutusu.genislik / 2, this.hitKutusu.position.y - 36, this.hitKutusu.genislik);
             this.tuval.context!.imageSmoothingEnabled = false;
         }
         if (this.oludur()) {
@@ -424,7 +434,7 @@ export class Savasci {
             this.tuval.context!.textAlign = 'center';
             this.tuval.context!.fillStyle = 'white';
             this.tuval.context!.imageSmoothingEnabled = true;
-            this.tuval.context!.fillText(String(this.respawnTimeLeft), this.hitKutusu.x + this.hitKutusu.genislik / 2, this.hitKutusu.y - 50, this.hitKutusu.genislik);
+            this.tuval.context!.fillText(String(this.respawnTimeLeft), this.hitKutusu.position.x + this.hitKutusu.genislik / 2, this.hitKutusu.position.y - 53, this.hitKutusu.genislik);
             this.tuval.context!.imageSmoothingEnabled = false;
         }
 

@@ -33,20 +33,20 @@ export class SavasciCarpisma {
 
     static duseydeKenarinaOtele(savasci1: Savasci, savasci2: Savasci) {
         if (savasci1.hitKutusu.merkezKordinat().y < savasci2.hitKutusu.merkezKordinat().y) { // yukarisinda olacak
-            savasci1.hitKutusu.y = savasci2.hitKutusu.y - savasci1.hitKutusu.yukseklik;
+            savasci1.hitKutusu.position.y = savasci2.hitKutusu.position.y - savasci1.hitKutusu.yukseklik;
         } else if (savasci1.hitKutusu.merkezKordinat().y >= savasci2.hitKutusu.merkezKordinat().y) { // asagisinda olacak
-            const yeniYPozisyonu = savasci2.hitKutusu.y + savasci2.hitKutusu.yukseklik;
+            const yeniYPozisyonu = savasci2.hitKutusu.position.y + savasci2.hitKutusu.yukseklik;
             if (yeniYPozisyonu < savasci1.tuval.yerKordinati - savasci1.hitKutusu.yukseklik) {
-                savasci1.hitKutusu.y = yeniYPozisyonu;
+                savasci1.hitKutusu.position.y = yeniYPozisyonu;
             } // aksi taktirde yerin dibine girer, o durumda oteleme yapilmaz.
         }
     }
 
     static yataydaKenarinaOtele(savasci1: Savasci, savasci2: Savasci) {
         if (savasci1.hitKutusu.merkezKordinat().x < savasci2.hitKutusu.merkezKordinat().x) { // solunda olacak
-            savasci1.hitKutusu.x = savasci2.hitKutusu.x - savasci1.hitKutusu.genislik;
+            savasci1.hitKutusu.position.x = savasci2.hitKutusu.position.x - savasci1.hitKutusu.genislik;
         } else if (savasci1.hitKutusu.merkezKordinat().x > savasci2.hitKutusu.merkezKordinat().x) { // saginda olacak
-            savasci1.hitKutusu.x = savasci2.hitKutusu.x + savasci2.hitKutusu.genislik;
+            savasci1.hitKutusu.position.x = savasci2.hitKutusu.position.x + savasci2.hitKutusu.genislik;
         }
     }
 }
