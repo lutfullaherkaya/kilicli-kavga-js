@@ -21,4 +21,5 @@ export interface WarriorInformation {
     isim: string;
     kontroller?: Partial<SavasciKontrolleri>;
     position?: Kordinat;
+    can?: number;
 }

@@ -21,6 +21,9 @@ export class UzaktanKontrolYoneticisi extends SavasciKontrolYoneticisi {
                 if (warriorInformation.position) {
                     this.savasci!.updatePositionFromServer(warriorInformation.position);
                 }
+                if (warriorInformation.can) {
+                    this.savasci!.can = warriorInformation.can;
+                }
             }
         }
         this.socket.on('oyun bilgisi', this.oyunBilgisiHalledici);

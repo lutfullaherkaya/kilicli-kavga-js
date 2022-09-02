@@ -146,33 +146,7 @@ export default Vue.extend({
         },
         main() {
             this.tuval = new Tuval(document.querySelector('canvas')!, tuvalGenisligi, tuvalYuksekligi, (tuvalYuksekligi / 600) * 490);
-            this.$watch('oyuncular', () => {
-                for (const oyuncu of this.oyuncular) {
-                    let savasciIsimleri = this.savascilar.map((savasci) => savasci.isim);
-                    if (!savasciIsimleri.includes(oyuncu.isim)) {
-                        if (this.buOyuncuIsmi != "" && oyuncu.isim == this.buOyuncuIsmi) {
-                            let kontrolYoneticisi: SavasciKontrolYoneticisi | null = null;
-                            if (this.mobildir) {
-                                kontrolYoneticisi = this.mobilKontrolYoneticisi;
-                            } else {
-                                kontrolYoneticisi = new KlavyeKontrolYoneticisi(this.socket, true, true, this.$refs['canvas-container'] as HTMLElement)
-                            }
-                            this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, kontrolYoneticisi);
-                        } else {
-                            this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, new UzaktanKontrolYoneticisi(this.socket));
-                        }
-                    }
-                }
-                const oyuncuIsimleri = this.oyuncular.map((oyuncu) => oyuncu.isim);
-                this.savascilar = this.savascilar.filter((savasci) => {
-                    if (!oyuncuIsimleri.includes(savasci.isim)) {
-                        Savasci.savasciCikar(savasci);
-                        return false;
-                    }
-                    return true;
-                });
-                (this.buSavasci?.kontrolYoneticisi as YayinciKontrolYoneticisi).sendWarriorInformation();
-            })
+
 
             const arkaplan = new Sprite(this.tuval, {
                 pozisyon: {
@@ -391,6 +365,33 @@ export default Vue.extend({
         window.addEventListener('msfullscreenchange', this.tamEkranGuncelle);
 
         this.main();
+        this.$watch('oyuncular', () => {
+            for (const oyuncu of this.oyuncular) {
+                let savasciIsimleri = this.savascilar.map((savasci) => savasci.isim);
+                if (!savasciIsimleri.includes(oyuncu.isim)) {
+                    if (this.buOyuncuIsmi != "" && oyuncu.isim == this.buOyuncuIsmi) {
+                        let kontrolYoneticisi: SavasciKontrolYoneticisi | null = null;
+                        if (this.mobildir) {
+                            kontrolYoneticisi = this.mobilKontrolYoneticisi;
+                        } else {
+                            kontrolYoneticisi = new KlavyeKontrolYoneticisi(this.socket, true, true, this.$refs['canvas-container'] as HTMLElement)
+                        }
+                        this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, kontrolYoneticisi);
+                    } else {
+                        this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, new UzaktanKontrolYoneticisi(this.socket));
+                    }
+                }
+            }
+            const oyuncuIsimleri = this.oyuncular.map((oyuncu) => oyuncu.isim);
+            this.savascilar = this.savascilar.filter((savasci) => {
+                if (!oyuncuIsimleri.includes(savasci.isim)) {
+                    Savasci.savasciCikar(savasci);
+                    return false;
+                }
+                return true;
+            });
+            (this.buSavasci?.kontrolYoneticisi as YayinciKontrolYoneticisi).sendWarriorInformation();
+        }, {immediate: true});
     },
 
     destroyed() {

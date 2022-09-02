@@ -28,7 +28,7 @@ export class Savasci {
     private yercekimiIvmesi = 0.098;
     private ziplamaHizi = 6;
     private yurumeHizi = 2;
-    private can = 100;
+    can = 100;
     private silahKutusu: Dikdortgen;
     private saldiriHasari = 10;
     private spriteler: any; // todo: bunu dynamic typeli yap
@@ -52,6 +52,7 @@ export class Savasci {
     public dateOfDeath: Date | null = null;
     public score = {kill: 0, death: 0, assist: 0} as Score;
     public showScore = true;
+    private oluHitKutusuSagaBakar = false;
 
 
     constructor(
@@ -318,30 +319,39 @@ export class Savasci {
     }
 
     oluHitKutusuYap() {
-        const uzunKenar = this.hitKutusu.yukseklik;
-        const kisaKenar = this.hitKutusu.genislik;
-        this.hitKutusu.genislik = uzunKenar;
-        this.hitKutusu.yukseklik = kisaKenar / 2;
-        this.hitKutusu.position.y += uzunKenar - kisaKenar + this.hitKutusu.yukseklik;
-        if (this.sonHasarAlinanYonSagdir) {
-            this.hitKutusu.position.x -= kisaKenar * 1.5;
-            this.spriteler.sag.oldu.pozisyonOffset = {x: -47, y: -165 - this.hitKutusu.yukseklik};
-        } else {
-            this.hitKutusu.position.x += kisaKenar;
-            this.spriteler.sol.oldu.pozisyonOffset = {x: -180, y: -165 - this.hitKutusu.yukseklik};
+        if (!this.hitKutusuOludur) {
+            this.hitKutusuOludur = true;
+            const uzunKenar = this.hitKutusu.yukseklik;
+            const kisaKenar = this.hitKutusu.genislik;
+            this.hitKutusu.genislik = uzunKenar;
+            this.hitKutusu.yukseklik = kisaKenar / 2;
+            this.hitKutusu.position.y += uzunKenar - kisaKenar + kisaKenar / 2;
+            if (this.sonHasarAlinanYonSagdir) {
+                this.oluHitKutusuSagaBakar = false;
+                this.hitKutusu.position.x -= kisaKenar * 1.5;
+                this.spriteler.sag.oldu.pozisyonOffset = {x: -47, y: -165 - this.hitKutusu.yukseklik};
+            } else {
+                this.oluHitKutusuSagaBakar = true;
+                this.hitKutusu.position.x += kisaKenar;
+                this.spriteler.sol.oldu.pozisyonOffset = {x: -180, y: -165 - this.hitKutusu.yukseklik};
+            }
         }
-        this.hitKutusuOludur = true;
     }
 
     canliHitKutusuYap() {
-        const uzunKenar = Math.max(this.hitKutusu.yukseklik, this.hitKutusu.genislik);
-        const kisaKenar = 2 * Math.min(this.hitKutusu.yukseklik, this.hitKutusu.genislik);
-        this.hitKutusu.genislik = kisaKenar;
-        this.hitKutusu.yukseklik = uzunKenar;
-        this.hitKutusu.position.y = 0;
-        this.hitKutusu.position.x = this.tuval.canvas.width / 2 - this.hitKutusu.genislik / 2;
-
-        this.hitKutusuOludur = false;
+        if (this.hitKutusuOludur) {
+            this.hitKutusuOludur = false;
+            const uzunKenar = Math.max(this.hitKutusu.yukseklik, this.hitKutusu.genislik);
+            const kisaKenar = 2 * Math.min(this.hitKutusu.yukseklik, this.hitKutusu.genislik);
+            this.hitKutusu.genislik = kisaKenar;
+            this.hitKutusu.yukseklik = uzunKenar;
+            this.hitKutusu.position.y -= uzunKenar - kisaKenar + kisaKenar / 2;
+            if (!this.oluHitKutusuSagaBakar) {
+                this.hitKutusu.position.x += kisaKenar * 1.5;
+            } else {
+                this.hitKutusu.position.x -= kisaKenar;
+            }
+        }
     }
 
     updatePositionFromServer(serverPosition: Kordinat) {
@@ -387,6 +397,7 @@ export class Savasci {
             this.oluHitKutusuYap();
         }
 
+
         if (this.isimGoster) {
             this.tuval.context!.textAlign = 'center';
             this.tuval.context!.fillStyle = 'white';
@@ -428,6 +439,9 @@ export class Savasci {
                 }
                 this.dateOfDeath = null;
             }
+        } else { // biz öldü sandık ama aslında ölmemiş, sunucudan ölmemiş diye güncelleme gelmiş aslında.
+            this.canliHitKutusuYap();
+            this.dateOfDeath = null;
         }
 
         if (this.oludur() && this.peopleDoRespawn) {

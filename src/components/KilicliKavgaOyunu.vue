@@ -10,6 +10,7 @@
         </v-form>
 
         <kilicli-kavga-oyunu-oyun
+                v-else
                 :mobil-kontrolleri-goster="mobilKontrolleriGoster"
                 :mobildir="mobildir"
                 :socket="socket"

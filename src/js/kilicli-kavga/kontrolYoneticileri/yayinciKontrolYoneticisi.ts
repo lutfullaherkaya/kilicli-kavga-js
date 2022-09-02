@@ -17,6 +17,7 @@ export abstract class YayinciKontrolYoneticisi extends SavasciKontrolYoneticisi 
                 isim: this.savasci.isim,
                 kontroller: baziKontroller,
                 position: this.savasci.position,
+                can: this.savasci.can,
             } as WarriorInformation);
         }
     }
@@ -28,6 +29,7 @@ export abstract class YayinciKontrolYoneticisi extends SavasciKontrolYoneticisi 
                 isim: this.savasci.isim,
                 kontroller: this.savasci.kontroller,
                 position: this.savasci.position,
+                can: this.savasci.can,
             } as WarriorInformation);
         }
 
