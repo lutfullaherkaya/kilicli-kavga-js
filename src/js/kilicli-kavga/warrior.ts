@@ -199,7 +199,9 @@ export class Warrior extends Entity {
 
     saldir() {
         if (!this.suanYapilanEylem) {
-            /*this.mp3Cal('ahmet');*/
+            if (this.isim.toLowerCase() === 'ahmet') {
+                this.mp3Cal('ahmet');
+            }
             if (this.alternatifSaldiri) {
                 this.suanYapilanEylem = {
                     spriteAdi: 'saldiri2',
