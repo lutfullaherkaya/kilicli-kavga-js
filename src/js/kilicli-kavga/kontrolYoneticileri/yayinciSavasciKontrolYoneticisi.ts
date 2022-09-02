@@ -11,12 +11,12 @@ export abstract class YayinciSavasciKontrolYoneticisi extends SavasciKontrolYone
     }
 
     kontrolGuncelle(baziKontroller: Partial<WarriorControls>): void {
-        if (this.savasci && this.yonetiliyor) {
+        if (this.savasci && this.yonetiliyor && Object.keys(baziKontroller).length > 0) {
             Object.assign(this.savasci.kontroller, baziKontroller);
             this.socket.emit('oyun bilgisi', {
                 isim: this.savasci.isim,
                 kontroller: baziKontroller,
-                position: this.savasci.position,
+                position: this.savasci.pos,
                 can: this.savasci.can,
             } as WarriorInformation);
         }
@@ -28,7 +28,7 @@ export abstract class YayinciSavasciKontrolYoneticisi extends SavasciKontrolYone
             this.socket.emit('oyun bilgisi', {
                 isim: this.savasci.isim,
                 kontroller: this.savasci.kontroller,
-                position: this.savasci.position,
+                position: this.savasci.pos,
                 can: this.savasci.can,
             } as WarriorInformation);
         }

@@ -12,6 +12,11 @@ export class TwoDVector {
         this.y = vector.y;
     }
 
+    setAsInt(vector: TwoDVector): void {
+        this.x = Math.round(vector.x);
+        this.y = Math.round(vector.y);
+    }
+
     add(vector: TwoDVector) {
         return new TwoDVector(this.x + vector.x, this.y + vector.y);
     }

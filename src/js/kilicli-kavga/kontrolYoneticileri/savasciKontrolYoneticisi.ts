@@ -15,7 +15,7 @@ export abstract class SavasciKontrolYoneticisi {
     abstract yonetirken() : void;
 
     kontrolGuncelle(baziKontroller: Partial<WarriorControls>): void {
-        if (this.savasci && this.yonetiliyor) {
+        if (this.savasci && this.yonetiliyor && Object.keys(baziKontroller).length > 0) {
             Object.assign(this.savasci.kontroller, baziKontroller);
         }
     }

@@ -7,9 +7,9 @@ import {Sprite} from "@/js/kilicli-kavga/sprite";
 export class Entity {
     id: number | string;
     tuval: Tuval;
-    position: TwoDVector;
-    velocity: TwoDVector;
-    acceleration: TwoDVector;
+    pos: TwoDVector;
+    v: TwoDVector;
+    accel: TwoDVector;
     hasGravity;
     gravity = new TwoDVector(0, 0.098);
     groundY: number;
@@ -19,9 +19,9 @@ export class Entity {
 
     constructor(id: number | string,
                 tuval: Tuval,
-                position: TwoDVector = new TwoDVector(0, 0),
-                velocity: TwoDVector = new TwoDVector(0, 0),
-                acceleration: TwoDVector = new TwoDVector(0, 0),
+                pos: TwoDVector = new TwoDVector(0, 0),
+                v: TwoDVector = new TwoDVector(0, 0),
+                accel: TwoDVector = new TwoDVector(0, 0),
                 hasGravity = true,
                 groundY = 100,
                 width = 50,
@@ -29,38 +29,39 @@ export class Entity {
                 sprite?: Sprite,) {
         this.id = id;
         this.tuval = tuval;
-        this.position = position;
-        this.velocity = velocity;
-        this.acceleration = acceleration;
+        this.pos = pos;
+        this.v = v;
+        this.accel = accel;
         this.hasGravity = hasGravity;
         this.groundY = groundY;
-        this.hitbox = new Dikdortgen(this.tuval, this.position, width, height);
+        this.hitbox = new Dikdortgen(this.tuval, this.pos, width, height);
         this.sprite = sprite;
     }
 
     move() {
-        this.position.set(this.position.add(this.velocity.divide(this.tuval.speedOfTime())));
+        // coordinates being whole numbers is important for performance (no need to draw sub-pixel objects with anti aliasing)
+        this.pos.setAsInt(this.pos.add(this.v.divide(this.tuval.avgTimeUnit()))); // x = x0 + vt
 
         if (this.hasGravity && this.hitbox.yerdedir()) {
-            this.velocity.y = 0;
-            this.acceleration.y = 0;
-            this.position.y = this.hitbox.ayagininAlti();
+            this.v.y = 0;
+            this.accel.y = 0;
+            this.pos.y = this.hitbox.ayagininAlti();
         }
         if (!this.canGoBeyondScreenBorders) {
-            if (this.position.x < 0) {
-                this.position.x = 0;
+            if (this.pos.x < 0) {
+                this.pos.x = 0;
             }
-            if (this.position.x + this.hitbox.genislik > this.tuval.canvas.width) {
-                this.position.x = this.tuval.canvas.width - this.hitbox.genislik;
+            if (this.pos.x + this.hitbox.genislik > this.tuval.canvas.width) {
+                this.pos.x = this.tuval.canvas.width - this.hitbox.genislik;
             }
-            if (this.position.y < 0) {
-                this.position.y = 0;
+            if (this.pos.y < 0) {
+                this.pos.y = 0;
             }
         }
 
-        this.velocity.set(this.velocity.add(this.acceleration.divide(this.tuval.speedOfTime())));
+        this.v.set(this.v.add(this.accel.divide(this.tuval.avgTimeUnit()))); // v = v0 + at
         if (this.hasGravity) {
-            this.velocity.set(this.velocity.add(this.gravity.divide(this.tuval.speedOfTime())));
+            this.v.set(this.v.add(this.gravity.divide(this.tuval.avgTimeUnit()))); // v = v0 + gt
         }
     }
 }

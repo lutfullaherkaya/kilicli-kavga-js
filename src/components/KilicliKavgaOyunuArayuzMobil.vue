@@ -1,7 +1,8 @@
 <template>
     <div class="arayuz-mobil-komponenti" ref="arayuz-mobil-komponenti">
         <div ref="joystick-menzili" class="joystick-menzili"></div>
-        <v-responsive class="sag-buton sag-saldiri-butonu" :aspect-ratio="1/1" @mousedown="saldirt" @touchstart="saldirt">
+        <v-responsive class="sag-buton sag-saldiri-butonu" :aspect-ratio="1/1" @mousedown="saldirt"
+                      @touchstart="saldirt">
             <div class="sag-buton-arkaplan" :style="{'background-color': butonRengi}">
             </div>
             <img src="/ikonlar/kilic.svg" class="sag-button-sembolu-kilic"
@@ -9,7 +10,8 @@
 
 
         </v-responsive>
-        <v-responsive class="sag-buton sag-takla-at-butonu" :aspect-ratio="1/1" @mousedown="taklaAttir" @touchstart="taklaAttir">
+        <v-responsive class="sag-buton sag-takla-at-butonu" :aspect-ratio="1/1" @mousedown="taklaAttir"
+                      @touchstart="taklaAttir">
 
             <div class="sag-buton-arkaplan" :style="{'background-color': butonRengi}">
             </div>
@@ -29,8 +31,7 @@ import {WarriorControls} from "@/js/kilicli-kavga/warrior";
 
 export default Vue.extend({
     name: "KilicliKavgaOyunuArayuzMobil",
-    props: {
-    },
+    props: {},
     data() {
         return {
             butonRengi: "white",
@@ -41,11 +42,12 @@ export default Vue.extend({
                     left: '32.5%',
                     bottom: '24.5%',
                 },
-                mode: 'static',
-                catchDistance: 150,
+                mode: 'semi',
+                catchDistance: 100,
             } as any,
             joystickZiplamaYerinde: false,
             joystickGenislikYuzdesi: 12.5,
+            joystickMenzilYuzdesi: 15,
         }
     },
     methods: {
@@ -102,10 +104,6 @@ export default Vue.extend({
                     }
                 } else {
                     if (this.joystickZiplamaYerinde) {
-                        const yeniKontroller = {
-                            zipla: false,
-                        };
-                        this.$emit('mobil-kontroller-degisti', yeniKontroller);
                         this.joystickZiplamaYerinde = false;
                     }
                 }
@@ -115,7 +113,6 @@ export default Vue.extend({
                 const yeniKontroller = {
                     solKosu: false,
                     sagKosu: false,
-                    zipla: false,
                 };
                 // sadece degisen kontrol anahtarları emitlenir.
                 this.$emit('mobil-kontroller-degisti', yeniKontroller);
@@ -123,10 +120,14 @@ export default Vue.extend({
             });
         },
         joystickBoyutYenile() {
-            const yeniBoyut = Math.round((this.$refs['arayuz-mobil-komponenti'] as HTMLDivElement)!.clientWidth * this.joystickGenislikYuzdesi / 100);
+            const cWidth = (this.$refs['arayuz-mobil-komponenti'] as HTMLDivElement)!.clientWidth;
+            const yeniBoyut = Math.round(cWidth * this.joystickGenislikYuzdesi / 100);
+            const yeniMenzil = Math.round(cWidth * this.joystickMenzilYuzdesi / 100);
+
             if (this.joystickAyarlari.size !== yeniBoyut) {
                 this.joystickAyarlari.size = yeniBoyut;
-                if (this.joystick && this.joystick.length > 0) {
+                this.joystickAyarlari.catchDistance = yeniMenzil;
+                if (this.joystick) {
                     this.joystick.destroy();
                 }
                 this.joystickOlustur();
@@ -164,7 +165,7 @@ export default Vue.extend({
     position: absolute;
     top: 0;
     left: 0;
-    width: 50%;
+    width: 60%;
     height: 100%;
 }
 

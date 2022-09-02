@@ -68,7 +68,9 @@ export class KlavyeSavasciKontrolYoneticisi extends YayinciSavasciKontrolYonetic
                 }
                 if (event.key + '!' in this.secilenTuslarTersi) {
                     this.secilenTuslarTersi[event.key + '!'].forEach(kontrol => {
-                        baziKontroller[kontrol] = false;
+                        if (!(kontrol in this.savasci!.posEdgeActivatedWarriorControls)) {
+                            baziKontroller[kontrol] = false;
+                        }
                     });
                 }
                 this.kontrolGuncelle(baziKontroller);
@@ -81,7 +83,9 @@ export class KlavyeSavasciKontrolYoneticisi extends YayinciSavasciKontrolYonetic
                 const baziKontroller: Partial<WarriorControls> = {};
                 if (event.key in this.secilenTuslarTersi) {
                     this.secilenTuslarTersi[event.key].forEach(kontrol => {
-                        baziKontroller[kontrol] = false;
+                        if (!(kontrol in this.savasci!.posEdgeActivatedWarriorControls)) {
+                            baziKontroller[kontrol] = false;
+                        }
                     });
                 }
                 if (event.key + '!' in this.secilenTuslarTersi) {
@@ -95,9 +99,7 @@ export class KlavyeSavasciKontrolYoneticisi extends YayinciSavasciKontrolYonetic
         }
 
         this.mousedownHalledici = () => {
-            const baziKontroller: Partial<WarriorControls> = {};
-            baziKontroller.saldiri = true;
-            this.kontrolGuncelle(baziKontroller);
+            this.kontrolGuncelle({saldiri: true});
         }
 
         this.contextMenuPreventer = (event: MouseEvent) => {

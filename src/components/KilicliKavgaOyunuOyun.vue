@@ -13,11 +13,12 @@
                                                       @tam-ekrani-kapat="tamEkraniKapat"
                                                       :savascilar="savascilar"
                 />
-                <kilicli-kavga-oyunu-arayuz-mobil v-if="mobilKontrolleriGoster"
-                                                  @mobil-kontroller-degisti="mobilKontrollerDegisince"
-                />
+
             </v-responsive>
         </div>
+        <kilicli-kavga-oyunu-arayuz-mobil v-if="mobilKontrolleriGoster"
+                                          @mobil-kontroller-degisti="mobilKontrollerDegisince"
+        />
 
 
     </div>
@@ -152,7 +153,7 @@ export default Vue.extend({
             }, 1000);
         },
         main() {
-            this.tuval = new Tuval(document.querySelector('canvas')!, tuvalGenisligi, tuvalYuksekligi, (tuvalYuksekligi / 600) * 490);
+            this.tuval = new Tuval(document.querySelector('canvas')!, tuvalGenisligi, tuvalYuksekligi, Math.round((tuvalYuksekligi / 600) * 490));
 
 
             const arkaplan = new Sprite(this.tuval, {
@@ -192,7 +193,6 @@ export default Vue.extend({
                         resimSayisi: 12,
                         pozisyonOffset: new TwoDVector(-130, -115),
                         skala: 2.7,
-
                         isim: 'taklaAt',
                         yonuSagdir: false,
                     }),
@@ -204,7 +204,6 @@ export default Vue.extend({
                         isim: 'zipla',
                         yonuSagdir: false,
                     }),
-
                     dusus: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Fall.png',
                         resimSayisi: 3,

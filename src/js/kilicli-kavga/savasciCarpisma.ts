@@ -21,12 +21,12 @@ export class SavasciCarpisma {
             if (Math.abs(savasci1.hitbox.merkezKordinat().y - savasci2.hitbox.merkezKordinat().y) <
                 Math.abs(savasci1.hitbox.merkezKordinat().x - savasci2.hitbox.merkezKordinat().x)) {
                 SavasciCarpisma.yataydaKenarinaOtele(savasci1, savasci2);
-                savasci1.acceleration.x = 0;
-                savasci1.velocity.x = 0;
+                savasci1.accel.x = 0;
+                savasci1.v.x = 0;
             } else {
                 SavasciCarpisma.duseydeKenarinaOtele(savasci1, savasci2);
-                savasci1.velocity.y = 0;
-                savasci1.acceleration.y = 0;
+                savasci1.v.y = 0;
+                savasci1.accel.y = 0;
             }
         }
     }

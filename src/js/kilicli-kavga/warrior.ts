@@ -29,6 +29,7 @@ export interface WarriorControls {
     zipla: boolean
 }
 
+
 export interface WarriorInformation {
     isim: string;
     kontroller?: Partial<WarriorControls>;
@@ -40,10 +41,17 @@ export class Warrior extends Entity {
     public static s: Warrior[] = [];
     private silahKutusu: Dikdortgen;
 
+
     private readonly ziplamaHizi = 6;
     private readonly yurumeHizi = 2;
 
     public kontroller: WarriorControls;
+    public posEdgeActivatedWarriorControls = {
+        saldiri: true,
+        taklaAt: true,
+        zipla: true
+    } as Partial<WarriorControls>;
+
     public isim: string;
     private sagaBakiyor: boolean;
     private taklaAtiyor = false;
@@ -69,7 +77,7 @@ export class Warrior extends Entity {
     public kalpGenisligi: number;
     public kalpYuksekligi: number;
     public kalpSayisi = 4;
-    public respawnTimeSeconds = 7;
+    public respawnTimeSeconds = 4;
     public peopleDoRespawn = true;
     public respawnTimeLeft = this.respawnTimeSeconds;
     public dateOfDeath: Date | null = null;
@@ -86,9 +94,9 @@ export class Warrior extends Entity {
         velocity: TwoDVector = new TwoDVector(0, 0),
         acceleration: TwoDVector = new TwoDVector(0, 0),
         hasGravity = true,
-        groundY= 100,
-        width= 50,
-        height= 100,
+        groundY = 100,
+        width = 50,
+        height = 100,
         sagaBakiyor = false,
         kontrolYoneticisi = null as null | SavasciKontrolYoneticisi,
         kontroller = {
@@ -118,7 +126,7 @@ export class Warrior extends Entity {
         }
         this.isim = isim;
         this.sagaBakiyor = sagaBakiyor;
-        this.silahKutusu = new Dikdortgen(this.tuval, new TwoDVector(this.position.x, this.position.y), 193, 110, 'rgba(255,255,255,0.53)');
+        this.silahKutusu = new Dikdortgen(this.tuval, new TwoDVector(this.pos.x, this.pos.y), 193, 110, 'rgba(255,255,255,0.53)');
         this.spriteler = spriteler;
         this.sprite = this.sagaBakiyor ? this.spriteler.sag.rolanti : this.spriteler.sol.rolanti;
 
@@ -174,7 +182,7 @@ export class Warrior extends Entity {
 
     zipla() {
         if (this.hitbox.yerdedir()) {
-            this.velocity.y -= this.ziplamaHizi;
+            this.v.y -= this.ziplamaHizi;
         }
         return this;
     }
@@ -237,17 +245,17 @@ export class Warrior extends Entity {
 
         if (this.taklaAtiyor) {
             if (this.taklayiSagaAtiyor) {
-                this.velocity.x = this.yurumeHizi;
+                this.v.x = this.yurumeHizi;
             } else {
-                this.velocity.x = -this.yurumeHizi;
+                this.v.x = -this.yurumeHizi;
             }
         } else {
             if (this.sagaBakiyor && this.kontroller.sagKosu) {
-                this.velocity.x = this.yurumeHizi;
+                this.v.x = this.yurumeHizi;
             } else if (!this.sagaBakiyor && this.kontroller.solKosu) {
-                this.velocity.x = -this.yurumeHizi;
+                this.v.x = -this.yurumeHizi;
             } else {
-                this.velocity.x = 0;
+                this.v.x = 0;
             }
         }
         this.move();
@@ -281,9 +289,6 @@ export class Warrior extends Entity {
                         this.taklaAtiyor = false;
                         this.kontroller.taklaAt = false;
                         break;
-                    case 'zipla':
-                        this.kontroller.zipla = false;
-                        break;
                 }
 
 
@@ -299,13 +304,14 @@ export class Warrior extends Entity {
 
             } else { // pasif spriteler. eylem yapılınca bunlar gözükmez.
                 if (!this.hitbox.yerdedir()) {
-                    if (this.velocity.y <= 0) {
+                    if (this.v.y <= 0) {
                         this.sprite = yonluSpriteler.zipla;
                     } else {
                         this.sprite = yonluSpriteler.dusus;
 
                     }
                 } else {
+                    this.kontroller.zipla = false;
                     if (this.sagaBakiyor && this.kontroller.sagKosu || !this.sagaBakiyor && this.kontroller.solKosu) {
                         if ((this.sprite!.isim == 'kosu' && (this.sprite!.yonuSagdir != this.sagaBakiyor)) ||
                             this.sprite!.isim == 'donme') {
@@ -355,7 +361,7 @@ export class Warrior extends Entity {
                 console.log('sura')
                 this.oluHitKutusuSagaBakar = false;
                 this.hitbox.position.x -= kisaKenar * 1.5;
-                this.spriteler.sag.oldu.pozisyonOffset = new TwoDVector(-47,-165 - this.hitbox.yukseklik);
+                this.spriteler.sag.oldu.pozisyonOffset = new TwoDVector(-47, -165 - this.hitbox.yukseklik);
             } else {
                 console.log('bura')
                 this.oluHitKutusuSagaBakar = true;
@@ -382,7 +388,7 @@ export class Warrior extends Entity {
     }
 
     updatePositionFromServer(serverPosition: TwoDVector) {
-        this.position.set(serverPosition);
+        this.pos.set(serverPosition);
         return this;
     }
 

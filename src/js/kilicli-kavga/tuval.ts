@@ -33,7 +33,7 @@ export class Tuval {
      * Time gets slower with lower fps.
      * I test the time with 144hz monitor, thus my reference of the speed of time is this.
      */
-    speedOfTime() {
+    avgTimeUnit() {
         return this.fps / 144;
     }
 
