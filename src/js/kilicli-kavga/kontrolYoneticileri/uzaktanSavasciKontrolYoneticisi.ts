@@ -2,7 +2,7 @@ import {SavasciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/s
 import {Socket} from "socket.io-client";
 import {WarriorInformation, SavasciKontrolleri} from "@/js/kilicli-kavga/interfaces";
 
-export class UzaktanKontrolYoneticisi extends SavasciKontrolYoneticisi {
+export class UzaktanSavasciKontrolYoneticisi extends SavasciKontrolYoneticisi {
     private socket: Socket;
     private oyunBilgisiHalledici: any = null;
 

@@ -1,4 +1,4 @@
-import {YayinciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/yayinciKontrolYoneticisi";
+import {YayinciSavasciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/yayinciSavasciKontrolYoneticisi";
 import {SavasciKontrolleri} from "@/js/kilicli-kavga/interfaces";
 import {Socket} from "socket.io-client";
 
@@ -6,7 +6,7 @@ type SavasciKontrolTuslari = {
     [Property in keyof SavasciKontrolleri]: string | string[];
 };
 
-export class KlavyeKontrolYoneticisi extends YayinciKontrolYoneticisi {
+export class KlavyeSavasciKontrolYoneticisi extends YayinciSavasciKontrolYoneticisi {
     private wasdTuslari: SavasciKontrolTuslari = {
         saldiri: ' ',
         sagKosu: ["d", "D"],

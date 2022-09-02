@@ -361,8 +361,8 @@ export class Savasci {
     }
 
     guncelle() {
-        /*this.hitKutusu.ciz();
-        this.silahKutusu.ciz();*/
+        this.hitKutusu.ciz();
+        this.silahKutusu.ciz();
         if (this.kanAkiyor) {
             this.spritePozisyonAyarlaHitKutusunaGore(this.kanSpritesi);
             this.kanSpritesi.guncelle();
@@ -429,6 +429,10 @@ export class Savasci {
             if (this.dateOfDeath == null) {
                 this.dateOfDeath = new Date();
                 this.score.death++;
+                this.kontroller.sagKosu = false;
+                this.kontroller.solKosu = false;
+
+
             }
             this.respawnTimeLeft = this.respawnTimeSeconds - Math.floor(this.getDifferenceBetweenDatesInSeconds(this.dateOfDeath!, new Date()));
             if (this.respawnTimeLeft < 0) {

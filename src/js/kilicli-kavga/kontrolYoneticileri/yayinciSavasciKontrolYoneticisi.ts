@@ -2,7 +2,7 @@ import {SavasciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/s
 import {Socket} from "socket.io-client";
 import {WarriorInformation, SavasciKontrolleri} from "@/js/kilicli-kavga/interfaces";
 
-export abstract class YayinciKontrolYoneticisi extends SavasciKontrolYoneticisi {
+export abstract class YayinciSavasciKontrolYoneticisi extends SavasciKontrolYoneticisi {
     private socket: Socket;
 
     protected constructor(socket: Socket) {

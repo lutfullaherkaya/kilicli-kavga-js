@@ -1,10 +1,10 @@
-import {YayinciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/yayinciKontrolYoneticisi";
+import {YayinciSavasciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/yayinciSavasciKontrolYoneticisi";
 import {Socket} from "socket.io-client";
 
 /**
  * mobil arayüzden gelen kontrollerle çalışır.
  */
-export class MobilKontrolYoneticisi extends YayinciKontrolYoneticisi {
+export class MobilSavasciKontrolYoneticisi extends YayinciSavasciKontrolYoneticisi {
     constructor(socket: Socket) {
         super(socket);
     }
