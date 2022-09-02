@@ -393,15 +393,14 @@ export class Warrior extends Entity {
         if (this.kontroller.zipla) {
             this.zipla();
         }
-        if (this.kontroller.taklaAt) {
-            this.taklaAt();
-        }
 
         if (!this.oludur()) {
             if (this.kontroller.saldiri) {
                 this.saldir();
             }
-
+            if (this.kontroller.taklaAt) {
+                this.taklaAt();
+            }
         }
 
         this.hareketEt();
