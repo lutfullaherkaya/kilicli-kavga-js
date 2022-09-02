@@ -5,7 +5,7 @@
                           :rules="[girdiKurallari.gerekli, girdiKurallari.counter, girdiKurallari.oyunculardaZatenOlmamali]">
             </v-text-field>
             <v-btn :disabled="!girdiFormuUygun" color="success" class="mr-4 text-capitalize" @click="oyuncuOlustur">
-                Oyuncu oluştur
+                Oyuna Katıl
             </v-btn>
         </v-form>
 

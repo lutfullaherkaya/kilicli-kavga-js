@@ -25,7 +25,7 @@
 <script lang="ts">
 import nipplejs from 'nipplejs';
 import Vue from "vue";
-import {SavasciKontrolleri} from "@/js/kilicli-kavga/interfaces";
+import {WarriorControls} from "@/js/kilicli-kavga/warrior";
 
 export default Vue.extend({
     name: "KilicliKavgaOyunuArayuzMobil",

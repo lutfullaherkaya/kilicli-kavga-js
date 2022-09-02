@@ -1,18 +1,18 @@
 import {Tuval} from "@/js/kilicli-kavga/tuval";
-import {Kordinat} from "@/js/kilicli-kavga/interfaces";
+import {TwoDVector} from "@/js/kilicli-kavga/utility/twoDVector";
 
 export class Dikdortgen {
     private tuval: Tuval;
     /**
      * Position is pass by reference and can be changed by the caller thus it must not be reassigned.
      */
-    public position: Kordinat;
+    public position: TwoDVector;
     public genislik: number;
     public yukseklik: number;
     private renk: string;
     public carpisabilir: boolean;
 
-    constructor(tuval: Tuval, position: Kordinat, genislik: number, yukseklik: number, renk: string, carpisabilir = true) {
+    constructor(tuval: Tuval, position: TwoDVector, genislik: number, yukseklik: number, renk = 'rgba(255, 255, 255, 0.5)', carpisabilir = true) {
         this.tuval = tuval;
         this.position = position;
         this.genislik = genislik;
@@ -28,6 +28,10 @@ export class Dikdortgen {
 
     yerdedir(): boolean {
         return this.position.y + this.yukseklik >= this.tuval.yerKordinati;
+    }
+
+    ayagininAlti() {
+        return this.tuval.yerKordinati - this.yukseklik;
     }
 
     static carpisir(dikdortgen1: Dikdortgen, dikdortgen2: Dikdortgen) {
@@ -54,11 +58,13 @@ export class Dikdortgen {
         return this.position.y >= dikdortgen.position.y + dikdortgen.yukseklik;
     }
 
-    merkezKordinat(): Kordinat {
-        return {
-            x: this.position.x + this.genislik / 2,
-            y: this.position.y + this.yukseklik / 2,
-        }
+    merkezKordinat(): TwoDVector {
+        return new TwoDVector(
+            this.position.x + this.genislik / 2,
+            this.position.y + this.yukseklik / 2
+        )
     }
+
+
 
 }

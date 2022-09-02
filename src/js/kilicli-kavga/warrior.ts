@@ -1,38 +1,61 @@
 import {Tuval} from "@/js/kilicli-kavga/tuval";
-import {Dikdortgen} from "@/js/kilicli-kavga/dikdortgen";
-import {Kordinat, SavasciKontrolleri} from "@/js/kilicli-kavga/interfaces";
+import {Dikdortgen} from "@/js/kilicli-kavga/utility/dikdortgen";
 import {Sprite} from "@/js/kilicli-kavga/sprite";
 import {SavasciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/savasciKontrolYoneticisi";
+import {TwoDVector} from "@/js/kilicli-kavga/utility/twoDVector";
+import {Entity} from "@/js/kilicli-kavga/entity";
 
-interface Score {
+export interface Score {
     kill: number;
     death: number;
     assist: number;
 }
 
-export class Savasci {
-    public static lar: Savasci[] = [];
-    public tuval: Tuval;
-    public hitKutusu: Dikdortgen;
-    public position: Kordinat = {x: 0, y: 0};
-    public hiz = {x: 0, y: 0};
-    public ivme = {x: 0, y: 0};
-    private yurumeIvmesi = {x: 0, y: 0};
-    public kontroller: SavasciKontrolleri;
+export interface SpriteBilgileri {
+    sol: {
+        [key: string]: Sprite;
+    },
+    sag: {
+        [key: string]: Sprite;
+    }
+}
+
+export interface WarriorControls {
+    saldiri: boolean;
+    taklaAt: boolean;
+    solKosu: boolean;
+    sonKosulanYonSagdir: boolean;
+    sagKosu: boolean;
+    zipla: boolean
+}
+
+export interface WarriorInformation {
+    isim: string;
+    kontroller?: Partial<WarriorControls>;
+    position?: TwoDVector;
+    can?: number;
+}
+
+export class Warrior extends Entity {
+    public static s: Warrior[] = [];
+    private silahKutusu: Dikdortgen;
+
+    private readonly ziplamaHizi = 6;
+    private readonly yurumeHizi = 2;
+
+    public kontroller: WarriorControls;
     public isim: string;
     private sagaBakiyor: boolean;
     private taklaAtiyor = false;
     private taklayiSagaAtiyor = false;
     private sonHasarAlinanYonSagdir = false;
     private hitKutusuOludur = false;
-    private yercekimiIvmesi = 0.098;
-    private ziplamaHizi = 6;
-    private yurumeHizi = 2;
-    can = 100;
-    private silahKutusu: Dikdortgen;
+
+    public can = 100;
+
     private saldiriHasari = 10;
-    private spriteler: any; // todo: bunu dynamic typeli yap
-    private sprite: Sprite;
+    private spriteler: SpriteBilgileri;
+
     private sonluEylemler: string[];
     private suanYapilanEylem: null | { spriteAdi: string } = null;
     private kanSpritesi: Sprite;
@@ -56,28 +79,38 @@ export class Savasci {
 
 
     constructor(
-        tuval: Tuval, {
-            renk = '',
-            position = {x: 0, y: 0} as Kordinat,
-            sagaBakiyor = false,
-            kontroller = {
-                saldiri: false,
-                taklaAt: false,
-                solKosu: false,
-                sonKosulanYonSagdir: false,
-                sagKosu: false,
-                zipla: false
-            } as SavasciKontrolleri,
-            kontrolYoneticisi = null as null | SavasciKontrolYoneticisi,
-            genislik,
-            yukseklik,
+        isim: string,
+        tuval: Tuval,
+        spriteler: SpriteBilgileri,
+        position: TwoDVector = new TwoDVector(0, 0),
+        velocity: TwoDVector = new TwoDVector(0, 0),
+        acceleration: TwoDVector = new TwoDVector(0, 0),
+        hasGravity = true,
+        groundY= 100,
+        width= 50,
+        height= 100,
+        sagaBakiyor = false,
+        kontrolYoneticisi = null as null | SavasciKontrolYoneticisi,
+        kontroller = {
+            saldiri: false,
+            taklaAt: false,
+            solKosu: false,
+            sonKosulanYonSagdir: false,
+            sagKosu: false,
+            zipla: false
+        } as WarriorControls,
+    ) {
+        super(
             isim,
-            spriteler,
-        }: any) {
-        this.tuval = tuval;
-        this.position = position;
-        this.hitKutusu = new Dikdortgen(this.tuval, this.position, genislik, yukseklik, renk);
-
+            tuval,
+            position,
+            velocity,
+            acceleration,
+            hasGravity,
+            groundY,
+            width,
+            height,
+        );
         this.kontroller = kontroller;
         this.kontrolYoneticisi = kontrolYoneticisi;
         if (this.kontrolYoneticisi) {
@@ -85,19 +118,16 @@ export class Savasci {
         }
         this.isim = isim;
         this.sagaBakiyor = sagaBakiyor;
-        this.silahKutusu = new Dikdortgen(this.tuval, {
-            x: this.position.x,
-            y: this.position.y
-        }, 193, 110, 'rgba(255,255,255,0.53)');
+        this.silahKutusu = new Dikdortgen(this.tuval, new TwoDVector(this.position.x, this.position.y), 193, 110, 'rgba(255,255,255,0.53)');
         this.spriteler = spriteler;
         this.sprite = this.sagaBakiyor ? this.spriteler.sag.rolanti : this.spriteler.sol.rolanti;
 
         this.sonluEylemler = ['zipla', 'taklaAt', 'saldiri1', 'saldiri2'];
         this.kanSpritesi = new Sprite(this.tuval, {
             resimKaynagi: './sprites/Blood FX Lite/JASONTOMLEE_BLOOD_GUSH_3.png',
-            pozisyon: {x: 32, y: tuval.canvas.height - 111},
+            pozisyon: new TwoDVector(32, tuval.canvas.height - 111),
             resimSayisi: 14,
-            pozisyonOffset: {x: -30, y: -115},
+            pozisyonOffset: new TwoDVector(-30, -115),
             skala: 1.5,
             isim: 'kan',
             kacSahnedeResimDegisir: 2,
@@ -108,17 +138,17 @@ export class Savasci {
         this.doluKalpResmi.src = './sprites/minecraft-kalp-dolu.png';
         this.bosKalpResmi = new Image();
         this.bosKalpResmi.src = './sprites/minecraft-kalp-bos.png';
-        this.kalpGenisligi = this.hitKutusu.genislik / this.kalpSayisi;
+        this.kalpGenisligi = this.hitbox.genislik / this.kalpSayisi;
         this.kalpYuksekligi = this.kalpGenisligi;
 
-        Savasci.lar.push(this);
+        Warrior.s.push(this);
     }
 
-    static savasciCikar(savasci: Savasci) {
-        const savasciIndeksi = Savasci.lar.indexOf(savasci);
+    static savasciCikar(savasci: Warrior) {
+        const savasciIndeksi = Warrior.s.indexOf(savasci);
         if (savasciIndeksi !== -1) {
             savasci.kontrolYoneticisi?.yonetmeyiBirak();
-            Savasci.lar.splice(savasciIndeksi, 1);
+            Warrior.s.splice(savasciIndeksi, 1);
         }
     }
 
@@ -128,11 +158,11 @@ export class Savasci {
     }
 
     silahYeriniAyarla() {
-        this.silahKutusu.position.x = this.hitKutusu.position.x;
-        this.silahKutusu.position.y = this.hitKutusu.position.y - 10;
+        this.silahKutusu.position.x = this.hitbox.position.x;
+        this.silahKutusu.position.y = this.hitbox.position.y - 10;
 
         if (this.sagaBakiyor) {
-            this.silahKutusu.position.x += this.hitKutusu.genislik - this.silahKutusu.genislik * 0.44;
+            this.silahKutusu.position.x += this.hitbox.genislik - this.silahKutusu.genislik * 0.44;
         } else {
             this.silahKutusu.position.x += -this.silahKutusu.genislik + this.silahKutusu.genislik * 0.56;
         }
@@ -143,8 +173,8 @@ export class Savasci {
     }
 
     zipla() {
-        if (this.hitKutusu.yerdedir()) {
-            this.hiz.y += -this.ziplamaHizi;
+        if (this.hitbox.yerdedir()) {
+            this.velocity.y -= this.ziplamaHizi;
         }
         return this;
     }
@@ -156,7 +186,7 @@ export class Savasci {
             this.suanYapilanEylem = {
                 spriteAdi: 'taklaAt',
             };
-            this.hitKutusu.carpisabilir = false;
+            this.hitbox.carpisabilir = false;
         }
     }
 
@@ -180,12 +210,12 @@ export class Savasci {
                 };
             }
             this.alternatifSaldiri = !this.alternatifSaldiri;
-            Savasci.lar.forEach((savaskar) => {
-                if (savaskar !== this && Dikdortgen.carpisir(this.silahKutusu, savaskar.hitKutusu)) {
+            Warrior.s.forEach((savaskar) => {
+                if (savaskar !== this && Dikdortgen.carpisir(this.silahKutusu, savaskar.hitbox)) {
                     savaskar.can = Math.max(0, savaskar.can - this.saldiriHasari);
                     savaskar.kanAkiyor = true;
-                    savaskar.sonHasarAlinanYonSagdir = this.hitKutusu.merkezKordinat().x > savaskar.hitKutusu.position.x;
-                    if (savaskar.can <= 0) {
+                    savaskar.sonHasarAlinanYonSagdir = this.hitbox.merkezKordinat().x > savaskar.hitbox.position.x;
+                    if (savaskar.can <= 0 && !savaskar.hitKutusuOludur) {
                         this.score.kill++;
                     }
                 }
@@ -201,31 +231,24 @@ export class Savasci {
         if (this.kontroller.solKosu && !this.kontroller.sonKosulanYonSagdir) {
             this.sagaBakiyor = false;
         }
-        // 3. durum: ikisi de false, oldugu gibi kalır yönü
+
 
         if (this.taklaAtiyor) {
             if (this.taklayiSagaAtiyor) {
-                this.position.x += this.tuval.gercekHiz(this.yurumeHizi);
+                this.velocity.x = this.yurumeHizi;
             } else {
-                this.position.x -= this.tuval.gercekHiz(this.yurumeHizi);
+                this.velocity.x = -this.yurumeHizi;
             }
         } else {
             if (this.sagaBakiyor && this.kontroller.sagKosu) {
-                this.position.x += this.tuval.gercekHiz(this.yurumeHizi);
+                this.velocity.x = this.yurumeHizi;
             } else if (!this.sagaBakiyor && this.kontroller.solKosu) {
-                this.position.x -= this.tuval.gercekHiz(this.yurumeHizi);
+                this.velocity.x = -this.yurumeHizi;
+            } else {
+                this.velocity.x = 0;
             }
         }
-
-        this.position.x += this.tuval.gercekHiz(this.hiz.x);
-        this.position.y += this.tuval.gercekHiz(this.hiz.y);
-
-        if (this.hitKutusu.yerdedir()) {
-            this.position.y = this.tuval.yerKordinati - this.hitKutusu.yukseklik;
-            this.hiz.y = 0;
-        }
-        this.hiz.y += this.tuval.gercekHiz(this.ivme.y + this.yercekimiIvmesi + this.yurumeIvmesi.y);
-        this.hiz.x += this.tuval.gercekHiz(this.ivme.x + this.yurumeIvmesi.x);
+        this.move();
 
         return this;
     }
@@ -234,7 +257,7 @@ export class Savasci {
         const yonluSpriteler = this.sagaBakiyor ? this.spriteler.sag : this.spriteler.sol;
 
         if (this.oludur()) {
-            if (this.sprite.isim != 'oldu') {
+            if (this.sprite!.isim != 'oldu') {
                 if (this.sonHasarAlinanYonSagdir) {
                     this.sprite = this.spriteler.sag.oldu;
                 } else {
@@ -252,7 +275,7 @@ export class Savasci {
                         this.kontroller.saldiri = false;
                         break;
                     case 'taklaAt':
-                        this.hitKutusu.carpisabilir = true;
+                        this.hitbox.carpisabilir = true;
                         this.taklaAtiyor = false;
                         this.kontroller.taklaAt = false;
                         break;
@@ -267,14 +290,14 @@ export class Savasci {
             }
 
             if (this.suanYapilanEylem) {
-                if (this.sprite.isim !== this.suanYapilanEylem.spriteAdi) {
+                if (this.sprite!.isim !== this.suanYapilanEylem.spriteAdi) {
                     this.sprite = yonluSpriteler[this.suanYapilanEylem.spriteAdi];
                     this.sprite.animasyonBasaSar();
                 }
 
             } else { // pasif spriteler. eylem yapılınca bunlar gözükmez.
-                if (!this.hitKutusu.yerdedir()) {
-                    if (this.hiz.y <= 0) {
+                if (!this.hitbox.yerdedir()) {
+                    if (this.velocity.y <= 0) {
                         this.sprite = yonluSpriteler.zipla;
                     } else {
                         this.sprite = yonluSpriteler.dusus;
@@ -282,9 +305,9 @@ export class Savasci {
                     }
                 } else {
                     if (this.sagaBakiyor && this.kontroller.sagKosu || !this.sagaBakiyor && this.kontroller.solKosu) {
-                        if ((this.sprite.isim == 'kosu' && (this.sprite.yonuSagdir != this.sagaBakiyor)) ||
-                            this.sprite.isim == 'donme') {
-                            if (this.sprite.isim == 'donme' && this.sprite.birKereTamAnimasyonOldu) {
+                        if ((this.sprite!.isim == 'kosu' && (this.sprite!.yonuSagdir != this.sagaBakiyor)) ||
+                            this.sprite!.isim == 'donme') {
+                            if (this.sprite!.isim == 'donme' && this.sprite!.birKereTamAnimasyonOldu) {
                                 this.spriteler.sol.donme.animasyonBasaSar();
                                 this.spriteler.sag.donme.animasyonBasaSar();
                                 this.sprite = yonluSpriteler.kosu;
@@ -313,27 +336,29 @@ export class Savasci {
     }
 
     spritePozisyonAyarlaHitKutusunaGore(sprite: Sprite) {
-        sprite.pozisyon.y = this.hitKutusu.position.y;
-        sprite.pozisyon.x = this.hitKutusu.position.x;
+        sprite.pozisyon.y = this.hitbox.position.y;
+        sprite.pozisyon.x = this.hitbox.position.x;
         return this;
     }
 
     oluHitKutusuYap() {
         if (!this.hitKutusuOludur) {
             this.hitKutusuOludur = true;
-            const uzunKenar = this.hitKutusu.yukseklik;
-            const kisaKenar = this.hitKutusu.genislik;
-            this.hitKutusu.genislik = uzunKenar;
-            this.hitKutusu.yukseklik = kisaKenar / 2;
-            this.hitKutusu.position.y += uzunKenar - kisaKenar + kisaKenar / 2;
+            const uzunKenar = this.hitbox.yukseklik;
+            const kisaKenar = this.hitbox.genislik;
+            this.hitbox.genislik = uzunKenar;
+            this.hitbox.yukseklik = kisaKenar / 2;
+            this.hitbox.position.y += uzunKenar - kisaKenar + kisaKenar / 2;
             if (this.sonHasarAlinanYonSagdir) {
+                console.log('sura')
                 this.oluHitKutusuSagaBakar = false;
-                this.hitKutusu.position.x -= kisaKenar * 1.5;
-                this.spriteler.sag.oldu.pozisyonOffset = {x: -47, y: -165 - this.hitKutusu.yukseklik};
+                this.hitbox.position.x -= kisaKenar * 1.5;
+                this.spriteler.sag.oldu.pozisyonOffset = new TwoDVector(-47,-165 - this.hitbox.yukseklik);
             } else {
+                console.log('bura')
                 this.oluHitKutusuSagaBakar = true;
-                this.hitKutusu.position.x += kisaKenar;
-                this.spriteler.sol.oldu.pozisyonOffset = {x: -180, y: -165 - this.hitKutusu.yukseklik};
+                this.hitbox.position.x += kisaKenar;
+                this.spriteler.sol.oldu.pozisyonOffset = new TwoDVector(-180, -165 - this.hitbox.yukseklik);
             }
         }
     }
@@ -341,37 +366,28 @@ export class Savasci {
     canliHitKutusuYap() {
         if (this.hitKutusuOludur) {
             this.hitKutusuOludur = false;
-            const uzunKenar = Math.max(this.hitKutusu.yukseklik, this.hitKutusu.genislik);
-            const kisaKenar = 2 * Math.min(this.hitKutusu.yukseklik, this.hitKutusu.genislik);
-            this.hitKutusu.genislik = kisaKenar;
-            this.hitKutusu.yukseklik = uzunKenar;
-            this.hitKutusu.position.y -= uzunKenar - kisaKenar + kisaKenar / 2;
+            const uzunKenar = Math.max(this.hitbox.yukseklik, this.hitbox.genislik);
+            const kisaKenar = 2 * Math.min(this.hitbox.yukseklik, this.hitbox.genislik);
+            this.hitbox.genislik = kisaKenar;
+            this.hitbox.yukseklik = uzunKenar;
+            this.hitbox.position.y -= uzunKenar - kisaKenar + kisaKenar / 2;
             if (!this.oluHitKutusuSagaBakar) {
-                this.hitKutusu.position.x += kisaKenar * 1.5;
+                this.hitbox.position.x += kisaKenar * 1.5;
             } else {
-                this.hitKutusu.position.x -= kisaKenar;
+                this.hitbox.position.x -= kisaKenar;
             }
         }
     }
 
-    updatePositionFromServer(serverPosition: Kordinat) {
-        this.position.x = serverPosition.x;
-        this.position.y = serverPosition.y;
+    updatePositionFromServer(serverPosition: TwoDVector) {
+        this.position.set(serverPosition);
         return this;
     }
 
     guncelle() {
-        this.hitKutusu.ciz();
-        this.silahKutusu.ciz();
-        if (this.kanAkiyor) {
-            this.spritePozisyonAyarlaHitKutusunaGore(this.kanSpritesi);
-            this.kanSpritesi.guncelle();
+        /*this.hitbox.ciz();
+        this.silahKutusu.ciz();*/
 
-            if (this.kanSpritesi.birKereTamAnimasyonOldu) {
-                this.kanAkiyor = false;
-                this.kanSpritesi.animasyonBasaSar();
-            }
-        }
         if (this.kontroller.zipla) {
             this.zipla();
         }
@@ -390,39 +406,47 @@ export class Savasci {
         this.silahYeriniAyarla();
 
         this.munasipSpriteSec();
-        this.spritePozisyonAyarlaHitKutusunaGore(this.sprite);
-        this.sprite.guncelle();
+        this.spritePozisyonAyarlaHitKutusunaGore(this.sprite!);
+        this.sprite!.guncelle();
 
-        if (this.oludur() && this.sprite.isim == 'oldu' && this.sprite.birKereTamAnimasyonOldu && !this.hitKutusuOludur) {
+        if (this.oludur() && this.sprite!.isim == 'oldu' && this.sprite!.birKereTamAnimasyonOldu && !this.hitKutusuOludur) {
             this.oluHitKutusuYap();
         }
 
+        if (this.kanAkiyor) {
+            this.spritePozisyonAyarlaHitKutusunaGore(this.kanSpritesi);
+            this.kanSpritesi.guncelle();
 
+            if (this.kanSpritesi.birKereTamAnimasyonOldu) {
+                this.kanAkiyor = false;
+                this.kanSpritesi.animasyonBasaSar();
+            }
+        }
         if (this.isimGoster) {
             this.tuval.context!.textAlign = 'center';
             this.tuval.context!.fillStyle = 'white';
             this.tuval.context!.imageSmoothingEnabled = true;
-            this.tuval.context!.fillText(this.isim, this.hitKutusu.position.x + this.hitKutusu.genislik / 2, this.hitKutusu.position.y - 6, this.hitKutusu.genislik);
+            this.tuval.context!.fillText(this.isim, this.hitbox.position.x + this.hitbox.genislik / 2, this.hitbox.position.y - 6);
             this.tuval.context!.imageSmoothingEnabled = false;
         }
         if (this.kalpGoster) {
-            const canGenisligi = this.hitKutusu.genislik / 5;
             for (let i = 0; i < this.kalpSayisi; ++i) {
                 const kalpResmi = (i < this.can / (100 / this.kalpSayisi)) ? this.doluKalpResmi : this.bosKalpResmi;
                 this.tuval.context!.drawImage(
                     kalpResmi,
-                    (this.hitKutusu.genislik - this.kalpSayisi * this.kalpGenisligi) / 2 + (this.hitKutusu.position.x + this.kalpGenisligi * i),
-                    this.hitKutusu.position.y - this.kalpYuksekligi - 19,
+                    (this.hitbox.genislik - this.kalpSayisi * this.kalpGenisligi) / 2 + (this.hitbox.position.x + this.kalpGenisligi * i),
+                    this.hitbox.position.y - this.kalpYuksekligi - 19,
                     this.kalpGenisligi,
                     this.kalpYuksekligi
                 )
             }
         }
+
         if (this.showScore) {
             this.tuval.context!.textAlign = 'center';
             this.tuval.context!.fillStyle = 'white';
             this.tuval.context!.imageSmoothingEnabled = true;
-            this.tuval.context!.fillText(`L:${this.score.kill} Ö:${this.score.death}`, this.hitKutusu.position.x + this.hitKutusu.genislik / 2, this.hitKutusu.position.y - 36, this.hitKutusu.genislik);
+            this.tuval.context!.fillText(`L:${this.score.kill} Ö:${this.score.death}`, this.hitbox.position.x + this.hitbox.genislik / 2, this.hitbox.position.y - 36, this.hitbox.genislik);
             this.tuval.context!.imageSmoothingEnabled = false;
         }
         if (this.oludur()) {
@@ -452,7 +476,7 @@ export class Savasci {
             this.tuval.context!.textAlign = 'center';
             this.tuval.context!.fillStyle = 'white';
             this.tuval.context!.imageSmoothingEnabled = true;
-            this.tuval.context!.fillText(String(this.respawnTimeLeft), this.hitKutusu.position.x + this.hitKutusu.genislik / 2, this.hitKutusu.position.y - 53, this.hitKutusu.genislik);
+            this.tuval.context!.fillText(String(this.respawnTimeLeft), this.hitbox.position.x + this.hitbox.genislik / 2, this.hitbox.position.y - 53, this.hitbox.genislik);
             this.tuval.context!.imageSmoothingEnabled = false;
         }
 

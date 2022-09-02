@@ -1,5 +1,5 @@
 import {Tuval} from "@/js/kilicli-kavga/tuval";
-import {Boyut, Kordinat} from "@/js/kilicli-kavga/interfaces";
+import {TwoDVector} from "@/js/kilicli-kavga/utility/twoDVector";
 
 /**
  * Bu hocama teşekkürler grafik için
@@ -8,15 +8,15 @@ import {Boyut, Kordinat} from "@/js/kilicli-kavga/interfaces";
  */
 export class Sprite {
     private tuval: Tuval;
-    pozisyon: Kordinat;
-    private pozisyonOffset: Boyut;
+    pozisyon: TwoDVector;
+    public pozisyonOffset: TwoDVector;
     private resimSayisi: number;
     private sonsuzAnimasyon: boolean;
     public isim: string;
     private suankiResim: number;
     private skala: number;
     private resim: HTMLImageElement;
-    yonuSagdir: boolean;
+    public yonuSagdir: boolean;
     private sonundaSonSahneyiTut: boolean;
     private kacSahnedeResimDegisir: number;
     private suankiSahne: number;
@@ -25,8 +25,8 @@ export class Sprite {
 
     constructor(
         tuval: Tuval, {
-            pozisyon = {x: 0, y: 0},
-            pozisyonOffset = {x: 0, y: 0},
+            pozisyon = new TwoDVector(0, 0),
+            pozisyonOffset = new TwoDVector(0, 0),
             resimKaynagi = '',
             skala = 1,
             resimSayisi = 1,

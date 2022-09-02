@@ -5,7 +5,7 @@ import Router from "./routes/routes.js";
 import cors from 'cors';
 import bodyParser from 'body-parser'; // todo: ne ise yarar
 import Oyuncu from "./controllers/oyuncu.js";
-import {WarriorInformation} from "../src/js/kilicli-kavga/interfaces";
+import {WarriorInformation} from "../src/js/kilicli-kavga/warrior";
 
 const app = express();
 const server = http.createServer(app);

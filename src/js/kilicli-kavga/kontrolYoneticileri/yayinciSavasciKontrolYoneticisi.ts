@@ -1,6 +1,6 @@
 import {SavasciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/savasciKontrolYoneticisi";
 import {Socket} from "socket.io-client";
-import {WarriorInformation, SavasciKontrolleri} from "@/js/kilicli-kavga/interfaces";
+import {WarriorControls, WarriorInformation} from "@/js/kilicli-kavga/warrior";
 
 export abstract class YayinciSavasciKontrolYoneticisi extends SavasciKontrolYoneticisi {
     private socket: Socket;
@@ -10,7 +10,7 @@ export abstract class YayinciSavasciKontrolYoneticisi extends SavasciKontrolYone
         this.socket = socket;
     }
 
-    kontrolGuncelle(baziKontroller: Partial<SavasciKontrolleri>): void {
+    kontrolGuncelle(baziKontroller: Partial<WarriorControls>): void {
         if (this.savasci && this.yonetiliyor) {
             Object.assign(this.savasci.kontroller, baziKontroller);
             this.socket.emit('oyun bilgisi', {

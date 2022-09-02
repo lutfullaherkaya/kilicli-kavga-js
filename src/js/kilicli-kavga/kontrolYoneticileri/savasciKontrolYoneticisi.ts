@@ -1,11 +1,10 @@
-import {SavasciKontrolleri} from "@/js/kilicli-kavga/interfaces";
-import {Savasci} from "@/js/kilicli-kavga/savasci";
+import {Warrior, WarriorControls} from "@/js/kilicli-kavga/warrior";
 
 export abstract class SavasciKontrolYoneticisi {
     protected yonetiliyor = false;
-    public savasci: Savasci | null = null;
+    public savasci: Warrior | null = null;
 
-    yonetmeyeBasla(savasci: Savasci): void {
+    yonetmeyeBasla(savasci: Warrior): void {
         if (!this.yonetiliyor) {
             this.yonetiliyor = true;
             this.savasci = savasci;
@@ -15,7 +14,7 @@ export abstract class SavasciKontrolYoneticisi {
 
     abstract yonetirken() : void;
 
-    kontrolGuncelle(baziKontroller: Partial<SavasciKontrolleri>): void {
+    kontrolGuncelle(baziKontroller: Partial<WarriorControls>): void {
         if (this.savasci && this.yonetiliyor) {
             Object.assign(this.savasci.kontroller, baziKontroller);
         }

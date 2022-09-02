@@ -30,11 +30,11 @@ export class Tuval {
     }
 
     /**
-     *  Benim ekranım 144hz olduğu için 144hz'ye göre hesaplıyorum. Mesela 60 fps'de iki kat hızlı olması gerek bundan
-     *  dolayı animasyonların.
+     * Time gets slower with lower fps.
+     * I test the time with 144hz monitor, thus my reference of the speed of time is this.
      */
-    gercekHiz(hiz: number) {
-        return hiz * 144 / this.fps;
+    speedOfTime() {
+        return this.fps / 144;
     }
 
     gercekSahneSayisi(sahneSayisi: number) {
