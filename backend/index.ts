@@ -5,8 +5,23 @@ import Router from "./routes/routes.js";
 import cors from 'cors';
 import bodyParser from 'body-parser'; // todo: ne ise yarar
 import Oyuncu from "./controllers/oyuncu.js";
-import {WarriorInformation} from "../src/js/kilicli-kavga/warrior";
+import {TwoDVector} from "../src/js/kilicli-kavga/utility/twoDVector";
 
+// todo: importlaman lazım warriordan ama o zaman derlenmiyor, hatayı çöz
+export interface WarriorControls {
+    saldiri: boolean;
+    taklaAt: boolean;
+    solKosu: boolean;
+    sonKosulanYonSagdir: boolean;
+    sagKosu: boolean;
+    zipla: boolean
+}
+export interface WarriorInformation {
+    isim: string;
+    kontroller?: Partial<WarriorControls>;
+    position?: TwoDVector;
+    can?: number;
+}
 const app = express();
 const server = http.createServer(app);
 

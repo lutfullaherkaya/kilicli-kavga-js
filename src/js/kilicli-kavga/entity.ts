@@ -41,7 +41,6 @@ export class Entity {
     move() {
         this.position.set(this.position.add(this.velocity.divide(this.tuval.speedOfTime())));
 
-
         if (this.hasGravity && this.hitbox.yerdedir()) {
             this.velocity.y = 0;
             this.acceleration.y = 0;
