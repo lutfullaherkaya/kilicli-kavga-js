@@ -1,10 +1,10 @@
 <template>
     <div>
-        <v-form v-if="!oyuncuIsmiSecildi" ref="girdi-formu" v-model="girdiFormuUygun" lazy-validation class="mb-2">
+        <v-form v-if="!oyuncuIsmiSecildi" ref="girdi-formu" v-model="girdiFormuUygun" lazy-validation class="mb-2" @submit="oyuncuOlustur">
             <v-text-field v-model="yeniOyuncuAdi" label="Yeni Oyuncu Adı" counter outlined maxlength="20"
                           :rules="[girdiKurallari.gerekli, girdiKurallari.counter, girdiKurallari.oyunculardaZatenOlmamali]">
             </v-text-field>
-            <v-btn :disabled="!girdiFormuUygun" color="success" class="mr-4 text-capitalize" @click="oyuncuOlustur">
+            <v-btn :disabled="!girdiFormuUygun" color="success" class="mr-4 mb-5 text-capitalize" type="submit">
                 Oyuna Katıl
             </v-btn>
         </v-form>
