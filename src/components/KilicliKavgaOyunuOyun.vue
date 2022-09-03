@@ -11,7 +11,7 @@
                                                       :mobil-kontrolleri-goster="mobilKontrolleriGoster"
                                                       @tam-ekrani-ac="tamEkraniAc"
                                                       @tam-ekrani-kapat="tamEkraniKapat"
-                                                      :savascilar="savascilar"
+                                                      :warriors="this.tuval?.warriors"
                 />
 <!--                <div style="width: 40px; height: 30px; position: absolute; left: 0; top: 0; background-color: red;"
                      id="kutu">
@@ -57,7 +57,6 @@ export default Vue.extend({
     },
     data() {
         return {
-            savascilar: [] as Warrior[],
             tamEkrandir: false,
             ekranGenisligi: 100,
             ekranYuksekligi: 100,
@@ -119,10 +118,10 @@ export default Vue.extend({
         savasciEkle(tuval: Tuval, isim: SavasciAdi, spriteler: SpriteBilgileri, kontrolYoneticisi: SavasciKontrolYoneticisi | null = null): void {
             let position = new TwoDVector(150, tuval.canvas.height - 111);
             let sagaBakiyor;
-            if (this.savascilar.length == 0) {
+            if (tuval.warriors.length == 0) {
                 position = new TwoDVector(150, tuval.canvas.height - 111);
                 sagaBakiyor = true;
-            } else if (this.savascilar.length == 1) {
+            } else if (tuval.warriors.length == 1) {
                 position = new TwoDVector(tuval.canvas.width - 200, tuval.canvas.height - 111);
                 sagaBakiyor = false;
             } else { // üçüncüden sonraki savaşçılar orta yukarıdan düşer.
@@ -143,16 +142,12 @@ export default Vue.extend({
                     kontrolYoneticisi,
             )
 
-            this.savascilar.push(yeniSavasci);
+            tuval.warriors.push(yeniSavasci);
 
             if (this.buOyuncuIsmi != "" && isim == this.buOyuncuIsmi) {
                 this.buSavasci = yeniSavasci;
                 this.mobilKontrolYoneticisi.yonetmeyeBasla(yeniSavasci);
             }
-
-            setTimeout(() => {
-                console.log(Warrior.s)
-            }, 1000);
         },
         main() {
             this.tuval = new Tuval(document.querySelector('canvas')!, tuvalGenisligi, tuvalYuksekligi, Math.round((tuvalYuksekligi / 600) * 490));
@@ -342,7 +337,7 @@ export default Vue.extend({
                 this.tuval!.fps = 1000 / frameTime;
                 this.tuval!.temizle();
                 arkaplan.guncelle();
-                for (const savasci of this.savascilar) {
+                for (const savasci of this.tuval!.warriors) {
                     savasci.guncelle();
                 }
                 /*if (this.savascilar.length > 0) {
@@ -353,7 +348,7 @@ export default Vue.extend({
 
                 }*/
 
-                SavasciCarpisma.engelle();
+                SavasciCarpisma.engelle(this.tuval!.warriors);
 
                 const thisFrameTime = (thisLoop = performance.now()) - lastLoop;
                 frameTime += (thisFrameTime - frameTime) / filterStrength;
@@ -379,28 +374,31 @@ export default Vue.extend({
 
         this.main();
         this.$watch('oyuncular', () => {
-            for (const oyuncu of this.oyuncular) {
-                let savasciIsimleri = this.savascilar.map((savasci) => savasci.isim);
-                if (!savasciIsimleri.includes(oyuncu.isim)) {
-                    if (this.buOyuncuIsmi != "" && oyuncu.isim == this.buOyuncuIsmi) {
-                        let kontrolYoneticisi: SavasciKontrolYoneticisi | null = null;
-                        kontrolYoneticisi = new KlavyeSavasciKontrolYoneticisi(this.socket, true, true, this.$refs['canvas-container'] as HTMLElement)
-                        this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, kontrolYoneticisi);
-                        // always using mouse and keybaord, sometimes using mobile
-                    } else {
-                        this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, new UzaktanSavasciKontrolYoneticisi(this.socket));
+            if (this.tuval) {
+                for (const oyuncu of this.oyuncular) {
+                    let savasciIsimleri = this.tuval.warriors.map((savasci) => savasci.isim);
+                    if (!savasciIsimleri.includes(oyuncu.isim)) {
+                        if (this.buOyuncuIsmi != "" && oyuncu.isim == this.buOyuncuIsmi) {
+                            let kontrolYoneticisi: SavasciKontrolYoneticisi | null = null;
+                            kontrolYoneticisi = new KlavyeSavasciKontrolYoneticisi(this.socket, true, true, this.$refs['canvas-container'] as HTMLElement)
+                            this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, kontrolYoneticisi);
+                            // always using mouse and keybaord, sometimes using mobile
+                        } else {
+                            this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, new UzaktanSavasciKontrolYoneticisi(this.socket));
+                        }
                     }
                 }
+                const oyuncuIsimleri = this.oyuncular.map((oyuncu) => oyuncu.isim);
+                this.tuval.warriors = this.tuval.warriors.filter((savasci) => {
+                    if (!oyuncuIsimleri.includes(savasci.isim)) {
+                        savasci.kontrolYoneticisi?.yonetmeyiBirak();
+                        return false;
+                    }
+                    return true;
+                });
+                (this.buSavasci?.kontrolYoneticisi as YayinciSavasciKontrolYoneticisi).sendWarriorInformation();
             }
-            const oyuncuIsimleri = this.oyuncular.map((oyuncu) => oyuncu.isim);
-            this.savascilar = this.savascilar.filter((savasci) => {
-                if (!oyuncuIsimleri.includes(savasci.isim)) {
-                    Warrior.savasciCikar(savasci);
-                    return false;
-                }
-                return true;
-            });
-            (this.buSavasci?.kontrolYoneticisi as YayinciSavasciKontrolYoneticisi).sendWarriorInformation();
+
         }, {immediate: true});
     },
 

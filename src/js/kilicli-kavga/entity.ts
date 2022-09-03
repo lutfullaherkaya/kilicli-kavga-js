@@ -54,9 +54,6 @@ export class Entity {
             if (this.pos.x + this.hitbox.genislik > this.tuval.canvas.width) {
                 this.pos.x = this.tuval.canvas.width - this.hitbox.genislik;
             }
-            if (this.pos.y < 0) {
-                this.pos.y = 0;
-            }
         }
 
         this.v.set(this.v.add(this.accel.divide(this.tuval.avgTimeUnit()))); // v = v0 + at

@@ -1,16 +1,32 @@
 <template>
-    <div>
+    <div ref="can-zaman-arayuzu">
         <div class="can-zaman-arayuzu">
             <div class="can-cubugu can-cubugu-1">
-                <div class="ic-can-cubugu-1" :style="{width: (savascilar[0]?.can ?? 0) + '%'}"></div>
-                <span class="can-cubugu-isim can-cubugu-isim-1">{{ savascilar[0]?.isim ?? '' }}</span>
+                <div class="ic-can-cubugu-1" :style="{width: (warriors[0]?.can ?? 0) + '%'}"></div>
+                <span class="can-cubugu-isim can-cubugu-isim-1">{{ warriors[0]?.isim ?? '' }}</span>
             </div>
             <div class="zaman-kutusu">
                 <span id="zaman" class="zaman">90</span>
             </div>
-            <div class="can-cubugu can-cubugu-2" >
-                <div class="ic-can-cubugu-2" :style="{width: (savascilar[1]?.can ?? 0) + '%'}"></div>
-                <span class="can-cubugu-isim can-cubugu-isim-2">{{ savascilar[1]?.isim ?? '' }}</span>
+            <div class="can-cubugu can-cubugu-2">
+                <div class="ic-can-cubugu-2" :style="{width: (warriors[1]?.can ?? 0) + '%'}"></div>
+                <span class="can-cubugu-isim can-cubugu-isim-2">{{ warriors[1]?.isim ?? '' }}</span>
+            </div>
+        </div>
+
+        <div class="warrior-stats" v-for="warrior in warriors" :key="warrior.isim"
+             :style="warriorStatStyle(warrior)">
+            <div class="warrior-respawn-time">
+                {{ warrior.can <= 0 ? warrior.respawnTimeLeft : '' }}
+            </div>
+            <div class="warrior-hearts">
+                <img src="sprites/minecraft-kalp-dolu.png" alt="heart" :class="{grayscale: warrior.can <= 0}">
+                <img src="sprites/minecraft-kalp-dolu.png" alt="heart" :class="{grayscale: warrior.can <= 25}">
+                <img src="sprites/minecraft-kalp-dolu.png" alt="heart" :class="{grayscale: warrior.can <= 50}">
+                <img src="sprites/minecraft-kalp-dolu.png" alt="heart" :class="{grayscale: warrior.can <= 75}">
+            </div>
+            <div class="warrior-stats-name">
+                {{ warrior.isim }}
             </div>
         </div>
 
@@ -22,18 +38,59 @@
                 mdi-fullscreen-exit
             </v-icon>
         </div>
+
     </div>
 
 </template>
 <script lang="ts">
 import Vue from "vue";
+import {Warrior} from "@/js/kilicli-kavga/warrior";
+
+const tuvalYuksekligi = 720;
+const tuvalGenisligi = tuvalYuksekligi * 16 / 9;
 
 export default Vue.extend({
     name: 'KilicliKavgaOyunuArayuzCanZaman',
     props: {
         tamEkrandir: Boolean,
-        savascilar: Array
+        warriors: {
+            type: Array as () => Warrior[],
+            default() {
+                return [];
+            }
+        }
     },
+    data() {
+        return {
+            canvasClientWidth: 1000
+        }
+    },
+    methods: {
+        refreshCanvasClientWidth() {
+            this.canvasClientWidth = (this.$refs['can-zaman-arayuzu'] as HTMLDivElement).clientWidth;
+        },
+        warriorStatStyle(warrior: Warrior) {
+            const style = {
+                position: 'absolute',
+            } as any;
+            const scale = this.canvasClientWidth / warrior.tuval.canvas.width;
+            style.top = warrior.hitbox.position.y * scale + 'px';
+            style.left = (warrior.hitbox.position.x + warrior.hitbox.genislik / 2) * scale + 'px';
+
+
+            return style;
+
+        }
+    },
+    mounted() {
+        this.refreshCanvasClientWidth();
+        new ResizeObserver(() => this.refreshCanvasClientWidth)
+                .observe(this.$refs['can-zaman-arayuzu'] as HTMLDivElement);
+        window.addEventListener('resize', this.refreshCanvasClientWidth); // in case ResizeObserver is not supported
+    },
+    destroyed() {
+        window.removeEventListener('resize', this.refreshCanvasClientWidth);
+    }
 })
 </script>
 <style scoped>
@@ -132,4 +189,29 @@ export default Vue.extend({
 .v-ripple__container {
     opacity: 0 !important;
 }
+
+.warrior-stats {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+    color: #f8f8f8;
+    transform: translate(-50%, -100%);
+}
+
+.warrior-stats > * {
+    margin-bottom: -0.35rem;
+
+}
+
+.warrior-hearts img {
+    width: 0.9rem;
+    height: 0.9rem;
+}
+
+.grayscale {
+    filter: grayscale(100%);
+}
+
 </style>

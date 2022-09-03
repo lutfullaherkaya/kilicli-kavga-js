@@ -12,6 +12,7 @@
 
         <kilicli-kavga-oyunu-oyun
                 v-else
+                ref="oyun"
                 :mobil-kontrolleri-goster="mobilKontrolleriGoster"
                 :dokunmalidir="dokunmalidir"
                 :socket="socket"
@@ -19,7 +20,12 @@
                 :bu-oyuncu-ismi="yeniOyuncuAdi"
         />
 
-        <v-switch v-model="mobilKontrolleriGoster" inset label="Mobil Kontrolleri Göster"></v-switch>
+        <v-switch v-if="oyuncuIsmiSecildi" v-model="mobilKontrolleriGoster" inset label="Mobil Kontrolleri Göster"
+                  style="width: fit-content; display: inline-block; align-content: end; margin-right: 15px;"></v-switch>
+        <v-btn color="primary"
+               v-if="oyuncuIsmiSecildi" @click="tamEkraniAc">
+            Tam Ekranı Aç
+        </v-btn>
         <v-simple-table>
             <template v-slot:default>
                 <thead>
@@ -80,13 +86,15 @@ export default Vue.extend({
     },
 
     methods: {
+        tamEkraniAc() {
+            (this.$refs.oyun as any)?.tamEkraniAc();
+        },
         mobilMi(): boolean {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         },
         dokunmaliMi(): boolean {
             return (('ontouchstart' in window) ||
-                    (navigator.maxTouchPoints > 0) ||
-                    (navigator.msMaxTouchPoints > 0));
+                    (navigator.maxTouchPoints > 0));
         },
         oyuncuOlustur() {
             axios.post('/oyuncular', {

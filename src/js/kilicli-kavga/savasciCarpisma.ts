@@ -2,9 +2,9 @@ import {Dikdortgen} from "@/js/kilicli-kavga/utility/dikdortgen";
 import {Warrior} from "@/js/kilicli-kavga/warrior";
 
 export class SavasciCarpisma {
-    static engelle() {
-        Warrior.s.forEach((savaskar1) => {
-            Warrior.s.forEach((savaskar2) => {
+    static engelle(warriors: Warrior[]) {
+        warriors.forEach((savaskar1) => {
+            warriors.forEach((savaskar2) => {
                 if (savaskar1 !== savaskar2) {
                     SavasciCarpisma.carpismayacakKadarOtele(savaskar1, savaskar2);
                 }

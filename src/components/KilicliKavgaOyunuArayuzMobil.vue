@@ -47,7 +47,7 @@ export default Vue.extend({
             } as any,
             joystickZiplamaYerinde: false,
             joystickGenislikYuzdesi: 12.5,
-            joystickMenzilYuzdesi: 15,
+            joystickMenzilYuzdesi: 14,
         }
     },
     methods: {

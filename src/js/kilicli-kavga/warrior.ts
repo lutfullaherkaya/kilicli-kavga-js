@@ -38,7 +38,6 @@ export interface WarriorInformation {
 }
 
 export class Warrior extends Entity {
-    public static s: Warrior[] = [];
     private silahKutusu: Dikdortgen;
 
 
@@ -70,19 +69,12 @@ export class Warrior extends Entity {
     private kanAkiyor = false;
     private alternatifSaldiri = true;  // surekli true false olur saldırdıkça
     public kontrolYoneticisi: null | SavasciKontrolYoneticisi;
-    public isimGoster = true;
-    public kalpGoster = true;
-    public doluKalpResmi: HTMLImageElement;
-    public bosKalpResmi: HTMLImageElement;
-    public kalpGenisligi: number;
-    public kalpYuksekligi: number;
-    public kalpSayisi = 4;
     public respawnTimeSeconds = 4;
     public peopleDoRespawn = true;
     public respawnTimeLeft = this.respawnTimeSeconds;
     public dateOfDeath: Date | null = null;
     public score = {kill: 0, death: 0, assist: 0} as Score;
-    public showScore = true;
+    public showScore = false;
     private oluHitKutusuSagaBakar = false;
 
 
@@ -142,23 +134,10 @@ export class Warrior extends Entity {
             sonsuzAnimasyon: false,
         });
 
-        this.doluKalpResmi = new Image();
-        this.doluKalpResmi.src = './sprites/minecraft-kalp-dolu.png';
-        this.bosKalpResmi = new Image();
-        this.bosKalpResmi.src = './sprites/minecraft-kalp-bos.png';
-        this.kalpGenisligi = this.hitbox.genislik / this.kalpSayisi;
-        this.kalpYuksekligi = this.kalpGenisligi;
 
-        Warrior.s.push(this);
+
     }
 
-    static savasciCikar(savasci: Warrior) {
-        const savasciIndeksi = Warrior.s.indexOf(savasci);
-        if (savasciIndeksi !== -1) {
-            savasci.kontrolYoneticisi?.yonetmeyiBirak();
-            Warrior.s.splice(savasciIndeksi, 1);
-        }
-    }
 
     getDifferenceBetweenDatesInSeconds(date1: Date, date2: Date): number {
         const difference = date2.getTime() - date1.getTime();
@@ -220,7 +199,7 @@ export class Warrior extends Entity {
                 };
             }
             this.alternatifSaldiri = !this.alternatifSaldiri;
-            Warrior.s.forEach((savaskar) => {
+            this.tuval.warriors.forEach((savaskar) => {
                 if (savaskar !== this && Dikdortgen.carpisir(this.silahKutusu, savaskar.hitbox)) {
                     savaskar.can = Math.max(0, savaskar.can - this.saldiriHasari);
                     savaskar.kanAkiyor = true;
@@ -429,25 +408,6 @@ export class Warrior extends Entity {
                 this.kanSpritesi.animasyonBasaSar();
             }
         }
-        if (this.isimGoster) {
-            this.tuval.context!.textAlign = 'center';
-            this.tuval.context!.fillStyle = 'white';
-            this.tuval.context!.imageSmoothingEnabled = true;
-            this.tuval.context!.fillText(this.isim, this.hitbox.position.x + this.hitbox.genislik / 2, this.hitbox.position.y - 6);
-            this.tuval.context!.imageSmoothingEnabled = false;
-        }
-        if (this.kalpGoster) {
-            for (let i = 0; i < this.kalpSayisi; ++i) {
-                const kalpResmi = (i < this.can / (100 / this.kalpSayisi)) ? this.doluKalpResmi : this.bosKalpResmi;
-                this.tuval.context!.drawImage(
-                    kalpResmi,
-                    (this.hitbox.genislik - this.kalpSayisi * this.kalpGenisligi) / 2 + (this.hitbox.position.x + this.kalpGenisligi * i),
-                    this.hitbox.position.y - this.kalpYuksekligi - 19,
-                    this.kalpGenisligi,
-                    this.kalpYuksekligi
-                )
-            }
-        }
 
         if (this.showScore) {
             this.tuval.context!.textAlign = 'center';
@@ -479,13 +439,7 @@ export class Warrior extends Entity {
             this.dateOfDeath = null;
         }
 
-        if (this.oludur() && this.peopleDoRespawn) {
-            this.tuval.context!.textAlign = 'center';
-            this.tuval.context!.fillStyle = 'white';
-            this.tuval.context!.imageSmoothingEnabled = true;
-            this.tuval.context!.fillText(String(this.respawnTimeLeft), this.hitbox.position.x + this.hitbox.genislik / 2, this.hitbox.position.y - 53, this.hitbox.genislik);
-            this.tuval.context!.imageSmoothingEnabled = false;
-        }
+
 
         return this;
     }

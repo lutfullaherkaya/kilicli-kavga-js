@@ -1,9 +1,12 @@
+import {Warrior} from "@/js/kilicli-kavga/warrior";
+
 export class Tuval {
     canvas: HTMLCanvasElement;
     yerKordinati: number;
     context: CanvasRenderingContext2D | null;
     private zaman: number;
     fps: number;
+    warriors: Warrior[] = [];
 
     constructor(canvas: HTMLCanvasElement, genislik: number, yukseklik: number, yerKordianti: number) {
         this.canvas = canvas;
