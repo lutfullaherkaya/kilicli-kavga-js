@@ -1,7 +1,7 @@
 <template>
     <div>
         <v-form v-if="!oyuncuIsmiSecildi" ref="girdi-formu" v-model="girdiFormuUygun" lazy-validation class="mb-2"
-                @submit="oyuncuOlustur">
+                @submit.prevent="oyuncuOlustur">
             <v-text-field v-model="yeniOyuncuAdi" label="Yeni Oyuncu Adı" counter outlined maxlength="20"
                           :rules="[girdiKurallari.gerekli, girdiKurallari.counter, girdiKurallari.oyunculardaZatenOlmamali]">
             </v-text-field>
