@@ -1,6 +1,7 @@
 <template>
     <div>
-        <v-form v-if="!oyuncuIsmiSecildi" ref="girdi-formu" v-model="girdiFormuUygun" lazy-validation class="mb-2" @submit="oyuncuOlustur">
+        <v-form v-if="!oyuncuIsmiSecildi" ref="girdi-formu" v-model="girdiFormuUygun" lazy-validation class="mb-2"
+                @submit="oyuncuOlustur">
             <v-text-field v-model="yeniOyuncuAdi" label="Yeni Oyuncu Adı" counter outlined maxlength="20"
                           :rules="[girdiKurallari.gerekli, girdiKurallari.counter, girdiKurallari.oyunculardaZatenOlmamali]">
             </v-text-field>
@@ -12,14 +13,13 @@
         <kilicli-kavga-oyunu-oyun
                 v-else
                 :mobil-kontrolleri-goster="mobilKontrolleriGoster"
-                :mobildir="mobildir"
+                :dokunmalidir="dokunmalidir"
                 :socket="socket"
                 :oyuncular="oyuncular"
                 :bu-oyuncu-ismi="yeniOyuncuAdi"
         />
 
-<!--        <v-switch v-model="mobilKontrolleriGoster" inset label="Mobil Kontrolleri Göster"></v-switch>-->
-
+        <v-switch v-model="mobilKontrolleriGoster" inset label="Mobil Kontrolleri Göster"></v-switch>
         <v-simple-table>
             <template v-slot:default>
                 <thead>
@@ -55,7 +55,7 @@ export default Vue.extend({
     data() {
         return {
             oyuncular: [] as any[],
-            mobildir: false,
+            dokunmalidir: false,
             mobilKontrolleriGoster: false,
             socket: io(),
             rakipIsmi: '',
@@ -83,6 +83,11 @@ export default Vue.extend({
         mobilMi(): boolean {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         },
+        dokunmaliMi(): boolean {
+            return (('ontouchstart' in window) ||
+                    (navigator.maxTouchPoints > 0) ||
+                    (navigator.msMaxTouchPoints > 0));
+        },
         oyuncuOlustur() {
             axios.post('/oyuncular', {
                 isim: this.yeniOyuncuAdi,
@@ -102,7 +107,7 @@ export default Vue.extend({
 
     },
     beforeMount() {
-        this.mobildir = this.mobilMi();
+        this.dokunmalidir = this.dokunmaliMi();
         this.mobilKontrolleriGoster = this.mobildir;
     },
     mounted() {
@@ -111,7 +116,7 @@ export default Vue.extend({
         }).catch(error => {
             (this as any).$snotify.error(error.response.data.message);
         });
-        this.socket.on('oyuncu guncel listesi', (msg)  => {
+        this.socket.on('oyuncu guncel listesi', (msg) => {
             this.oyuncular = Object.values(msg);
 
         })

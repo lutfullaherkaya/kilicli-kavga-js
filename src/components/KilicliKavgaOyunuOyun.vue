@@ -16,7 +16,7 @@
 
             </v-responsive>
         </div>
-        <kilicli-kavga-oyunu-arayuz-mobil v-if="mobilKontrolleriGoster"
+        <kilicli-kavga-oyunu-arayuz-mobil v-if="mobilKontrolleriGoster" style="z-index: 1111;"
                                           @mobil-kontroller-degisti="mobilKontrollerDegisince"
         />
 
@@ -47,7 +47,7 @@ export default Vue.extend({
     name: 'KilicliKavgaOyunuOyun',
     components: {KilicliKavgaOyunuArayuzMobil, KilicliKavgaOyunuArayuzCanZaman},
     props: {
-        mobildir: Boolean,
+        dokunmalidir: Boolean,
         mobilKontrolleriGoster: Boolean,
         socket: Object,
         oyuncular: Array as () => Array<{ isim: SavasciAdi }>,
@@ -142,9 +142,7 @@ export default Vue.extend({
             )
 
             this.savascilar.push(yeniSavasci);
-            if (this.mobilKontrolYoneticisi === kontrolYoneticisi) {
-                this.mobilKontrolYoneticisi.savasci = yeniSavasci;
-            }
+            this.mobilKontrolYoneticisi.yonetmeyeBasla(yeniSavasci);
             if (this.buOyuncuIsmi != "" && isim == this.buOyuncuIsmi) {
                 this.buSavasci = yeniSavasci;
             }
@@ -374,12 +372,9 @@ export default Vue.extend({
                 if (!savasciIsimleri.includes(oyuncu.isim)) {
                     if (this.buOyuncuIsmi != "" && oyuncu.isim == this.buOyuncuIsmi) {
                         let kontrolYoneticisi: SavasciKontrolYoneticisi | null = null;
-                        if (this.mobildir) {
-                            kontrolYoneticisi = this.mobilKontrolYoneticisi;
-                        } else {
-                            kontrolYoneticisi = new KlavyeSavasciKontrolYoneticisi(this.socket, true, true, this.$refs['canvas-container'] as HTMLElement)
-                        }
+                        kontrolYoneticisi = new KlavyeSavasciKontrolYoneticisi(this.socket, true, true, this.$refs['canvas-container'] as HTMLElement)
                         this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, kontrolYoneticisi);
+                        // always using mouse and keybaord, sometimes using mobile
                     } else {
                         this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, new UzaktanSavasciKontrolYoneticisi(this.socket));
                     }

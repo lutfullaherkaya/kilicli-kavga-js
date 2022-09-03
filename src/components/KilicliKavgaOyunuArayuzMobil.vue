@@ -51,14 +51,16 @@ export default Vue.extend({
         }
     },
     methods: {
-        taklaAttir() {
+        taklaAttir(event: any) {
+            event.stopPropagation();
             const yeniKontroller = {
                 taklaAt: true,
             };
             // sadece degisen kontrol anahtarları emitlenir.
             this.$emit('mobil-kontroller-degisti', yeniKontroller);
         },
-        saldirt() {
+        saldirt(event: any) {
+            event.stopPropagation();
             const yeniKontroller = {
                 saldiri: true,
             };
