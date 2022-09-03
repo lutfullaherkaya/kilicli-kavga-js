@@ -144,10 +144,12 @@ export default Vue.extend({
             )
 
             this.savascilar.push(yeniSavasci);
-            this.mobilKontrolYoneticisi.yonetmeyeBasla(yeniSavasci);
+
             if (this.buOyuncuIsmi != "" && isim == this.buOyuncuIsmi) {
                 this.buSavasci = yeniSavasci;
+                this.mobilKontrolYoneticisi.yonetmeyeBasla(yeniSavasci);
             }
+
             setTimeout(() => {
                 console.log(Warrior.s)
             }, 1000);
@@ -343,13 +345,13 @@ export default Vue.extend({
                 for (const savasci of this.savascilar) {
                     savasci.guncelle();
                 }
-                if (this.savascilar.length > 0) {
+                /*if (this.savascilar.length > 0) {
                     const canvasClientWidth = document.querySelector('canvas').clientWidth;
                     const scale = canvasClientWidth / this.tuval!.canvas.width;
                     document.getElementById('kutu').style.top = this.savascilar[0].hitbox.position.y * scale + 'px';
                     document.getElementById('kutu').style.left = this.savascilar[0].hitbox.position.x * scale + 'px';
 
-                }
+                }*/
 
                 SavasciCarpisma.engelle();
 
