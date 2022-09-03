@@ -13,9 +13,9 @@
                                                       @tam-ekrani-kapat="tamEkraniKapat"
                                                       :savascilar="savascilar"
                 />
-                <div style="width: 40px; height: 30px; position: absolute; left: 0; top: 0; background-color: red;"
+<!--                <div style="width: 40px; height: 30px; position: absolute; left: 0; top: 0; background-color: red;"
                      id="kutu">
-                </div>
+                </div>-->
             </v-responsive>
         </div>
         <kilicli-kavga-oyunu-arayuz-mobil v-if="mobilKontrolleriGoster" style="z-index: 1111;"

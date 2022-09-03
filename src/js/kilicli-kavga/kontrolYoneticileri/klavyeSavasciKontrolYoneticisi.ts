@@ -59,15 +59,16 @@ export class KlavyeSavasciKontrolYoneticisi extends YayinciSavasciKontrolYonetic
     yonetirken(kontroller?: WarriorControls): void {
         // böyle yapmanın sebebi hem thisi addeventlistenerde görmek hem de removeeventlistener yapabilmektir.
         this.keydownHalledici = (event: KeyboardEvent) => {
-            event.preventDefault();
             if (this.savasci!.kontroller && !event.repeat) {
                 const baziKontroller: Partial<WarriorControls> = {};
                 if (event.key in this.secilenTuslarTersi) {
+                    event.preventDefault();
                     this.secilenTuslarTersi[event.key].forEach(kontrol => {
                         baziKontroller[kontrol] = true;
                     });
                 }
                 if (event.key + '!' in this.secilenTuslarTersi) {
+                    event.preventDefault();
                     this.secilenTuslarTersi[event.key + '!'].forEach(kontrol => {
                         if (!(kontrol in this.savasci!.posEdgeActivatedWarriorControls)) {
                             baziKontroller[kontrol] = false;
@@ -84,6 +85,7 @@ export class KlavyeSavasciKontrolYoneticisi extends YayinciSavasciKontrolYonetic
             if (this.savasci!.kontroller && !event.repeat) {
                 const baziKontroller: Partial<WarriorControls> = {};
                 if (event.key in this.secilenTuslarTersi) {
+                    event.preventDefault();
                     this.secilenTuslarTersi[event.key].forEach(kontrol => {
                         if (!(kontrol in this.savasci!.posEdgeActivatedWarriorControls)) {
                             baziKontroller[kontrol] = false;
@@ -91,6 +93,7 @@ export class KlavyeSavasciKontrolYoneticisi extends YayinciSavasciKontrolYonetic
                     });
                 }
                 if (event.key + '!' in this.secilenTuslarTersi) {
+                    event.preventDefault();
                     this.secilenTuslarTersi[event.key + '!'].forEach(kontrol => {
                         baziKontroller[kontrol] = true;
                     });
