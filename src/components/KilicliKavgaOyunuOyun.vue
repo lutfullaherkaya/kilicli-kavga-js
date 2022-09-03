@@ -156,6 +156,7 @@ export default Vue.extend({
             const arkaplan = new Sprite(this.tuval, {
                 resimKaynagi: './sprites/NightForest/Image without mist.png',
                 skala: 1.72 * tuvalYuksekligi / 600,
+                canvasFilter: 'contrast(2) sepia(1)'
             });
 
 
@@ -340,13 +341,6 @@ export default Vue.extend({
                 for (const savasci of this.tuval!.warriors) {
                     savasci.guncelle();
                 }
-                /*if (this.savascilar.length > 0) {
-                    const canvasClientWidth = document.querySelector('canvas').clientWidth;
-                    const scale = canvasClientWidth / this.tuval!.canvas.width;
-                    document.getElementById('kutu').style.top = this.savascilar[0].hitbox.position.y * scale + 'px';
-                    document.getElementById('kutu').style.left = this.savascilar[0].hitbox.position.x * scale + 'px';
-
-                }*/
 
                 SavasciCarpisma.engelle(this.tuval!.warriors);
 

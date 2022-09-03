@@ -22,6 +22,7 @@ export class Sprite {
     private suankiSahne: number;
     private gercekKacSahnedeResimDegistir: number;
     birKereTamAnimasyonOldu: boolean;
+    public canvasFilter: string | null = null;
 
     constructor(
         tuval: Tuval, {
@@ -35,6 +36,7 @@ export class Sprite {
             isim = 'sprite',
             kacSahnedeResimDegisir = 10,
             yonuSagdir = false,
+            canvasFilter = null as null | string,
         }) {
         this.tuval = tuval;
         this.pozisyon = pozisyon;
@@ -49,6 +51,7 @@ export class Sprite {
         this.resimSayisi = resimSayisi;
         this.yonuSagdir = yonuSagdir;
         this.sonundaSonSahneyiTut = sonundaSonSahneyiTut;
+        this.canvasFilter = canvasFilter;
 
         this.kacSahnedeResimDegisir = kacSahnedeResimDegisir;
         if (this.isim == 'donme') {
@@ -62,6 +65,10 @@ export class Sprite {
     }
 
     ciz() {
+        if (this.canvasFilter) {
+            this.tuval.context!.filter = this.canvasFilter;
+        }
+
         this.tuval.context!.drawImage(
             this.resim,
             (this.suankiResim % this.resimSayisi) * (this.resim.width / this.resimSayisi),
@@ -72,6 +79,11 @@ export class Sprite {
             this.pozisyon.y + this.pozisyonOffset.y,
             (this.resim.width / this.resimSayisi) * this.skala,
             this.resim.height * this.skala);
+
+        if (this.canvasFilter) {
+            this.tuval.context!.filter = 'none';
+        }
+
         return this;
     }
 

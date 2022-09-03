@@ -16,10 +16,14 @@
 
         <div class="warrior-stats" v-for="warrior in warriors" :key="warrior.isim"
              :style="warriorStatStyle(warrior)">
+
             <div class="warrior-respawn-time">
+                {{ `K:${warrior.score.kill} Ö:${warrior.score.death}` }}
+            </div>
+            <div class="warrior-scores">
                 {{ warrior.can <= 0 ? warrior.respawnTimeLeft : '' }}
             </div>
-            <div class="warrior-hearts">
+            <div class="warrior-hearts mt-2">
                 <img src="sprites/minecraft-kalp-dolu.png" alt="heart" :class="{grayscale: warrior.can <= 0}">
                 <img src="sprites/minecraft-kalp-dolu.png" alt="heart" :class="{grayscale: warrior.can <= 25}">
                 <img src="sprites/minecraft-kalp-dolu.png" alt="heart" :class="{grayscale: warrior.can <= 50}">
@@ -201,7 +205,11 @@ export default Vue.extend({
 }
 
 .warrior-stats > * {
-    margin-bottom: -0.35rem;
+    margin-bottom: -0.25rem;
+
+}
+
+.warrior-hearts {
 
 }
 

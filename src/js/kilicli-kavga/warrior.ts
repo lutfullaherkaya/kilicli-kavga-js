@@ -135,6 +135,27 @@ export class Warrior extends Entity {
         });
 
 
+        let nameHash = 0;
+        for (let i = 0; i < this.isim.length; i++) {
+            nameHash = this.isim.charCodeAt(i) + ((nameHash << 5) - nameHash);
+        }
+        nameHash = nameHash % 360;
+        console.log(nameHash, this.isim);
+        const kopyalanmisSpriteler = {
+            sag: {},
+            sol: {}
+        } as SpriteBilgileri;
+
+        for (const sprite of Object.values(this.spriteler.sag)) {
+            kopyalanmisSpriteler.sag[sprite.isim] = Object.assign(Object.create(Object.getPrototypeOf(sprite)), sprite)
+            kopyalanmisSpriteler.sag[sprite.isim] .canvasFilter = `contrast(1.5) hue-rotate(${nameHash}deg) saturate(1.5)`;
+        }
+        for (const sprite of Object.values(this.spriteler.sol)) {
+            kopyalanmisSpriteler.sol[sprite.isim] = Object.assign(Object.create(Object.getPrototypeOf(sprite)), sprite)
+            kopyalanmisSpriteler.sol[sprite.isim] .canvasFilter = `contrast(1.5) hue-rotate(${nameHash}deg) saturate(1.5)`;
+        }
+        this.spriteler = kopyalanmisSpriteler;
+
 
     }
 
@@ -369,8 +390,8 @@ export class Warrior extends Entity {
     }
 
     guncelle() {
-        this.hitbox.ciz();
-        this.weaponBox.ciz();
+        /*this.hitbox.ciz();
+        this.weaponBox.ciz();*/
 
         if (this.kontroller.zipla) {
             this.zipla();
@@ -389,6 +410,7 @@ export class Warrior extends Entity {
         this.updateWeaponPos();
 
         this.munasipSpriteSec();
+
         this.spritePozisyonAyarlaHitKutusunaGore(this.sprite!);
         this.sprite!.guncelle();
 
@@ -406,13 +428,6 @@ export class Warrior extends Entity {
             }
         }
 
-        if (this.showScore) {
-            this.tuval.context!.textAlign = 'center';
-            this.tuval.context!.fillStyle = 'white';
-            this.tuval.context!.imageSmoothingEnabled = true;
-            this.tuval.context!.fillText(`L:${this.score.kill} Ö:${this.score.death}`, this.hitbox.pos.x + this.hitbox.w / 2, this.hitbox.pos.y - 36, this.hitbox.w);
-            this.tuval.context!.imageSmoothingEnabled = false;
-        }
         if (this.oludur()) {
             if (this.dateOfDeath == null) {
                 this.dateOfDeath = new Date();
