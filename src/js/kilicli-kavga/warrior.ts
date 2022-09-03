@@ -38,7 +38,7 @@ export interface WarriorInformation {
 }
 
 export class Warrior extends Entity {
-    private silahKutusu: Dikdortgen;
+    private weaponBox: Dikdortgen;
 
 
     private readonly ziplamaHizi = 6;
@@ -118,7 +118,7 @@ export class Warrior extends Entity {
         }
         this.isim = isim;
         this.sagaBakiyor = sagaBakiyor;
-        this.silahKutusu = new Dikdortgen(this.tuval, new TwoDVector(this.pos.x, this.pos.y), 193, 110, 'rgba(255,255,255,0.53)');
+        this.weaponBox = new Dikdortgen(this.tuval, new TwoDVector(this.pos.x, this.pos.y + 10), 155, 110, 'rgba(255,255,255,0.53)');
         this.spriteler = spriteler;
         this.sprite = this.sagaBakiyor ? this.spriteler.sag.rolanti : this.spriteler.sol.rolanti;
 
@@ -144,14 +144,11 @@ export class Warrior extends Entity {
         return Math.floor(difference / 1000);
     }
 
-    silahYeriniAyarla() {
-        this.silahKutusu.position.x = this.hitbox.position.x;
-        this.silahKutusu.position.y = this.hitbox.position.y - 10;
-
-        if (this.sagaBakiyor) {
-            this.silahKutusu.position.x += this.hitbox.genislik - this.silahKutusu.genislik * 0.44;
-        } else {
-            this.silahKutusu.position.x += -this.silahKutusu.genislik + this.silahKutusu.genislik * 0.56;
+    updateWeaponPos() {
+        this.weaponBox.pos.set(this.hitbox.pos);
+        this.weaponBox.pos.y -= this.weaponBox.h - this.hitbox.h;
+        if (!this.sagaBakiyor) {
+            this.weaponBox.pos.x -= this.weaponBox.w - this.hitbox.w;
         }
     }
 
@@ -200,10 +197,10 @@ export class Warrior extends Entity {
             }
             this.alternatifSaldiri = !this.alternatifSaldiri;
             this.tuval.warriors.forEach((savaskar) => {
-                if (savaskar !== this && Dikdortgen.carpisir(this.silahKutusu, savaskar.hitbox)) {
+                if (savaskar !== this && Dikdortgen.carpisir(this.weaponBox, savaskar.hitbox)) {
                     savaskar.can = Math.max(0, savaskar.can - this.saldiriHasari);
                     savaskar.kanAkiyor = true;
-                    savaskar.sonHasarAlinanYonSagdir = this.hitbox.merkezKordinat().x > savaskar.hitbox.position.x;
+                    savaskar.sonHasarAlinanYonSagdir = this.hitbox.merkezKordinat().x > savaskar.hitbox.pos.x;
                     if (savaskar.can <= 0 && !savaskar.hitKutusuOludur) {
                         this.score.kill++;
                     }
@@ -323,29 +320,29 @@ export class Warrior extends Entity {
     }
 
     spritePozisyonAyarlaHitKutusunaGore(sprite: Sprite) {
-        sprite.pozisyon.y = this.hitbox.position.y;
-        sprite.pozisyon.x = this.hitbox.position.x;
+        sprite.pozisyon.y = this.hitbox.pos.y;
+        sprite.pozisyon.x = this.hitbox.pos.x;
         return this;
     }
 
     oluHitKutusuYap() {
         if (!this.hitKutusuOludur) {
             this.hitKutusuOludur = true;
-            const uzunKenar = this.hitbox.yukseklik;
-            const kisaKenar = this.hitbox.genislik;
-            this.hitbox.genislik = uzunKenar;
-            this.hitbox.yukseklik = kisaKenar / 2;
-            this.hitbox.position.y += uzunKenar - kisaKenar + kisaKenar / 2;
+            const uzunKenar = this.hitbox.h;
+            const kisaKenar = this.hitbox.w;
+            this.hitbox.w = uzunKenar;
+            this.hitbox.h = kisaKenar / 2;
+            this.hitbox.pos.y += uzunKenar - kisaKenar + kisaKenar / 2;
             if (this.sonHasarAlinanYonSagdir) {
                 console.log('sura')
                 this.oluHitKutusuSagaBakar = false;
-                this.hitbox.position.x -= kisaKenar * 1.5;
-                this.spriteler.sag.oldu.pozisyonOffset = new TwoDVector(-47, -165 - this.hitbox.yukseklik);
+                this.hitbox.pos.x -= kisaKenar * 1.5;
+                this.spriteler.sag.oldu.pozisyonOffset = new TwoDVector(-47, -165 - this.hitbox.h);
             } else {
                 console.log('bura')
                 this.oluHitKutusuSagaBakar = true;
-                this.hitbox.position.x += kisaKenar;
-                this.spriteler.sol.oldu.pozisyonOffset = new TwoDVector(-180, -165 - this.hitbox.yukseklik);
+                this.hitbox.pos.x += kisaKenar;
+                this.spriteler.sol.oldu.pozisyonOffset = new TwoDVector(-180, -165 - this.hitbox.h);
             }
         }
     }
@@ -353,15 +350,15 @@ export class Warrior extends Entity {
     canliHitKutusuYap() {
         if (this.hitKutusuOludur) {
             this.hitKutusuOludur = false;
-            const uzunKenar = Math.max(this.hitbox.yukseklik, this.hitbox.genislik);
-            const kisaKenar = 2 * Math.min(this.hitbox.yukseklik, this.hitbox.genislik);
-            this.hitbox.genislik = kisaKenar;
-            this.hitbox.yukseklik = uzunKenar;
-            this.hitbox.position.y -= uzunKenar - kisaKenar + kisaKenar / 2;
+            const uzunKenar = Math.max(this.hitbox.h, this.hitbox.w);
+            const kisaKenar = 2 * Math.min(this.hitbox.h, this.hitbox.w);
+            this.hitbox.w = kisaKenar;
+            this.hitbox.h = uzunKenar;
+            this.hitbox.pos.y -= uzunKenar - kisaKenar + kisaKenar / 2;
             if (!this.oluHitKutusuSagaBakar) {
-                this.hitbox.position.x += kisaKenar * 1.5;
+                this.hitbox.pos.x += kisaKenar * 1.5;
             } else {
-                this.hitbox.position.x -= kisaKenar;
+                this.hitbox.pos.x -= kisaKenar;
             }
         }
     }
@@ -372,8 +369,8 @@ export class Warrior extends Entity {
     }
 
     guncelle() {
-        /*this.hitbox.ciz();
-        this.silahKutusu.ciz();*/
+        this.hitbox.ciz();
+        this.weaponBox.ciz();
 
         if (this.kontroller.zipla) {
             this.zipla();
@@ -389,7 +386,7 @@ export class Warrior extends Entity {
         }
 
         this.hareketEt();
-        this.silahYeriniAyarla();
+        this.updateWeaponPos();
 
         this.munasipSpriteSec();
         this.spritePozisyonAyarlaHitKutusunaGore(this.sprite!);
@@ -413,7 +410,7 @@ export class Warrior extends Entity {
             this.tuval.context!.textAlign = 'center';
             this.tuval.context!.fillStyle = 'white';
             this.tuval.context!.imageSmoothingEnabled = true;
-            this.tuval.context!.fillText(`L:${this.score.kill} Ö:${this.score.death}`, this.hitbox.position.x + this.hitbox.genislik / 2, this.hitbox.position.y - 36, this.hitbox.genislik);
+            this.tuval.context!.fillText(`L:${this.score.kill} Ö:${this.score.death}`, this.hitbox.pos.x + this.hitbox.w / 2, this.hitbox.pos.y - 36, this.hitbox.w);
             this.tuval.context!.imageSmoothingEnabled = false;
         }
         if (this.oludur()) {

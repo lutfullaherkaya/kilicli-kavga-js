@@ -51,8 +51,8 @@ export class Entity {
             if (this.pos.x < 0) {
                 this.pos.x = 0;
             }
-            if (this.pos.x + this.hitbox.genislik > this.tuval.canvas.width) {
-                this.pos.x = this.tuval.canvas.width - this.hitbox.genislik;
+            if (this.pos.x + this.hitbox.w > this.tuval.canvas.width) {
+                this.pos.x = this.tuval.canvas.width - this.hitbox.w;
             }
         }
 
