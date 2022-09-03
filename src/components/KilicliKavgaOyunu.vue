@@ -108,7 +108,7 @@ export default Vue.extend({
     },
     beforeMount() {
         this.dokunmalidir = this.dokunmaliMi();
-        this.mobilKontrolleriGoster = this.mobildir;
+        this.mobilKontrolleriGoster = this.mobilMi();
     },
     mounted() {
         axios.get('/oyuncular').then(response => {

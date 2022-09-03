@@ -7,11 +7,11 @@ import {Sprite} from "@/js/kilicli-kavga/sprite";
 export class Entity {
     id: number | string;
     tuval: Tuval;
-    pos: TwoDVector;
-    v: TwoDVector;
-    accel: TwoDVector;
+    readonly pos: TwoDVector;
+    readonly v: TwoDVector;
+    readonly accel: TwoDVector;
     hasGravity;
-    gravity = new TwoDVector(0, 0.098);
+    readonly gravity = new TwoDVector(0, 0.098);
     groundY: number;
     hitbox: Dikdortgen;
     sprite?: Sprite;

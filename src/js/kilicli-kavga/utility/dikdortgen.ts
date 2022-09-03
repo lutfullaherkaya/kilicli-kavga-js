@@ -6,7 +6,7 @@ export class Dikdortgen {
     /**
      * Position is pass by reference and can be changed by the caller thus it must not be reassigned.
      */
-    public position: TwoDVector;
+    public readonly position: TwoDVector;
     public genislik: number;
     public yukseklik: number;
     private renk: string;

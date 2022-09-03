@@ -13,7 +13,9 @@
                                                       @tam-ekrani-kapat="tamEkraniKapat"
                                                       :savascilar="savascilar"
                 />
-
+                <div style="width: 40px; height: 30px; position: absolute; left: 0; top: 0; background-color: red;"
+                     id="kutu">
+                </div>
             </v-responsive>
         </div>
         <kilicli-kavga-oyunu-arayuz-mobil v-if="mobilKontrolleriGoster" style="z-index: 1111;"
@@ -332,7 +334,7 @@ export default Vue.extend({
 
             const filterStrength = 5;
             let frameTime = 16.7, lastLoop = performance.now(), thisLoop;
-
+            let currentFrame = 0;
             const canlandir = () => {
                 window.requestAnimationFrame(canlandir);
                 this.tuval!.fps = 1000 / frameTime;
@@ -341,6 +343,14 @@ export default Vue.extend({
                 for (const savasci of this.savascilar) {
                     savasci.guncelle();
                 }
+                if (this.savascilar.length > 0) {
+                    const canvasClientWidth = document.querySelector('canvas').clientWidth;
+                    const scale = canvasClientWidth / this.tuval!.canvas.width;
+                    document.getElementById('kutu').style.top = this.savascilar[0].hitbox.position.y * scale + 'px';
+                    document.getElementById('kutu').style.left = this.savascilar[0].hitbox.position.x * scale + 'px';
+
+                }
+
                 SavasciCarpisma.engelle();
 
                 const thisFrameTime = (thisLoop = performance.now()) - lastLoop;
