@@ -1,6 +1,7 @@
 import {Tuval} from "@/js/kilicli-kavga/tuval";
 import {Dikdortgen} from "@/js/kilicli-kavga/utility/dikdortgen";
 import {Sprite} from "@/js/kilicli-kavga/sprite";
+import {SpriteWithSound} from "@/js/kilicli-kavga/spriteWithSound";
 import {SavasciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/savasciKontrolYoneticisi";
 import {TwoDVector} from "@/js/kilicli-kavga/utility/twoDVector";
 import {Entity} from "@/js/kilicli-kavga/entity";
@@ -123,7 +124,7 @@ export class Warrior extends Entity {
         this.sprite = this.sagaBakiyor ? this.spriteler.sag.rolanti : this.spriteler.sol.rolanti;
 
         this.sonluEylemler = ['zipla', 'taklaAt', 'saldiri1', 'saldiri2'];
-        this.kanSpritesi = new Sprite(this.tuval, {
+        this.kanSpritesi = new SpriteWithSound(this.tuval, {
             resimKaynagi: './sprites/Blood FX Lite/JASONTOMLEE_BLOOD_GUSH_3.png',
             pozisyon: new TwoDVector(32, tuval.canvas.height - 111),
             resimSayisi: 14,
@@ -231,34 +232,7 @@ export class Warrior extends Entity {
 
     }
 
-    hareketEt() {
-        if (this.kontroller.sagKosu && this.kontroller.sonKosulanYonSagdir) {
-            this.sagaBakiyor = true;
-        }
-        if (this.kontroller.solKosu && !this.kontroller.sonKosulanYonSagdir) {
-            this.sagaBakiyor = false;
-        }
 
-
-        if (this.taklaAtiyor) {
-            if (this.taklayiSagaAtiyor) {
-                this.v.x = this.yurumeHizi;
-            } else {
-                this.v.x = -this.yurumeHizi;
-            }
-        } else {
-            if (this.sagaBakiyor && this.kontroller.sagKosu) {
-                this.v.x = this.yurumeHizi;
-            } else if (!this.sagaBakiyor && this.kontroller.solKosu) {
-                this.v.x = -this.yurumeHizi;
-            } else {
-                this.v.x = 0;
-            }
-        }
-        this.move();
-
-        return this;
-    }
 
     munasipSpriteSec() {
         const yonluSpriteler = this.sagaBakiyor ? this.spriteler.sag : this.spriteler.sol;
@@ -308,7 +282,6 @@ export class Warrior extends Entity {
 
                     }
                 } else {
-                    this.kontroller.zipla = false;
                     if (this.sagaBakiyor && this.kontroller.sagKosu || !this.sagaBakiyor && this.kontroller.solKosu) {
                         if ((this.sprite!.isim == 'kosu' && (this.sprite!.yonuSagdir != this.sagaBakiyor)) ||
                             this.sprite!.isim == 'donme') {
@@ -367,6 +340,10 @@ export class Warrior extends Entity {
             }
         }
     }
+    updatePositionFromServer(serverPosition: TwoDVector) {
+        this.pos.set(serverPosition);
+        return this;
+    }
 
     canliHitKutusuYap() {
         if (this.hitKutusuOludur) {
@@ -384,17 +361,16 @@ export class Warrior extends Entity {
         }
     }
 
-    updatePositionFromServer(serverPosition: TwoDVector) {
-        this.pos.set(serverPosition);
-        return this;
-    }
 
-    guncelle() {
+
+
+    beforeUpdate(): this {
         /*this.hitbox.ciz();
         this.weaponBox.ciz();*/
 
         if (this.kontroller.zipla) {
             this.zipla();
+            this.kontroller.zipla = false;
         }
 
         if (!this.oludur()) {
@@ -406,13 +382,12 @@ export class Warrior extends Entity {
             }
         }
 
-        this.hareketEt();
-        this.updateWeaponPos();
 
+        this.updateWeaponPos();
         this.munasipSpriteSec();
 
         this.spritePozisyonAyarlaHitKutusunaGore(this.sprite!);
-        this.sprite!.guncelle();
+
 
         if (this.oludur() && this.sprite!.isim == 'oldu' && this.sprite!.birKereTamAnimasyonOldu && !this.hitKutusuOludur) {
             this.oluHitKutusuYap();
@@ -420,7 +395,7 @@ export class Warrior extends Entity {
 
         if (this.kanAkiyor) {
             this.spritePozisyonAyarlaHitKutusunaGore(this.kanSpritesi);
-            this.kanSpritesi.guncelle();
+            this.kanSpritesi.update();
 
             if (this.kanSpritesi.birKereTamAnimasyonOldu) {
                 this.kanAkiyor = false;
@@ -453,6 +428,32 @@ export class Warrior extends Entity {
 
 
 
+        return this;
+    }
+
+    beforeMove() {
+        if (this.kontroller.sagKosu && this.kontroller.sonKosulanYonSagdir) {
+            this.sagaBakiyor = true;
+        }
+        if (this.kontroller.solKosu && !this.kontroller.sonKosulanYonSagdir) {
+            this.sagaBakiyor = false;
+        }
+
+        if (this.taklaAtiyor) {
+            if (this.taklayiSagaAtiyor) {
+                this.v.x = this.yurumeHizi;
+            } else {
+                this.v.x = -this.yurumeHizi;
+            }
+        } else {
+            if (this.sagaBakiyor && this.kontroller.sagKosu) {
+                this.v.x = this.yurumeHizi;
+            } else if (!this.sagaBakiyor && this.kontroller.solKosu) {
+                this.v.x = -this.yurumeHizi;
+            } else {
+                this.v.x = 0;
+            }
+        }
         return this;
     }
 

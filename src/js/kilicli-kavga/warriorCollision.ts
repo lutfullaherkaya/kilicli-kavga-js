@@ -1,12 +1,12 @@
 import {Dikdortgen} from "@/js/kilicli-kavga/utility/dikdortgen";
 import {Warrior} from "@/js/kilicli-kavga/warrior";
 
-export class SavasciCarpisma {
+export class WarriorCollision {
     static engelle(warriors: Warrior[]) {
         warriors.forEach((savaskar1) => {
             warriors.forEach((savaskar2) => {
                 if (savaskar1 !== savaskar2) {
-                    SavasciCarpisma.carpismayacakKadarOtele(savaskar1, savaskar2);
+                    WarriorCollision.carpismayacakKadarOtele(savaskar1, savaskar2);
                 }
             });
         });
@@ -20,11 +20,11 @@ export class SavasciCarpisma {
         if (Dikdortgen.carpisir(savasci1.hitbox, savasci2.hitbox)) {
             if (Math.abs(savasci1.hitbox.merkezKordinat().y - savasci2.hitbox.merkezKordinat().y) <
                 Math.abs(savasci1.hitbox.merkezKordinat().x - savasci2.hitbox.merkezKordinat().x)) {
-                SavasciCarpisma.yataydaKenarinaOtele(savasci1, savasci2);
+                WarriorCollision.yataydaKenarinaOtele(savasci1, savasci2);
                 savasci1.accel.x = 0;
                 savasci1.v.x = 0;
             } else {
-                SavasciCarpisma.duseydeKenarinaOtele(savasci1, savasci2);
+                WarriorCollision.duseydeKenarinaOtele(savasci1, savasci2);
                 savasci1.v.y = 0;
                 savasci1.accel.y = 0;
             }

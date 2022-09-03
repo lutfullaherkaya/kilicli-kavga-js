@@ -216,10 +216,15 @@ export default Vue.extend({
 .warrior-hearts img {
     width: 0.9rem;
     height: 0.9rem;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
 }
 
 .grayscale {
     filter: grayscale(100%);
 }
+
+
 
 </style>

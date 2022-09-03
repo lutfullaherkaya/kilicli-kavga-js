@@ -94,7 +94,7 @@ export class Sprite {
         this.gercekKacSahnedeResimDegistir = this.tuval.gercekSahneSayisi(this.kacSahnedeResimDegisir);
     }
 
-    guncelle() {
+    update() {
         if (this.suankiResim === this.resimSayisi) {
             this.birKereTamAnimasyonOldu = true;
             if (!this.sonsuzAnimasyon && this.birKereTamAnimasyonOldu && this.sonundaSonSahneyiTut) {
@@ -114,3 +114,4 @@ export class Sprite {
     }
 
 }
+

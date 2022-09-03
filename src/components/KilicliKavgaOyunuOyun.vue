@@ -31,7 +31,7 @@ import KilicliKavgaOyunuArayuzMobil from '@/components/KilicliKavgaOyunuArayuzMo
 import Vue from "vue";
 import {Tuval} from "@/js/kilicli-kavga/tuval";
 import {Sprite} from "@/js/kilicli-kavga/sprite";
-import {SavasciCarpisma} from "@/js/kilicli-kavga/savasciCarpisma";
+import {WarriorCollision} from "@/js/kilicli-kavga/warriorCollision";
 import {SavasciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/savasciKontrolYoneticisi";
 import {KlavyeSavasciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/klavyeSavasciKontrolYoneticisi";
 import {MobilSavasciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/mobilSavasciKontrolYoneticisi";
@@ -173,7 +173,7 @@ export default Vue.extend({
                     kosu: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Run.png',
                         resimSayisi: 10,
-                        pozisyonOffset: new TwoDVector(-140, -115),
+                        pozisyonOffset: new TwoDVector(-150, -115),
                         skala: 2.7,
                         isim: 'kosu',
                         yonuSagdir: false,
@@ -181,7 +181,7 @@ export default Vue.extend({
                     donme: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_TurnAround.png',
                         resimSayisi: 3,
-                        pozisyonOffset: new TwoDVector(-140, -115),
+                        pozisyonOffset: new TwoDVector(-150, -115),
                         skala: 2.7,
                         isim: 'donme',
                         yonuSagdir: false,
@@ -197,7 +197,7 @@ export default Vue.extend({
                     zipla: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Jump.png',
                         resimSayisi: 3,
-                        pozisyonOffset: new TwoDVector(-130, -115),
+                        pozisyonOffset: new TwoDVector(-150, -115),
                         skala: 2.7,
                         isim: 'zipla',
                         yonuSagdir: false,
@@ -205,7 +205,7 @@ export default Vue.extend({
                     dusus: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Fall.png',
                         resimSayisi: 3,
-                        pozisyonOffset: new TwoDVector(-130, -115),
+                        pozisyonOffset: new TwoDVector(-150, -115),
                         skala: 2.7,
                         isim: 'dusus',
                         yonuSagdir: false,
@@ -213,7 +213,7 @@ export default Vue.extend({
                     saldiri1: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_AttackNoMovement.png',
                         resimSayisi: 4,
-                        pozisyonOffset: new TwoDVector(-130, -115),
+                        pozisyonOffset: new TwoDVector(-150, -115),
                         skala: 2.7,
                         isim: 'saldiri1',
                         kacSahnedeResimDegisir: 7,
@@ -222,7 +222,7 @@ export default Vue.extend({
                     saldiri2: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Attack2NoMovement.png',
                         resimSayisi: 6,
-                        pozisyonOffset: new TwoDVector(-130, -115),
+                        pozisyonOffset: new TwoDVector(-150, -115),
                         skala: 2.7,
                         isim: 'saldiri2',
                         kacSahnedeResimDegisir: 7,
@@ -231,7 +231,7 @@ export default Vue.extend({
                     oldu: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Death.png',
                         resimSayisi: 10,
-                        pozisyonOffset: new TwoDVector(-130, -115),
+                        pozisyonOffset: new TwoDVector(-150, -115),
                         skala: 2.7,
                         isim: 'oldu',
                         yonuSagdir: false,
@@ -337,12 +337,12 @@ export default Vue.extend({
                 window.requestAnimationFrame(canlandir);
                 this.tuval!.fps = 1000 / frameTime;
                 this.tuval!.temizle();
-                arkaplan.guncelle();
-                for (const savasci of this.tuval!.warriors) {
-                    savasci.guncelle();
+                arkaplan.update();
+                for (const warrior of this.tuval!.warriors) {
+                    warrior.update();
                 }
 
-                SavasciCarpisma.engelle(this.tuval!.warriors);
+                WarriorCollision.engelle(this.tuval!.warriors);
 
                 const thisFrameTime = (thisLoop = performance.now()) - lastLoop;
                 frameTime += (thisFrameTime - frameTime) / filterStrength;

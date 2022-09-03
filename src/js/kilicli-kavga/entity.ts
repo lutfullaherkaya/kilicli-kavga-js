@@ -4,7 +4,7 @@ import {Tuval} from "@/js/kilicli-kavga/tuval";
 import {Sprite} from "@/js/kilicli-kavga/sprite";
 
 
-export class Entity {
+export abstract class Entity {
     id: number | string;
     tuval: Tuval;
     readonly pos: TwoDVector;
@@ -38,7 +38,10 @@ export class Entity {
         this.sprite = sprite;
     }
 
-    move() {
+    abstract beforeMove(): this;
+
+    move(): this {
+        this.beforeMove();
         // coordinates being whole numbers is important for performance (no need to draw sub-pixel objects with anti aliasing)
         this.pos.setAsInt(this.pos.add(this.v.divide(this.tuval.avgTimeUnit()))); // x = x0 + vt
 
@@ -60,5 +63,21 @@ export class Entity {
         if (this.hasGravity) {
             this.v.set(this.v.add(this.gravity.divide(this.tuval.avgTimeUnit()))); // v = v0 + gt
         }
+        return this;
     }
+
+    abstract beforeUpdate(): this;
+
+    update(): this {
+        this.beforeUpdate();
+
+        this.move();
+        if (this.sprite) {
+            this.sprite.update();
+        }
+
+        return this;
+    }
+
+
 }
