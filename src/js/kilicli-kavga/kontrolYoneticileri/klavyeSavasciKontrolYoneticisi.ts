@@ -59,6 +59,7 @@ export class KlavyeSavasciKontrolYoneticisi extends YayinciSavasciKontrolYonetic
     yonetirken(kontroller?: WarriorControls): void {
         // böyle yapmanın sebebi hem thisi addeventlistenerde görmek hem de removeeventlistener yapabilmektir.
         this.keydownHalledici = (event: KeyboardEvent) => {
+            event.preventDefault();
             if (this.savasci!.kontroller && !event.repeat) {
                 const baziKontroller: Partial<WarriorControls> = {};
                 if (event.key in this.secilenTuslarTersi) {
@@ -79,6 +80,7 @@ export class KlavyeSavasciKontrolYoneticisi extends YayinciSavasciKontrolYonetic
         }
 
         this.keyupHalledici = (event: KeyboardEvent) => {
+            event.preventDefault();
             if (this.savasci!.kontroller && !event.repeat) {
                 const baziKontroller: Partial<WarriorControls> = {};
                 if (event.key in this.secilenTuslarTersi) {
@@ -94,7 +96,6 @@ export class KlavyeSavasciKontrolYoneticisi extends YayinciSavasciKontrolYonetic
                     });
                 }
                 this.kontrolGuncelle(baziKontroller);
-
             }
         }
 
