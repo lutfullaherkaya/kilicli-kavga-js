@@ -22,7 +22,7 @@ export class Sprite {
     private suankiSahne: number;
     private gercekKacSahnedeResimDegistir: number;
     birKereTamAnimasyonOldu: boolean;
-    public canvasFilter: string | null = null;
+    public canvasFilter: string | null = null; // this slows down firefox mobile
     isPlaying = false;
 
     constructor(
@@ -69,6 +69,8 @@ export class Sprite {
         if (this.canvasFilter) {
             this.tuval.context!.filter = this.canvasFilter;
         }
+
+
 
         this.tuval.context!.drawImage(
             this.resim,

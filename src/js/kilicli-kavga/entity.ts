@@ -4,7 +4,7 @@ import {Tuval} from "@/js/kilicli-kavga/tuval";
 import {Sprite} from "@/js/kilicli-kavga/sprite";
 
 
-export abstract class Entity {
+export class Entity {
     id: number | string;
     tuval: Tuval;
     readonly pos: TwoDVector;
@@ -38,7 +38,10 @@ export abstract class Entity {
         this.sprite = sprite;
     }
 
-    abstract beforeMove(): this;
+    beforeMove(): this {
+        // override this method to add custom logic
+        return this;
+    }
 
     move(): this {
         this.beforeMove();
@@ -66,7 +69,10 @@ export abstract class Entity {
         return this;
     }
 
-    abstract beforeUpdate(): this;
+    beforeUpdate(): this {
+        // override this method to add custom logic
+        return this;
+    }
 
     update(): this {
         this.beforeUpdate();

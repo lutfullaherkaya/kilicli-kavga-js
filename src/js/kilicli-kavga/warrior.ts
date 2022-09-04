@@ -53,6 +53,7 @@ export class Warrior extends Entity {
     } as Partial<WarriorControls>;
 
     public isim: string;
+    public nameHash: number;
     private sagaBakiyor: boolean;
     private taklaAtiyor = false;
     private taklayiSagaAtiyor = false;
@@ -61,7 +62,7 @@ export class Warrior extends Entity {
 
     public can = 100;
 
-    private saldiriHasari = 33;
+    private saldiriHasari = 12.5;
     private spriteler: SpriteBilgileri;
 
     private suanYapilanEylem: null | { spriteAdi: string } = null;
@@ -138,7 +139,8 @@ export class Warrior extends Entity {
         for (let i = 0; i < this.isim.length; i++) {
             nameHash = this.isim.charCodeAt(i) + ((nameHash << 5) - nameHash);
         }
-        nameHash = nameHash % 360;
+        this.nameHash = nameHash % 360;
+
         const kopyalanmisSpriteler = {
             sag: {},
             sol: {}
@@ -146,12 +148,20 @@ export class Warrior extends Entity {
 
         for (const sprite of Object.values(this.spriteler.sag)) {
             kopyalanmisSpriteler.sag[sprite.isim] = Object.assign(Object.create(Object.getPrototypeOf(sprite)), sprite)
-            kopyalanmisSpriteler.sag[sprite.isim].canvasFilter = `contrast(1.5) hue-rotate(${nameHash}deg) saturate(1.5)`;
+            // check if firefox android
+            if (!(navigator.userAgent.indexOf('Android') > -1 && navigator.userAgent.indexOf('Firefox') > -1)) {
+                kopyalanmisSpriteler.sag[sprite.isim].canvasFilter = `contrast(1.1) hue-rotate(${nameHash}deg) saturate(1.5)`;
+            }
+
+
             kopyalanmisSpriteler.sag[sprite.isim].pozisyon = this.hitbox.pos;
         }
         for (const sprite of Object.values(this.spriteler.sol)) {
             kopyalanmisSpriteler.sol[sprite.isim] = Object.assign(Object.create(Object.getPrototypeOf(sprite)), sprite)
-            kopyalanmisSpriteler.sol[sprite.isim].canvasFilter = `contrast(1.5) hue-rotate(${nameHash}deg) saturate(1.5)`;
+            if (!(navigator.userAgent.indexOf('Android') > -1 && navigator.userAgent.indexOf('Firefox') > -1)) {
+                kopyalanmisSpriteler.sol[sprite.isim].canvasFilter = `contrast(1.1) hue-rotate(${nameHash}deg) saturate(1.5)`;
+            }
+
             kopyalanmisSpriteler.sol[sprite.isim].pozisyon = this.hitbox.pos;
         }
         this.spriteler = kopyalanmisSpriteler;

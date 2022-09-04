@@ -162,7 +162,6 @@ export default Vue.extend({
             const arkaplan = new Sprite(this.tuval, {
                 resimKaynagi: './sprites/NightForest/Image without mist.png',
                 skala: 1.72 * tuvalYuksekligi / 600,
-                canvasFilter: 'contrast(2) sepia(1)'
             });
 
 
