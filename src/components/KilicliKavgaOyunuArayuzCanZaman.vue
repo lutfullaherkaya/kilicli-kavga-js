@@ -62,17 +62,12 @@ export default Vue.extend({
             default() {
                 return [];
             }
-        }
-    },
-    data() {
-        return {
-            canvasClientWidth: 1000
-        }
-    },
-    methods: {
-        refreshCanvasClientWidth() {
-            this.canvasClientWidth = (this.$refs['can-zaman-arayuzu'] as HTMLDivElement).clientWidth;
         },
+        canvasClientWidth: Number,
+    },
+
+    methods: {
+
         warriorStatStyle(warrior: Warrior) {
             const style = {
                 position: 'absolute',
@@ -86,15 +81,7 @@ export default Vue.extend({
 
         }
     },
-    mounted() {
-        this.refreshCanvasClientWidth();
-        new ResizeObserver(() => this.refreshCanvasClientWidth)
-                .observe(this.$refs['can-zaman-arayuzu'] as HTMLDivElement);
-        window.addEventListener('resize', this.refreshCanvasClientWidth); // in case ResizeObserver is not supported
-    },
-    destroyed() {
-        window.removeEventListener('resize', this.refreshCanvasClientWidth);
-    }
+
 })
 </script>
 <style scoped>

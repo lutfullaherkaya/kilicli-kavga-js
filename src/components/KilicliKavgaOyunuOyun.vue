@@ -5,17 +5,18 @@
         <div class="genislik-sinirlayici" :style="{width: genislikSinirlayiciGenisligi}">
             <!-- bunun amaci tam ekran oldugunda kenarlara siyah cubuk koyabilmek -->
             <v-responsive :aspect-ratio="16/9">
-                <canvas style="width: 100%; height: 100%;"></canvas>
+                <canvas ref="game-canvas" style="width: 100%; height: 100%;"></canvas>
 
                 <kilicli-kavga-oyunu-arayuz-can-zaman :tam-ekrandir="tamEkrandir"
                                                       :mobil-kontrolleri-goster="mobilKontrolleriGoster"
                                                       @tam-ekrani-ac="tamEkraniAc"
                                                       @tam-ekrani-kapat="tamEkraniKapat"
                                                       :warriors="this.tuval?.warriors"
+                                                      :canvas-client-width="canvasClientWidth"
                 />
-<!--                <div style="width: 40px; height: 30px; position: absolute; left: 0; top: 0; background-color: red;"
-                     id="kutu">
-                </div>-->
+                <!--                <div style="width: 40px; height: 30px; position: absolute; left: 0; top: 0; background-color: red;"
+                                     id="kutu">
+                                </div>-->
             </v-responsive>
         </div>
         <kilicli-kavga-oyunu-arayuz-mobil v-if="mobilKontrolleriGoster" style="z-index: 1111;"
@@ -64,6 +65,7 @@ export default Vue.extend({
             tuval: null as null | Tuval,
             mobilKontrolYoneticisi: new MobilSavasciKontrolYoneticisi(this.socket),
             buSavasci: null as null | Warrior,
+            canvasClientWidth: 1000,
         }
     },
     watch: {},
@@ -77,6 +79,9 @@ export default Vue.extend({
         }
     },
     methods: {
+        refreshCanvasClientWidth() {
+            this.canvasClientWidth = (this.$refs['game-canvas'] as HTMLDivElement).clientWidth;
+        },
         ekranBoyutuGuncelle(): void {
             this.ekranGenisligi = window.outerWidth;
             this.ekranYuksekligi = window.outerHeight;
@@ -365,6 +370,10 @@ export default Vue.extend({
         window.addEventListener('mozfullscreenchange', this.tamEkranGuncelle);
         window.addEventListener('webkitfullscreenchange', this.tamEkranGuncelle);
         window.addEventListener('msfullscreenchange', this.tamEkranGuncelle);
+        window.addEventListener('resize', this.refreshCanvasClientWidth); // in case ResizeObserver is not supported
+        this.refreshCanvasClientWidth();
+        new ResizeObserver(() => this.refreshCanvasClientWidth)
+                .observe(this.$refs['game-canvas'] as HTMLDivElement);
 
         this.main();
         this.$watch('oyuncular', () => {
@@ -402,6 +411,7 @@ export default Vue.extend({
         window.removeEventListener('mozfullscreenchange', this.tamEkranGuncelle);
         window.removeEventListener('webkitfullscreenchange', this.tamEkranGuncelle);
         window.removeEventListener('msfullscreenchange', this.tamEkranGuncelle);
+        window.removeEventListener('resize', this.refreshCanvasClientWidth);
 
     }
 })
