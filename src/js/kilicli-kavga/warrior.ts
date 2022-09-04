@@ -235,6 +235,7 @@ export class Warrior extends Entity {
                     if (savaskar.can <= 0 && !savaskar.hitKutusuOludur) {
                         this.score.kill++;
                     }
+                    this.mp3Cal('sounds/minecraft-death')
                 }
             })
         }

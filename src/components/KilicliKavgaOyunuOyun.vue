@@ -252,7 +252,7 @@ export default Vue.extend({
                         yonuSagdir: false,
                         sonsuzAnimasyon: false,
                         sonundaSonSahneyiTut: true,
-                        soundSrc: 'sounds/minecraft-death.mp3'
+                        soundSrc: 'sounds/gta-wasted.mp3'
                     }),
 
                 },
@@ -343,7 +343,7 @@ export default Vue.extend({
                         yonuSagdir: true,
                         sonsuzAnimasyon: false,
                         sonundaSonSahneyiTut: true,
-                        soundSrc: 'sounds/minecraft-death.mp3'
+                        soundSrc: 'sounds/gta-wasted.mp3'
                     }),
                 },
             };
