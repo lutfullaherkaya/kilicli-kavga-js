@@ -90,6 +90,7 @@ export default Vue.extend({
     --can-cubugu-yuksekligi: min(2.8vw, 2rem);
     --font-boyutu: var(--can-cubugu-yuksekligi);
     --can-cubugu-kenar-kalinligi: 3px;
+    user-select: none;
 }
 
 .can-zaman-arayuzu {

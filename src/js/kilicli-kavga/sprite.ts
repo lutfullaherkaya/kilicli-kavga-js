@@ -11,7 +11,7 @@ export class Sprite {
     pozisyon: TwoDVector;
     public pozisyonOffset: TwoDVector;
     private resimSayisi: number;
-    private sonsuzAnimasyon: boolean;
+    imageLoops: boolean;
     public isim: string;
     private suankiResim: number;
     private skala: number;
@@ -23,6 +23,7 @@ export class Sprite {
     private gercekKacSahnedeResimDegistir: number;
     birKereTamAnimasyonOldu: boolean;
     public canvasFilter: string | null = null;
+    isPlaying = false;
 
     constructor(
         tuval: Tuval, {
@@ -31,7 +32,7 @@ export class Sprite {
             resimKaynagi = '',
             skala = 1,
             resimSayisi = 1,
-            sonsuzAnimasyon = true,
+            sonsuzAnimasyon: imageLoops = true,
             sonundaSonSahneyiTut = false,
             isim = 'sprite',
             kacSahnedeResimDegisir = 10,
@@ -42,7 +43,7 @@ export class Sprite {
         this.pozisyon = pozisyon;
         this.pozisyonOffset = pozisyonOffset;
         this.resimSayisi = resimSayisi;
-        this.sonsuzAnimasyon = sonsuzAnimasyon;
+        this.imageLoops = imageLoops;
         this.isim = isim;
         this.suankiResim = 0;
         this.skala = skala;
@@ -64,7 +65,7 @@ export class Sprite {
 
     }
 
-    ciz() {
+    ciz(): this {
         if (this.canvasFilter) {
             this.tuval.context!.filter = this.canvasFilter;
         }
@@ -87,29 +88,47 @@ export class Sprite {
         return this;
     }
 
-    animasyonBasaSar() {
+    rewindToBeginning(): this {
         this.suankiResim = 0;
         this.suankiSahne = 0;
         this.birKereTamAnimasyonOldu = false;
         this.gercekKacSahnedeResimDegistir = this.tuval.gercekSahneSayisi(this.kacSahnedeResimDegisir);
+        return this;
     }
 
-    update() {
-        if (this.suankiResim === this.resimSayisi) {
-            this.birKereTamAnimasyonOldu = true;
-            if (!this.sonsuzAnimasyon && this.birKereTamAnimasyonOldu && this.sonundaSonSahneyiTut) {
-                this.suankiResim = this.resimSayisi - 1;
-            }
+    start(): this {
+        if (!this.isPlaying) {
+            this.isPlaying = true;
         }
-        if (this.sonsuzAnimasyon || !this.birKereTamAnimasyonOldu || this.sonundaSonSahneyiTut) {
-            this.ciz();
-        }
-        if (this.suankiSahne === 0) {
-            this.suankiResim++;
-            this.gercekKacSahnedeResimDegistir = this.tuval.gercekSahneSayisi(this.kacSahnedeResimDegisir);
-        }
-        this.suankiSahne = (this.suankiSahne + 1) % this.gercekKacSahnedeResimDegistir;
+        return this;
+    }
 
+    pause(): this {
+        if (this.isPlaying) {
+            this.isPlaying = false;
+        }
+
+        return this;
+    }
+
+
+    update(): this {
+        if (this.isPlaying) {
+            if (this.suankiResim === this.resimSayisi) {
+                this.birKereTamAnimasyonOldu = true;
+                if (!this.imageLoops && this.birKereTamAnimasyonOldu && this.sonundaSonSahneyiTut) {
+                    this.suankiResim = this.resimSayisi - 1;
+                }
+            }
+            if (this.imageLoops || !this.birKereTamAnimasyonOldu || this.sonundaSonSahneyiTut) {
+                this.ciz();
+            }
+            if (this.suankiSahne === 0) {
+                this.suankiResim++;
+                this.gercekKacSahnedeResimDegistir = this.tuval.gercekSahneSayisi(this.kacSahnedeResimDegisir);
+            }
+            this.suankiSahne = (this.suankiSahne + 1) % this.gercekKacSahnedeResimDegistir;
+        }
         return this;
     }
 

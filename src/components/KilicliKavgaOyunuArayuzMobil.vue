@@ -150,6 +150,9 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+* {
+    user-select: none;
+}
 .arayuz-mobil-komponenti {
     position: absolute;
     top: 0;

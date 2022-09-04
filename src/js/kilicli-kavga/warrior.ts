@@ -61,10 +61,9 @@ export class Warrior extends Entity {
 
     public can = 100;
 
-    private saldiriHasari = 10;
+    private saldiriHasari = 33;
     private spriteler: SpriteBilgileri;
 
-    private sonluEylemler: string[];
     private suanYapilanEylem: null | { spriteAdi: string } = null;
     private kanSpritesi: Sprite;
     private kanAkiyor = false;
@@ -123,10 +122,9 @@ export class Warrior extends Entity {
         this.spriteler = spriteler;
         this.sprite = this.sagaBakiyor ? this.spriteler.sag.rolanti : this.spriteler.sol.rolanti;
 
-        this.sonluEylemler = ['zipla', 'taklaAt', 'saldiri1', 'saldiri2'];
         this.kanSpritesi = new SpriteWithSound(this.tuval, {
             resimKaynagi: './sprites/Blood FX Lite/JASONTOMLEE_BLOOD_GUSH_3.png',
-            pozisyon: new TwoDVector(32, tuval.canvas.height - 111),
+            pozisyon: this.hitbox.pos,
             resimSayisi: 14,
             pozisyonOffset: new TwoDVector(-30, -115),
             skala: 1.5,
@@ -141,7 +139,6 @@ export class Warrior extends Entity {
             nameHash = this.isim.charCodeAt(i) + ((nameHash << 5) - nameHash);
         }
         nameHash = nameHash % 360;
-        console.log(nameHash, this.isim);
         const kopyalanmisSpriteler = {
             sag: {},
             sol: {}
@@ -149,11 +146,13 @@ export class Warrior extends Entity {
 
         for (const sprite of Object.values(this.spriteler.sag)) {
             kopyalanmisSpriteler.sag[sprite.isim] = Object.assign(Object.create(Object.getPrototypeOf(sprite)), sprite)
-            kopyalanmisSpriteler.sag[sprite.isim] .canvasFilter = `contrast(1.5) hue-rotate(${nameHash}deg) saturate(1.5)`;
+            kopyalanmisSpriteler.sag[sprite.isim].canvasFilter = `contrast(1.5) hue-rotate(${nameHash}deg) saturate(1.5)`;
+            kopyalanmisSpriteler.sag[sprite.isim].pozisyon = this.hitbox.pos;
         }
         for (const sprite of Object.values(this.spriteler.sol)) {
             kopyalanmisSpriteler.sol[sprite.isim] = Object.assign(Object.create(Object.getPrototypeOf(sprite)), sprite)
-            kopyalanmisSpriteler.sol[sprite.isim] .canvasFilter = `contrast(1.5) hue-rotate(${nameHash}deg) saturate(1.5)`;
+            kopyalanmisSpriteler.sol[sprite.isim].canvasFilter = `contrast(1.5) hue-rotate(${nameHash}deg) saturate(1.5)`;
+            kopyalanmisSpriteler.sol[sprite.isim].pozisyon = this.hitbox.pos;
         }
         this.spriteler = kopyalanmisSpriteler;
 
@@ -233,52 +232,29 @@ export class Warrior extends Entity {
     }
 
 
-
-    munasipSpriteSec() {
+    munasipSpriteBul()  {
         const yonluSpriteler = this.sagaBakiyor ? this.spriteler.sag : this.spriteler.sol;
 
         if (this.oludur()) {
             if (this.sprite!.isim != 'oldu') {
                 if (this.sonHasarAlinanYonSagdir) {
-                    this.sprite = this.spriteler.sag.oldu;
+                    return this.spriteler.sag.oldu;
                 } else {
-                    this.sprite = this.spriteler.sol.oldu;
+                    return this.spriteler.sol.oldu;
                 }
             }
         } else {
-            /**
-             * sprite animasyonu bitimi burasıdır.
-             */
-            if (this.sprite && this.sprite.birKereTamAnimasyonOldu && this.sonluEylemler.includes(this.sprite.isim)) {
-                switch (this.sprite.isim) {
-                    case 'saldiri1':
-                    case 'saldiri2':
-                        this.kontroller.saldiri = false;
-                        break;
-                    case 'taklaAt':
-                        this.hitbox.carpisabilir = true;
-                        this.taklaAtiyor = false;
-                        this.kontroller.taklaAt = false;
-                        break;
-                }
-
-
-                this.suanYapilanEylem = null;
-                this.sprite.birKereTamAnimasyonOldu = false;
-            }
-
             if (this.suanYapilanEylem) {
                 if (this.sprite!.isim !== this.suanYapilanEylem.spriteAdi) {
-                    this.sprite = yonluSpriteler[this.suanYapilanEylem.spriteAdi];
-                    this.sprite.animasyonBasaSar();
+                    return yonluSpriteler[this.suanYapilanEylem.spriteAdi];
                 }
 
             } else { // pasif spriteler. eylem yapılınca bunlar gözükmez.
                 if (!this.hitbox.yerdedir()) {
                     if (this.v.y <= 0) {
-                        this.sprite = yonluSpriteler.zipla;
+                        return yonluSpriteler.zipla;
                     } else {
-                        this.sprite = yonluSpriteler.dusus;
+                        return yonluSpriteler.dusus;
 
                     }
                 } else {
@@ -286,37 +262,29 @@ export class Warrior extends Entity {
                         if ((this.sprite!.isim == 'kosu' && (this.sprite!.yonuSagdir != this.sagaBakiyor)) ||
                             this.sprite!.isim == 'donme') {
                             if (this.sprite!.isim == 'donme' && this.sprite!.birKereTamAnimasyonOldu) {
-                                this.spriteler.sol.donme.animasyonBasaSar();
-                                this.spriteler.sag.donme.animasyonBasaSar();
-                                this.sprite = yonluSpriteler.kosu;
+                                this.spriteler.sol.donme.rewindToBeginning().pause();
+                                this.spriteler.sag.donme.rewindToBeginning().pause();
+                                return yonluSpriteler.kosu;
                             } else {
                                 if (this.sagaBakiyor) {
-                                    this.sprite = this.spriteler.sol.donme;
+                                    return this.spriteler.sol.donme;
                                 } else {
-                                    this.sprite = this.spriteler.sag.donme;
+                                    return this.spriteler.sag.donme;
                                 }
                             }
 
                         } else {
-                            this.sprite = yonluSpriteler.kosu;
+                            return yonluSpriteler.kosu;
                         }
 
                     } else {
-                        this.sprite = yonluSpriteler.rolanti;
+                        return yonluSpriteler.rolanti;
                     }
                 }
 
             }
         }
-
-
-        return this;
-    }
-
-    spritePozisyonAyarlaHitKutusunaGore(sprite: Sprite) {
-        sprite.pozisyon.y = this.hitbox.pos.y;
-        sprite.pozisyon.x = this.hitbox.pos.x;
-        return this;
+        return this.sprite;
     }
 
     oluHitKutusuYap() {
@@ -328,18 +296,17 @@ export class Warrior extends Entity {
             this.hitbox.h = kisaKenar / 2;
             this.hitbox.pos.y += uzunKenar - kisaKenar + kisaKenar / 2;
             if (this.sonHasarAlinanYonSagdir) {
-                console.log('sura')
                 this.oluHitKutusuSagaBakar = false;
                 this.hitbox.pos.x -= kisaKenar * 1.5;
                 this.spriteler.sag.oldu.pozisyonOffset = new TwoDVector(-47, -165 - this.hitbox.h);
             } else {
-                console.log('bura')
                 this.oluHitKutusuSagaBakar = true;
                 this.hitbox.pos.x += kisaKenar;
                 this.spriteler.sol.oldu.pozisyonOffset = new TwoDVector(-180, -165 - this.hitbox.h);
             }
         }
     }
+
     updatePositionFromServer(serverPosition: TwoDVector) {
         this.pos.set(serverPosition);
         return this;
@@ -362,8 +329,6 @@ export class Warrior extends Entity {
     }
 
 
-
-
     beforeUpdate(): this {
         /*this.hitbox.ciz();
         this.weaponBox.ciz();*/
@@ -376,17 +341,35 @@ export class Warrior extends Entity {
         if (!this.oludur()) {
             if (this.kontroller.saldiri) {
                 this.saldir();
+                this.kontroller.saldiri = false;
             }
             if (this.kontroller.taklaAt) {
                 this.taklaAt();
+                this.kontroller.taklaAt = false;
             }
         }
 
 
         this.updateWeaponPos();
-        this.munasipSpriteSec();
 
-        this.spritePozisyonAyarlaHitKutusunaGore(this.sprite!);
+        if (this.sprite && this.sprite.birKereTamAnimasyonOldu && !this.sprite.imageLoops) {
+            switch (this.sprite.isim) {
+                case 'taklaAt':
+                    this.hitbox.carpisabilir = true;
+                    this.taklaAtiyor = false;
+                    break;
+            }
+
+            this.suanYapilanEylem = null;
+            this.sprite.birKereTamAnimasyonOldu = false;
+        }
+
+        const munasipSprite = this.munasipSpriteBul();
+        if (munasipSprite && munasipSprite.isim != this.sprite!.isim) {
+            this.sprite!.rewindToBeginning().pause();
+        }
+        this.sprite = munasipSprite;
+
 
 
         if (this.oludur() && this.sprite!.isim == 'oldu' && this.sprite!.birKereTamAnimasyonOldu && !this.hitKutusuOludur) {
@@ -394,12 +377,11 @@ export class Warrior extends Entity {
         }
 
         if (this.kanAkiyor) {
-            this.spritePozisyonAyarlaHitKutusunaGore(this.kanSpritesi);
-            this.kanSpritesi.update();
+            this.kanSpritesi.start().update();
 
             if (this.kanSpritesi.birKereTamAnimasyonOldu) {
                 this.kanAkiyor = false;
-                this.kanSpritesi.animasyonBasaSar();
+                this.kanSpritesi.rewindToBeginning().pause().pause();
             }
         }
 
@@ -425,7 +407,6 @@ export class Warrior extends Entity {
             this.canliHitKutusuYap();
             this.dateOfDeath = null;
         }
-
 
 
         return this;

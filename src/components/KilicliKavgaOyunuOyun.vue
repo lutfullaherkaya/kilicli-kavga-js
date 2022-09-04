@@ -40,6 +40,7 @@ import {UzaktanSavasciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYonetic
 import {Warrior, WarriorControls, SpriteBilgileri} from "@/js/kilicli-kavga/warrior";
 import {YayinciSavasciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/yayinciSavasciKontrolYoneticisi";
 import {TwoDVector} from "@/js/kilicli-kavga/utility/twoDVector";
+import {SpriteWithSound} from "@/js/kilicli-kavga/spriteWithSound";
 
 type SavasciAdi = string;
 
@@ -83,8 +84,8 @@ export default Vue.extend({
             this.canvasClientWidth = (this.$refs['game-canvas'] as HTMLDivElement).clientWidth;
         },
         ekranBoyutuGuncelle(): void {
-            this.ekranGenisligi = window.outerWidth;
-            this.ekranYuksekligi = window.outerHeight;
+            this.ekranGenisligi = window.innerWidth;
+            this.ekranYuksekligi = window.innerHeight;
         },
         tamEkranGuncelle(): void {
             this.tamEkrandir = Boolean(document.fullscreenElement);
@@ -174,14 +175,17 @@ export default Vue.extend({
                         skala: 2.7,
                         isim: 'rolanti',
                         yonuSagdir: false,
+
                     }),
-                    kosu: new Sprite(this.tuval, {
+                    kosu: new SpriteWithSound(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Run.png',
                         resimSayisi: 10,
                         pozisyonOffset: new TwoDVector(-150, -115),
                         skala: 2.7,
                         isim: 'kosu',
                         yonuSagdir: false,
+                        soundSrc: 'sounds/half-life-walking.mp3',
+                        soundLoops: true,
                     }),
                     donme: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_TurnAround.png',
@@ -191,13 +195,15 @@ export default Vue.extend({
                         isim: 'donme',
                         yonuSagdir: false,
                     }),
-                    taklaAt: new Sprite(this.tuval, {
+                    taklaAt: new SpriteWithSound(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Roll.png',
                         resimSayisi: 12,
                         pozisyonOffset: new TwoDVector(-130, -115),
                         skala: 2.7,
                         isim: 'taklaAt',
                         yonuSagdir: false,
+                        sonsuzAnimasyon: false,
+                        soundSrc: 'sounds/dark-souls-3-takla.mp3',
                     }),
                     zipla: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Jump.png',
@@ -215,7 +221,7 @@ export default Vue.extend({
                         isim: 'dusus',
                         yonuSagdir: false,
                     }),
-                    saldiri1: new Sprite(this.tuval, {
+                    saldiri1: new SpriteWithSound(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_AttackNoMovement.png',
                         resimSayisi: 4,
                         pozisyonOffset: new TwoDVector(-150, -115),
@@ -223,8 +229,10 @@ export default Vue.extend({
                         isim: 'saldiri1',
                         kacSahnedeResimDegisir: 7,
                         yonuSagdir: false,
+                        sonsuzAnimasyon: false,
+                        soundSrc: 'sounds/sword-quick.mp3',
                     }),
-                    saldiri2: new Sprite(this.tuval, {
+                    saldiri2: new SpriteWithSound(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Attack2NoMovement.png',
                         resimSayisi: 6,
                         pozisyonOffset: new TwoDVector(-150, -115),
@@ -232,8 +240,10 @@ export default Vue.extend({
                         isim: 'saldiri2',
                         kacSahnedeResimDegisir: 7,
                         yonuSagdir: false,
+                        sonsuzAnimasyon: false,
+                        soundSrc: 'sounds/sword-side.mp3',
                     }),
-                    oldu: new Sprite(this.tuval, {
+                    oldu: new SpriteWithSound(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Death.png',
                         resimSayisi: 10,
                         pozisyonOffset: new TwoDVector(-150, -115),
@@ -242,6 +252,7 @@ export default Vue.extend({
                         yonuSagdir: false,
                         sonsuzAnimasyon: false,
                         sonundaSonSahneyiTut: true,
+                        soundSrc: 'sounds/minecraft-death.mp3'
                     }),
 
                 },
@@ -254,13 +265,16 @@ export default Vue.extend({
                         isim: 'rolanti',
                         yonuSagdir: true,
                     }),
-                    kosu: new Sprite(this.tuval, {
+                    kosu: new SpriteWithSound(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_Run.png',
                         resimSayisi: 10,
                         pozisyonOffset: new TwoDVector(-126, -115),
                         skala: 2.7,
                         isim: 'kosu',
                         yonuSagdir: true,
+                        soundSrc: 'sounds/half-life-walking.mp3',
+                        soundLoops: true,
+
                     }),
                     donme: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_TurnAround.png',
@@ -269,8 +283,9 @@ export default Vue.extend({
                         skala: 2.7,
                         isim: 'donme',
                         yonuSagdir: true,
+
                     }),
-                    taklaAt: new Sprite(this.tuval, {
+                    taklaAt: new SpriteWithSound(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_Roll.png',
                         resimSayisi: 12,
                         pozisyonOffset: new TwoDVector(-122, -115),
@@ -278,6 +293,8 @@ export default Vue.extend({
 
                         isim: 'taklaAt',
                         yonuSagdir: true,
+                        sonsuzAnimasyon: false,
+                        soundSrc: 'sounds/dark-souls-3-takla.mp3',
                     }),
                     zipla: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_Jump.png',
@@ -295,7 +312,7 @@ export default Vue.extend({
                         isim: 'dusus',
                         yonuSagdir: true,
                     }),
-                    saldiri1: new Sprite(this.tuval, {
+                    saldiri1: new SpriteWithSound(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_AttackNoMovement.png',
                         resimSayisi: 4,
                         pozisyonOffset: new TwoDVector(-122, -115),
@@ -303,8 +320,10 @@ export default Vue.extend({
                         isim: 'saldiri1',
                         kacSahnedeResimDegisir: 7,
                         yonuSagdir: true,
+                        sonsuzAnimasyon: false,
+                        soundSrc: 'sounds/sword-quick.mp3',
                     }),
-                    saldiri2: new Sprite(this.tuval, {
+                    saldiri2: new SpriteWithSound(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_Attack2NoMovement.png',
                         resimSayisi: 6,
                         pozisyonOffset: new TwoDVector(-122, -115),
@@ -312,8 +331,10 @@ export default Vue.extend({
                         isim: 'saldiri2',
                         kacSahnedeResimDegisir: 7,
                         yonuSagdir: true,
+                        sonsuzAnimasyon: false,
+                        soundSrc: 'sounds/sword-side.mp3',
                     }),
-                    oldu: new Sprite(this.tuval, {
+                    oldu: new SpriteWithSound(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_Death.png',
                         resimSayisi: 10,
                         pozisyonOffset: new TwoDVector(-122, -115),
@@ -322,6 +343,7 @@ export default Vue.extend({
                         yonuSagdir: true,
                         sonsuzAnimasyon: false,
                         sonundaSonSahneyiTut: true,
+                        soundSrc: 'sounds/minecraft-death.mp3'
                     }),
                 },
             };
@@ -342,7 +364,7 @@ export default Vue.extend({
                 window.requestAnimationFrame(canlandir);
                 this.tuval!.fps = 1000 / frameTime;
                 this.tuval!.temizle();
-                arkaplan.update();
+                arkaplan.start().update();
                 for (const warrior of this.tuval!.warriors) {
                     warrior.update();
                 }
@@ -377,7 +399,7 @@ export default Vue.extend({
 
         this.main();
         this.$watch('oyuncular', () => {
-            if (this.tuval) {
+            if (this.tuval && this.oyuncular) {
                 for (const oyuncu of this.oyuncular) {
                     let savasciIsimleri = this.tuval.warriors.map((savasci) => savasci.isim);
                     if (!savasciIsimleri.includes(oyuncu.isim)) {

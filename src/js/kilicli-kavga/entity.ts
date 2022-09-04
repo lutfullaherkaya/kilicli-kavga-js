@@ -73,7 +73,7 @@ export abstract class Entity {
 
         this.move();
         if (this.sprite) {
-            this.sprite.update();
+            this.sprite.start().update();
         }
 
         return this;
