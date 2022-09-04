@@ -372,7 +372,7 @@ export class Warrior extends Entity {
 
 
 
-        if (this.oludur() && this.sprite!.isim == 'oldu' && this.sprite!.birKereTamAnimasyonOldu && !this.hitKutusuOludur) {
+        if (this.oludur() && this.sprite!.isim == 'oldu' && !this.hitKutusuOludur) {
             this.oluHitKutusuYap();
         }
 

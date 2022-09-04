@@ -190,11 +190,11 @@ export default Vue.extend({
     font-size: 1rem;
     color: #f8f8f8;
     transform: translate(-50%, -100%);
+    width: max-content;
 }
 
 .warrior-stats > * {
     margin-bottom: -0.25rem;
-
 }
 
 .warrior-hearts {
