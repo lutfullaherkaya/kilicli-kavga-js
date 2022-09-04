@@ -432,9 +432,9 @@ export class Warrior extends Entity {
 
         if (this.taklaAtiyor) {
             if (this.taklayiSagaAtiyor) {
-                this.v.x = this.yurumeHizi;
+                this.v.x = Math.round(this.yurumeHizi * 1.25);
             } else {
-                this.v.x = -this.yurumeHizi;
+                this.v.x = Math.round(-this.yurumeHizi * 1.25);
             }
         } else {
             if (this.sagaBakiyor && this.kontroller.sagKosu) {
