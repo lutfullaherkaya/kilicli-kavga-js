@@ -203,6 +203,7 @@ export default Vue.extend({
                         yonuSagdir: false,
                         sonsuzAnimasyon: false,
                         soundSrc: 'sounds/dark-souls-3-takla.mp3',
+                        kacSahnedeResimDegisir: 6,
                     }),
                     zipla: new Sprite(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Jump.png',
@@ -289,7 +290,7 @@ export default Vue.extend({
                         resimSayisi: 12,
                         pozisyonOffset: new TwoDVector(-122, -115),
                         skala: 2.7,
-
+                        kacSahnedeResimDegisir: 6,
                         isim: 'taklaAt',
                         yonuSagdir: true,
                         sonsuzAnimasyon: false,
