@@ -26,7 +26,7 @@ export class Entity {
                 groundY = 100,
                 width = 50,
                 height = 100,
-                sprite?: Sprite,) {
+                sprite?: Sprite) {
         this.id = id;
         this.tuval = tuval;
         this.pos = pos;
@@ -36,6 +36,10 @@ export class Entity {
         this.groundY = groundY;
         this.hitbox = new Dikdortgen(this.tuval, this.pos, width, height);
         this.sprite = sprite;
+        if (this.sprite) {
+            this.sprite.pozisyon = this.pos;
+        }
+
     }
 
     beforeMove(): this {

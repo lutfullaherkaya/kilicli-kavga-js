@@ -27,7 +27,8 @@ export interface WarriorControls {
     solKosu: boolean;
     sonKosulanYonSagdir: boolean;
     sagKosu: boolean;
-    zipla: boolean
+    zipla: boolean;
+    atesAt: boolean;
 }
 
 
@@ -194,6 +195,28 @@ export class Warrior extends Entity {
         return this;
     }
 
+    atesAt() {
+        if (!this.suanYapilanEylem) {
+            this.suanYapilanEylem = {
+                spriteAdi: 'atesAt',
+            };
+            this.mp3Cal('sounds/rocket-launch');// todo: change id
+            this.tuval.entities.push(new Entity(
+                'fuze',
+                this.tuval,
+                new TwoDVector(this.hitbox.pos.x, this.hitbox.pos.y+35),
+                new TwoDVector(0, 0),
+                new TwoDVector(this.sagaBakiyor ? 0.2 : -0.2, 0),
+                false,
+                0,
+                100,
+                100,
+                this.spriteler![this.sagaBakiyor ? 'sag' : 'sol'].roket));
+            console.log(this.tuval);
+        }
+    }
+
+
     taklaAt() {
         if (!this.suanYapilanEylem) {
             this.taklaAtiyor = true;
@@ -205,8 +228,11 @@ export class Warrior extends Entity {
         }
     }
 
-    // play mp3 file
-    mp3Cal(fileName: string) {
+// play mp3 file
+    mp3Cal(fileName
+               :
+               string
+    ) {
         const audio = new Audio(`/${fileName}.mp3`);
         audio.play();
     }
@@ -243,7 +269,7 @@ export class Warrior extends Entity {
     }
 
 
-    munasipSpriteBul()  {
+    munasipSpriteBul() {
         const yonluSpriteler = this.sagaBakiyor ? this.spriteler.sag : this.spriteler.sol;
 
         if (this.oludur()) {
@@ -318,7 +344,10 @@ export class Warrior extends Entity {
         }
     }
 
-    updatePositionFromServer(serverPosition: TwoDVector) {
+    updatePositionFromServer(serverPosition
+                                 :
+                                 TwoDVector
+    ) {
         this.pos.set(serverPosition);
         return this;
     }
@@ -340,7 +369,9 @@ export class Warrior extends Entity {
     }
 
 
-    beforeUpdate(): this {
+    beforeUpdate()
+        :
+        this {
         /*this.hitbox.ciz();
         this.weaponBox.ciz();*/
 
@@ -358,6 +389,11 @@ export class Warrior extends Entity {
                 this.taklaAt();
                 this.kontroller.taklaAt = false;
             }
+            if (this.kontroller.atesAt) {
+                this.atesAt();
+                this.kontroller.atesAt = false;
+            }
+
         }
 
 
@@ -380,7 +416,6 @@ export class Warrior extends Entity {
             this.sprite!.rewindToBeginning().pause();
         }
         this.sprite = munasipSprite;
-
 
 
         if (this.oludur() && this.sprite!.isim == 'oldu' && !this.hitKutusuOludur) {
@@ -448,5 +483,6 @@ export class Warrior extends Entity {
         }
         return this;
     }
+
 
 }

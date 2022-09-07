@@ -1,4 +1,5 @@
 import {Warrior} from "@/js/kilicli-kavga/warrior";
+import {Entity} from "@/js/kilicli-kavga/entity";
 
 export class Tuval {
     canvas: HTMLCanvasElement;
@@ -7,6 +8,7 @@ export class Tuval {
     private zaman: number;
     fps: number;
     warriors: Warrior[] = [];
+    entities: Entity[] = [];
 
     constructor(canvas: HTMLCanvasElement, genislik: number, yukseklik: number, yerKordianti: number) {
         this.canvas = canvas;

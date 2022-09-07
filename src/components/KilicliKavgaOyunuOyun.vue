@@ -254,7 +254,25 @@ export default Vue.extend({
                         sonundaSonSahneyiTut: true,
                         soundSrc: 'sounds/gta-wasted.mp3'
                     }),
-
+                    atesAt: new SpriteWithSound(this.tuval, {
+                        resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/bazuka-adam-sol.png',
+                        resimSayisi: 4,
+                        pozisyonOffset: new TwoDVector(-150, -115),
+                        skala: 2.7,
+                        isim: 'atesAt',
+                        yonuSagdir: false,
+                        sonsuzAnimasyon: false,
+                        soundSrc: 'sounds/rocket-launch.mp3'
+                    }),
+                    roket: new SpriteWithSound(this.tuval, {
+                        resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/rocket-sol.png',
+                        resimSayisi: 1,
+                        pozisyonOffset: new TwoDVector(-122, -115),
+                        skala: 2.7,
+                        isim: 'roket',
+                        yonuSagdir: false,
+                        sonsuzAnimasyon: true,
+                    }),
                 },
                 sag: {
                     rolanti: new Sprite(this.tuval, {
@@ -332,7 +350,6 @@ export default Vue.extend({
                         kacSahnedeResimDegisir: 7,
                         yonuSagdir: true,
                         sonsuzAnimasyon: false,
-                        soundSrc: 'sounds/sword-side.mp3',
                     }),
                     oldu: new SpriteWithSound(this.tuval, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_Death.png',
@@ -344,6 +361,24 @@ export default Vue.extend({
                         sonsuzAnimasyon: false,
                         sonundaSonSahneyiTut: true,
                         soundSrc: 'sounds/gta-wasted.mp3'
+                    }),
+                    atesAt: new SpriteWithSound(this.tuval, {
+                        resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/bazuka-adam.png',
+                        resimSayisi: 4,
+                        pozisyonOffset: new TwoDVector(-122, -115),
+                        skala: 2.7,
+                        isim: 'atesAt',
+                        yonuSagdir: true,
+                        sonsuzAnimasyon: false,
+                    }),
+                    roket: new SpriteWithSound(this.tuval, {
+                        resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/rocket.png',
+                        resimSayisi: 1,
+                        pozisyonOffset: new TwoDVector(-122, -115),
+                        skala: 2.7,
+                        isim: 'roket',
+                        yonuSagdir: true,
+                        sonsuzAnimasyon: true,
                     }),
                 },
             };
@@ -367,6 +402,9 @@ export default Vue.extend({
                 arkaplan.start().update();
                 for (const warrior of this.tuval!.warriors) {
                     warrior.update();
+                }
+                for (const entity of this.tuval!.entities) {
+                    entity.update();
                 }
 
                 WarriorCollision.engelle(this.tuval!.warriors);

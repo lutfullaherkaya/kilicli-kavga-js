@@ -14,6 +14,7 @@ export class KlavyeSavasciKontrolYoneticisi extends YayinciSavasciKontrolYonetic
         sonKosulanYonSagdir: ['d', 'D', 'a!', 'A!'],
         taklaAt: "Shift",
         zipla: ["w", "W"],
+        atesAt: ["q", "Q"],
     };
     private okTuslari: SavasciKontrolTuslari = {
         saldiri: 'ArrowDown',
@@ -22,6 +23,7 @@ export class KlavyeSavasciKontrolYoneticisi extends YayinciSavasciKontrolYonetic
         sonKosulanYonSagdir: ["ArrowRight", 'ArrowLeft!'],
         taklaAt: ".",
         zipla: "ArrowUp",
+        atesAt: "Enter",
     };
     private secilenTuslar: SavasciKontrolTuslari;
     private secilenTuslarTersi: { [index: string]: Array<keyof WarriorControls> } = {};
