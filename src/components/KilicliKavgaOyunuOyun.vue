@@ -11,7 +11,7 @@
                                                       :mobil-kontrolleri-goster="mobilKontrolleriGoster"
                                                       @tam-ekrani-ac="tamEkraniAc"
                                                       @tam-ekrani-kapat="tamEkraniKapat"
-                                                      :warriors="this.tuval?.warriors"
+                                                      :warriors="tuval?.warriors"
                                                       :canvas-client-width="canvasClientWidth"
                 />
                 <!--                <div style="width: 40px; height: 30px; position: absolute; left: 0; top: 0; background-color: red;"
