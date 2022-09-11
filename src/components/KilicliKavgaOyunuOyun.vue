@@ -375,7 +375,7 @@ export default Vue.extend({
                     warrior.update();
                 }
 
-                //WarriorCollision.engelle(this.game!.warriors);
+                WarriorCollision.engelle(this.game!.warriors);
 
             }
             const fpsOut = document.getElementById('fps');
