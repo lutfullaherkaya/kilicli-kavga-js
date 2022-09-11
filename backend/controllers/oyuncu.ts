@@ -6,16 +6,18 @@ export default class Oyuncu {
         [isim: string]: Oyuncu;
     };
     isim: string;
+    dateCreated: Date;
     public socket: null | Socket = null;
 
     static io: Server | null = null;
 
     constructor(isim: string) {
         this.isim = isim;
+        this.dateCreated = new Date();
+        console.log(this.dateCreated.toISOString(), 'Oyuncu oluşturuldu', this.isim); // todo: zaman dilimi yanlış geliyor galiba greenwitch geliyor bunda
     }
 
     static olustur(req: any, res: any) {
-
         // Validate request
         if (!req.body.isim) {
             res.status(400).send({
@@ -36,7 +38,6 @@ export default class Oyuncu {
             });
         } else {
             Oyuncu.lar[req.body.isim] = (new Oyuncu(req.body.isim));
-            console.log('oyuncu olusturuldu', req.body.isim);
             res.send({
                 isim: req.body.isim,
                 message: 'Oyuncu oluşturuldu.',
