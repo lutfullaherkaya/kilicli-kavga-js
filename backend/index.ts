@@ -42,7 +42,6 @@ io.on('connection', (socket) => {
         if (Oyuncu.lar[msg.isim]) {
             Oyuncu.lar[msg.isim].socket = socket;
             socketSahibiOyuncu = Oyuncu.lar[msg.isim];
-            console.log('yollaniyor');
 
 
         }

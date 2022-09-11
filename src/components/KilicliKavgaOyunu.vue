@@ -42,6 +42,7 @@
                 </tbody>
             </template>
         </v-simple-table>
+
         <vue-snotify></vue-snotify>
     </div>
 

@@ -41,9 +41,8 @@ export interface WarriorInformation {
 export class Warrior extends Entity {
     private weaponBox: Dikdortgen;
 
-
-    private readonly ziplamaHizi = 6;
-    private readonly yurumeHizi = 2;
+    private readonly jumpSpeedPxPerMs = 0.75;
+    private readonly walkingSpeedPxPerMs = 0.36;
 
     public kontroller: WarriorControls;
     public posEdgeActivatedWarriorControls = {
@@ -189,7 +188,7 @@ export class Warrior extends Entity {
 
     zipla() {
         if (this.hitbox.yerdedir()) {
-            this.v.y -= this.ziplamaHizi;
+            this.v.y -= this.jumpSpeedPxPerMs;
         }
         return this;
     }
@@ -433,15 +432,15 @@ export class Warrior extends Entity {
 
         if (this.taklaAtiyor) {
             if (this.taklayiSagaAtiyor) {
-                this.v.x = Math.round(this.yurumeHizi * 1.25);
+                this.v.x = Math.round(this.walkingSpeedPxPerMs * 1.25);
             } else {
-                this.v.x = Math.round(-this.yurumeHizi * 1.25);
+                this.v.x = Math.round(-this.walkingSpeedPxPerMs * 1.25);
             }
         } else {
             if (this.sagaBakiyor && this.kontroller.sagKosu) {
-                this.v.x = this.yurumeHizi;
+                this.v.x = this.walkingSpeedPxPerMs;
             } else if (!this.sagaBakiyor && this.kontroller.solKosu) {
-                this.v.x = -this.yurumeHizi;
+                this.v.x = -this.walkingSpeedPxPerMs;
             } else {
                 this.v.x = 0;
             }

@@ -7,6 +7,7 @@ export class Tuval {
     private zaman: number;
     fps: number;
     warriors: Warrior[] = [];
+    thisFrameTimeInMs = 0;
 
     constructor(canvas: HTMLCanvasElement, genislik: number, yukseklik: number, yerKordianti: number) {
         this.canvas = canvas;
@@ -22,6 +23,7 @@ export class Tuval {
 
     }
 
+
     temizle() {
         this.context!.fillStyle = '#0b2e2f';
         this.context!.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -29,15 +31,6 @@ export class Tuval {
 
     setZamanKutucugu() {
         document.getElementById('zaman')!.innerText = String(this.zaman--);
-
-    }
-
-    /**
-     * Time gets slower with lower fps.
-     * I test the time with 144hz monitor, thus my reference of the speed of time is this.
-     */
-    avgTimeUnit() {
-        return this.fps / 144;
     }
 
     gercekSahneSayisi(sahneSayisi: number) {

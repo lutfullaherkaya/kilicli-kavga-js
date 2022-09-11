@@ -11,7 +11,7 @@ export class Entity {
     readonly v: TwoDVector;
     readonly accel: TwoDVector;
     hasGravity;
-    readonly gravity = new TwoDVector(0, 0.098);
+    readonly gravity = new TwoDVector(0, 0.002);
     groundY: number;
     hitbox: Dikdortgen;
     sprite?: Sprite;
@@ -46,7 +46,7 @@ export class Entity {
     move(): this {
         this.beforeMove();
         // coordinates being whole numbers is important for performance (no need to draw sub-pixel objects with anti aliasing)
-        this.pos.setAsInt(this.pos.add(this.v.divide(this.tuval.avgTimeUnit()))); // x = x0 + vt
+        this.pos.setAsInt(this.pos.add(this.v.multiply(this.tuval.thisFrameTimeInMs))); // x = x0 + vt
 
         if (this.hasGravity && this.hitbox.yerdedir()) {
             this.v.y = 0;
@@ -62,9 +62,9 @@ export class Entity {
             }
         }
 
-        this.v.set(this.v.add(this.accel.divide(this.tuval.avgTimeUnit()))); // v = v0 + at
+        this.v.set(this.v.add(this.accel.multiply(this.tuval.thisFrameTimeInMs))); // v = v0 + at
         if (this.hasGravity) {
-            this.v.set(this.v.add(this.gravity.divide(this.tuval.avgTimeUnit()))); // v = v0 + gt
+            this.v.set(this.v.add(this.gravity.multiply(this.tuval.thisFrameTimeInMs))); // v = v0 + gt
         }
         return this;
     }

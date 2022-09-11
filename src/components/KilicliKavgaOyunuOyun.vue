@@ -358,31 +358,32 @@ export default Vue.extend({
             // 16.7ms yani 60 fps'den baslatiyoruz hesaplamaya.
 
             const filterStrength = 5;
-            let frameTime = 16.7, lastLoop = performance.now(), thisLoop;
-            let currentFrame = 0;
-            const canlandir = () => {
+            let avgFrameTime = 16.7, lastTimeStamp = performance.now();
+
+            const canlandir = (timestamp: number) => {
                 window.requestAnimationFrame(canlandir);
-                this.tuval!.fps = 1000 / frameTime;
+                const thisFrameTimeInMs = timestamp - lastTimeStamp;
+                avgFrameTime += (thisFrameTimeInMs - avgFrameTime) / filterStrength;
+                lastTimeStamp = timestamp;
+
+                this.tuval!.thisFrameTimeInMs = thisFrameTimeInMs;
+                this.tuval!.fps = 1000 / avgFrameTime;
                 this.tuval!.temizle();
                 arkaplan.start().update();
                 for (const warrior of this.tuval!.warriors) {
                     warrior.update();
                 }
-
                 WarriorCollision.engelle(this.tuval!.warriors);
 
-                const thisFrameTime = (thisLoop = performance.now()) - lastLoop;
-                frameTime += (thisFrameTime - frameTime) / filterStrength;
-                lastLoop = thisLoop;
 
             }
             const fpsOut = document.getElementById('fps');
 
             setInterval(function () {
-                fpsOut!.innerHTML = (1000 / frameTime).toFixed(1) + " fps";
+                fpsOut!.innerHTML = (1000 / avgFrameTime).toFixed(1) + " fps";
             }, 1000);
 
-            canlandir();
+            window.requestAnimationFrame(canlandir);
         }
     }
     ,
