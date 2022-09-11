@@ -431,9 +431,9 @@ export class Warrior extends Entity {
 
         if (this.taklaAtiyor) {
             if (this.taklayiSagaAtiyor) {
-                this.v.x = Math.round(this.walkingSpeedPxPerMs * 1.25);
+                this.v.x = this.walkingSpeedPxPerMs * 1.25;
             } else {
-                this.v.x = Math.round(-this.walkingSpeedPxPerMs * 1.25);
+                this.v.x = -this.walkingSpeedPxPerMs * 1.25;
             }
         } else {
             if (this.sagaBakiyor && this.kontroller.sagKosu) {
