@@ -11,7 +11,7 @@
                                                       :mobil-kontrolleri-goster="mobilKontrolleriGoster"
                                                       @tam-ekrani-ac="tamEkraniAc"
                                                       @tam-ekrani-kapat="tamEkraniKapat"
-                                                      :warriors="this.tuval?.warriors"
+                                                      :warriors="this.game?.warriors"
                                                       :canvas-client-width="canvasClientWidth"
                 />
                 <!--                <div style="width: 40px; height: 30px; position: absolute; left: 0; top: 0; background-color: red;"
@@ -30,7 +30,7 @@
 import KilicliKavgaOyunuArayuzCanZaman from '@/components/KilicliKavgaOyunuArayuzCanZaman.vue'
 import KilicliKavgaOyunuArayuzMobil from '@/components/KilicliKavgaOyunuArayuzMobil.vue'
 import Vue from "vue";
-import {Tuval} from "@/js/kilicli-kavga/tuval";
+import {Game} from "@/js/kilicli-kavga/game";
 import {Sprite} from "@/js/kilicli-kavga/sprite";
 import {WarriorCollision} from "@/js/kilicli-kavga/warriorCollision";
 import {SavasciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/savasciKontrolYoneticisi";
@@ -63,7 +63,7 @@ export default Vue.extend({
             ekranGenisligi: 100,
             ekranYuksekligi: 100,
             darkSoulsaBenzeyenElemanSpriteleri: null as any,
-            tuval: null as null | Tuval,
+            game: null as null | Game,
             mobilKontrolYoneticisi: new MobilSavasciKontrolYoneticisi(this.socket),
             buSavasci: null as null | Warrior,
             canvasClientWidth: 1000,
@@ -121,14 +121,14 @@ export default Vue.extend({
         mobilKontrollerDegisince(baziKontroller: Partial<WarriorControls>): void {
             this.mobilKontrolYoneticisi.kontrolGuncelle(baziKontroller);
         },
-        savasciEkle(tuval: Tuval, isim: SavasciAdi, spriteler: SpriteBilgileri, kontrolYoneticisi: SavasciKontrolYoneticisi | null = null): void {
-            let position = new TwoDVector(150, tuval.canvas.height - 111);
+        savasciEkle(tuval: Game, isim: SavasciAdi, spriteler: SpriteBilgileri, kontrolYoneticisi: SavasciKontrolYoneticisi | null = null): void {
+            let position = new TwoDVector(150, tuval.height - 111);
             let sagaBakiyor;
             if (tuval.warriors.length == 0) {
-                position = new TwoDVector(150, tuval.canvas.height - 111);
+                position = new TwoDVector(150, tuval.height - 111);
                 sagaBakiyor = true;
             } else if (tuval.warriors.length == 1) {
-                position = new TwoDVector(tuval.canvas.width - 200, tuval.canvas.height - 111);
+                position = new TwoDVector(tuval.width - 200, tuval.height - 111);
                 sagaBakiyor = false;
             } else { // üçüncüden sonraki savaşçılar orta yukarıdan düşer.
                 position = new TwoDVector(1920 / 2 + 25, -100);
@@ -141,7 +141,7 @@ export default Vue.extend({
                     undefined,
                     undefined,
                     true,
-                    tuval.yerKordinati,
+                    tuval.groundLevelY,
                     50,
                     100,
                     sagaBakiyor,
@@ -149,6 +149,7 @@ export default Vue.extend({
             )
 
             tuval.warriors.push(yeniSavasci);
+            tuval.entities.push(yeniSavasci);
 
             if (this.buOyuncuIsmi != "" && isim == this.buOyuncuIsmi) {
                 this.buSavasci = yeniSavasci;
@@ -156,10 +157,10 @@ export default Vue.extend({
             }
         },
         main() {
-            this.tuval = new Tuval(document.querySelector('canvas')!, tuvalGenisligi, tuvalYuksekligi, Math.round((tuvalYuksekligi / 600) * 490));
+            this.game = new Game(document.querySelector('canvas'), tuvalGenisligi, tuvalYuksekligi, Math.round((tuvalYuksekligi / 600) * 490));
 
 
-            const arkaplan = new Sprite(this.tuval, {
+            const arkaplan = new Sprite(this.game, {
                 resimKaynagi: './sprites/NightForest/Image without mist.png',
                 skala: 1.72 * tuvalYuksekligi / 600,
             });
@@ -167,7 +168,7 @@ export default Vue.extend({
 
             this.darkSoulsaBenzeyenElemanSpriteleri = {
                 sol: {
-                    rolanti: new Sprite(this.tuval, {
+                    rolanti: new Sprite(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Idle.png',
                         resimSayisi: 10,
                         pozisyonOffset: new TwoDVector(-150, -115),
@@ -176,7 +177,7 @@ export default Vue.extend({
                         yonuSagdir: false,
 
                     }),
-                    kosu: new SpriteWithSound(this.tuval, {
+                    kosu: new SpriteWithSound(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Run.png',
                         resimSayisi: 10,
                         pozisyonOffset: new TwoDVector(-150, -115),
@@ -186,7 +187,7 @@ export default Vue.extend({
                         soundSrc: 'sounds/half-life-walking.mp3',
                         soundLoops: true,
                     }),
-                    donme: new Sprite(this.tuval, {
+                    donme: new Sprite(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_TurnAround.png',
                         resimSayisi: 3,
                         pozisyonOffset: new TwoDVector(-150, -115),
@@ -194,7 +195,7 @@ export default Vue.extend({
                         isim: 'donme',
                         yonuSagdir: false,
                     }),
-                    taklaAt: new SpriteWithSound(this.tuval, {
+                    taklaAt: new SpriteWithSound(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Roll.png',
                         resimSayisi: 12,
                         pozisyonOffset: new TwoDVector(-130, -115),
@@ -205,7 +206,7 @@ export default Vue.extend({
                         soundSrc: 'sounds/dark-souls-3-takla.mp3',
                         kacSahnedeResimDegisir: 6,
                     }),
-                    zipla: new Sprite(this.tuval, {
+                    zipla: new Sprite(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Jump.png',
                         resimSayisi: 3,
                         pozisyonOffset: new TwoDVector(-150, -115),
@@ -213,7 +214,7 @@ export default Vue.extend({
                         isim: 'zipla',
                         yonuSagdir: false,
                     }),
-                    dusus: new Sprite(this.tuval, {
+                    dusus: new Sprite(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Fall.png',
                         resimSayisi: 3,
                         pozisyonOffset: new TwoDVector(-150, -115),
@@ -221,7 +222,7 @@ export default Vue.extend({
                         isim: 'dusus',
                         yonuSagdir: false,
                     }),
-                    saldiri1: new SpriteWithSound(this.tuval, {
+                    saldiri1: new SpriteWithSound(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_AttackNoMovement.png',
                         resimSayisi: 4,
                         pozisyonOffset: new TwoDVector(-150, -115),
@@ -232,7 +233,7 @@ export default Vue.extend({
                         sonsuzAnimasyon: false,
                         soundSrc: 'sounds/sword-quick.mp3',
                     }),
-                    saldiri2: new SpriteWithSound(this.tuval, {
+                    saldiri2: new SpriteWithSound(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Attack2NoMovement.png',
                         resimSayisi: 6,
                         pozisyonOffset: new TwoDVector(-150, -115),
@@ -243,7 +244,7 @@ export default Vue.extend({
                         sonsuzAnimasyon: false,
                         soundSrc: 'sounds/sword-side.mp3',
                     }),
-                    oldu: new SpriteWithSound(this.tuval, {
+                    oldu: new SpriteWithSound(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_left/_Death.png',
                         resimSayisi: 10,
                         pozisyonOffset: new TwoDVector(-150, -115),
@@ -257,7 +258,7 @@ export default Vue.extend({
 
                 },
                 sag: {
-                    rolanti: new Sprite(this.tuval, {
+                    rolanti: new Sprite(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_Idle.png',
                         resimSayisi: 10,
                         pozisyonOffset: new TwoDVector(-122, -115),
@@ -265,7 +266,7 @@ export default Vue.extend({
                         isim: 'rolanti',
                         yonuSagdir: true,
                     }),
-                    kosu: new SpriteWithSound(this.tuval, {
+                    kosu: new SpriteWithSound(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_Run.png',
                         resimSayisi: 10,
                         pozisyonOffset: new TwoDVector(-126, -115),
@@ -276,7 +277,7 @@ export default Vue.extend({
                         soundLoops: true,
 
                     }),
-                    donme: new Sprite(this.tuval, {
+                    donme: new Sprite(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_TurnAround.png',
                         resimSayisi: 3,
                         pozisyonOffset: new TwoDVector(-126, -115),
@@ -285,7 +286,7 @@ export default Vue.extend({
                         yonuSagdir: true,
 
                     }),
-                    taklaAt: new SpriteWithSound(this.tuval, {
+                    taklaAt: new SpriteWithSound(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_Roll.png',
                         resimSayisi: 12,
                         pozisyonOffset: new TwoDVector(-122, -115),
@@ -296,7 +297,7 @@ export default Vue.extend({
                         sonsuzAnimasyon: false,
                         soundSrc: 'sounds/dark-souls-3-takla.mp3',
                     }),
-                    zipla: new Sprite(this.tuval, {
+                    zipla: new Sprite(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_Jump.png',
                         resimSayisi: 3,
                         pozisyonOffset: new TwoDVector(-122, -115),
@@ -304,7 +305,7 @@ export default Vue.extend({
                         isim: 'zipla',
                         yonuSagdir: true,
                     }),
-                    dusus: new Sprite(this.tuval, {
+                    dusus: new Sprite(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_Fall.png',
                         resimSayisi: 3,
                         pozisyonOffset: new TwoDVector(-122, -115),
@@ -312,7 +313,7 @@ export default Vue.extend({
                         isim: 'dusus',
                         yonuSagdir: true,
                     }),
-                    saldiri1: new SpriteWithSound(this.tuval, {
+                    saldiri1: new SpriteWithSound(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_AttackNoMovement.png',
                         resimSayisi: 4,
                         pozisyonOffset: new TwoDVector(-122, -115),
@@ -323,7 +324,7 @@ export default Vue.extend({
                         sonsuzAnimasyon: false,
                         soundSrc: 'sounds/sword-quick.mp3',
                     }),
-                    saldiri2: new SpriteWithSound(this.tuval, {
+                    saldiri2: new SpriteWithSound(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_Attack2NoMovement.png',
                         resimSayisi: 6,
                         pozisyonOffset: new TwoDVector(-122, -115),
@@ -334,7 +335,7 @@ export default Vue.extend({
                         sonsuzAnimasyon: false,
                         soundSrc: 'sounds/sword-side.mp3',
                     }),
-                    oldu: new SpriteWithSound(this.tuval, {
+                    oldu: new SpriteWithSound(this.game, {
                         resimKaynagi: './sprites/FreeKnight_v1/Colour1/NoOutline/120x80_PNGSheets_right/_Death.png',
                         resimSayisi: 10,
                         pozisyonOffset: new TwoDVector(-122, -115),
@@ -348,7 +349,7 @@ export default Vue.extend({
                 },
             };
             setInterval(() => {
-                this.tuval!.setZamanKutucugu();
+                this.game!.setTimeLeftInUI();
             }, 1000);
 
 
@@ -366,15 +367,15 @@ export default Vue.extend({
                 avgFrameTime += (thisFrameTimeInMs - avgFrameTime) / filterStrength;
                 lastTimeStamp = timestamp;
 
-                this.tuval!.thisFrameTimeInMs = thisFrameTimeInMs;
-                this.tuval!.fps = 1000 / avgFrameTime;
-                this.tuval!.temizle();
+                this.game!.thisFrameTimeInMs = thisFrameTimeInMs;
+                this.game!.fps = 1000 / avgFrameTime;
+                this.game!.cleanCanvas();
                 arkaplan.start().update();
-                for (const warrior of this.tuval!.warriors) {
+                for (const warrior of this.game!.warriors) {
                     warrior.update();
                 }
-                WarriorCollision.engelle(this.tuval!.warriors);
 
+                WarriorCollision.engelle(this.game!.warriors);
 
             }
             const fpsOut = document.getElementById('fps');
@@ -400,22 +401,22 @@ export default Vue.extend({
 
         this.main();
         this.$watch('oyuncular', () => {
-            if (this.tuval && this.oyuncular) {
+            if (this.game && this.oyuncular) {
                 for (const oyuncu of this.oyuncular) {
-                    let savasciIsimleri = this.tuval.warriors.map((savasci) => savasci.isim);
+                    let savasciIsimleri = this.game.warriors.map((savasci) => savasci.isim);
                     if (!savasciIsimleri.includes(oyuncu.isim)) {
                         if (this.buOyuncuIsmi != "" && oyuncu.isim == this.buOyuncuIsmi) {
                             let kontrolYoneticisi: SavasciKontrolYoneticisi | null = null;
                             kontrolYoneticisi = new KlavyeSavasciKontrolYoneticisi(this.socket, true, true, this.$refs['canvas-container'] as HTMLElement)
-                            this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, kontrolYoneticisi);
+                            this.savasciEkle(this.game!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, kontrolYoneticisi);
                             // always using mouse and keybaord, sometimes using mobile
                         } else {
-                            this.savasciEkle(this.tuval!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, new UzaktanSavasciKontrolYoneticisi(this.socket));
+                            this.savasciEkle(this.game!, oyuncu.isim, this.darkSoulsaBenzeyenElemanSpriteleri, new UzaktanSavasciKontrolYoneticisi(this.socket));
                         }
                     }
                 }
                 const oyuncuIsimleri = this.oyuncular.map((oyuncu) => oyuncu.isim);
-                this.tuval.warriors = this.tuval.warriors.filter((savasci) => {
+                this.game.warriors = this.game.warriors.filter((savasci) => {
                     if (!oyuncuIsimleri.includes(savasci.isim)) {
                         savasci.kontrolYoneticisi?.yonetmeyiBirak();
                         return false;

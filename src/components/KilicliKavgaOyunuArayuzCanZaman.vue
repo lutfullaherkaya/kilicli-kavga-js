@@ -72,7 +72,7 @@ export default Vue.extend({
             const style = {
                 position: 'absolute',
             } as any;
-            const scale = this.canvasClientWidth / warrior.tuval.canvas.width;
+            const scale = this.canvasClientWidth / warrior.game.width;
             style.top = warrior.hitbox.pos.y * scale + 'px';
             style.left = (warrior.hitbox.pos.x + warrior.hitbox.w / 2) * scale + 'px';
 

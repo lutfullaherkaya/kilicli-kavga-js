@@ -1,4 +1,4 @@
-import {Tuval} from "@/js/kilicli-kavga/tuval";
+import {Game} from "@/js/kilicli-kavga/game";
 import {TwoDVector} from "@/js/kilicli-kavga/utility/twoDVector";
 
 /**
@@ -7,7 +7,7 @@ import {TwoDVector} from "@/js/kilicli-kavga/utility/twoDVector";
  *
  */
 export class Sprite {
-    private tuval: Tuval;
+    private game: Game;
     pozisyon: TwoDVector;
     public pozisyonOffset: TwoDVector;
     private resimSayisi: number;
@@ -26,7 +26,7 @@ export class Sprite {
     isPlaying = false;
 
     constructor(
-        tuval: Tuval, {
+        game: Game, {
             pozisyon = new TwoDVector(0, 0),
             pozisyonOffset = new TwoDVector(0, 0),
             resimKaynagi = '',
@@ -39,7 +39,7 @@ export class Sprite {
             yonuSagdir = false,
             canvasFilter = null as null | string,
         }) {
-        this.tuval = tuval;
+        this.game = game;
         this.pozisyon = pozisyon;
         this.pozisyonOffset = pozisyonOffset;
         this.resimSayisi = resimSayisi;
@@ -59,7 +59,7 @@ export class Sprite {
             this.kacSahnedeResimDegisir = 20;
         }
         this.suankiSahne = 0;
-        this.gercekKacSahnedeResimDegistir = this.tuval.gercekSahneSayisi(this.kacSahnedeResimDegisir);
+        this.gercekKacSahnedeResimDegistir = this.game.relativeFrameCount(this.kacSahnedeResimDegisir);
 
         this.birKereTamAnimasyonOldu = false;
 
@@ -67,12 +67,12 @@ export class Sprite {
 
     ciz(): this {
         if (this.canvasFilter) {
-            this.tuval.context!.filter = this.canvasFilter;
+            this.game.context!.filter = this.canvasFilter;
         }
 
 
 
-        this.tuval.context!.drawImage(
+        this.game.context!.drawImage(
             this.resim,
             (this.suankiResim % this.resimSayisi) * (this.resim.width / this.resimSayisi),
             0,
@@ -84,7 +84,7 @@ export class Sprite {
             this.resim.height * this.skala);
 
         if (this.canvasFilter) {
-            this.tuval.context!.filter = 'none';
+            this.game.context!.filter = 'none';
         }
 
         return this;
@@ -94,7 +94,7 @@ export class Sprite {
         this.suankiResim = 0;
         this.suankiSahne = 0;
         this.birKereTamAnimasyonOldu = false;
-        this.gercekKacSahnedeResimDegistir = this.tuval.gercekSahneSayisi(this.kacSahnedeResimDegisir);
+        this.gercekKacSahnedeResimDegistir = this.game.relativeFrameCount(this.kacSahnedeResimDegisir);
         return this;
     }
 
@@ -127,7 +127,7 @@ export class Sprite {
             }
             if (this.suankiSahne === 0) {
                 this.suankiResim++;
-                this.gercekKacSahnedeResimDegistir = this.tuval.gercekSahneSayisi(this.kacSahnedeResimDegisir);
+                this.gercekKacSahnedeResimDegistir = this.game.relativeFrameCount(this.kacSahnedeResimDegisir);
             }
             this.suankiSahne = (this.suankiSahne + 1) % this.gercekKacSahnedeResimDegistir;
         }

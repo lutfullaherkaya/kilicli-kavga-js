@@ -1,4 +1,4 @@
-import {Tuval} from "@/js/kilicli-kavga/tuval";
+import {Game} from "@/js/kilicli-kavga/game";
 import {Dikdortgen} from "@/js/kilicli-kavga/utility/dikdortgen";
 import {Sprite} from "@/js/kilicli-kavga/sprite";
 import {SpriteWithSound} from "@/js/kilicli-kavga/spriteWithSound";
@@ -74,13 +74,12 @@ export class Warrior extends Entity {
     public respawnTimeLeft = this.respawnTimeSeconds;
     public dateOfDeath: Date | null = null;
     public score = {kill: 0, death: 0, assist: 0} as Score;
-    public showScore = false;
     private oluHitKutusuSagaBakar = false;
 
 
     constructor(
         isim: string,
-        tuval: Tuval,
+        tuval: Game,
         spriteler: SpriteBilgileri,
         position: TwoDVector = new TwoDVector(0, 0),
         velocity: TwoDVector = new TwoDVector(0, 0),
@@ -118,11 +117,11 @@ export class Warrior extends Entity {
         }
         this.isim = isim;
         this.sagaBakiyor = sagaBakiyor;
-        this.weaponBox = new Dikdortgen(this.tuval, new TwoDVector(this.pos.x, this.pos.y + 10), 155, 110, 'rgba(255,255,255,0.53)');
+        this.weaponBox = new Dikdortgen(this.game, new TwoDVector(this.pos.x, this.pos.y + 10), 155, 110, 'rgba(255,255,255,0.53)');
         this.spriteler = spriteler;
         this.sprite = this.sagaBakiyor ? this.spriteler.sag.rolanti : this.spriteler.sol.rolanti;
 
-        this.kanSpritesi = new SpriteWithSound(this.tuval, {
+        this.kanSpritesi = new SpriteWithSound(this.game, {
             resimKaynagi: './sprites/Blood FX Lite/JASONTOMLEE_BLOOD_GUSH_3.png',
             pozisyon: this.hitbox.pos,
             resimSayisi: 14,
@@ -187,7 +186,7 @@ export class Warrior extends Entity {
     }
 
     zipla() {
-        if (this.hitbox.yerdedir()) {
+        if (this.hitbox.isOnTopOfSomething()) {
             this.v.y -= this.jumpSpeedPxPerMs;
         }
         return this;
@@ -226,7 +225,7 @@ export class Warrior extends Entity {
                 };
             }
             this.alternatifSaldiri = !this.alternatifSaldiri;
-            this.tuval.warriors.forEach((savaskar) => {
+            this.game.warriors.forEach((savaskar) => {
                 if (savaskar !== this && Dikdortgen.carpisir(this.weaponBox, savaskar.hitbox)) {
                     savaskar.can = Math.max(0, savaskar.can - this.saldiriHasari);
                     savaskar.kanAkiyor = true;
@@ -260,7 +259,7 @@ export class Warrior extends Entity {
                 }
 
             } else { // pasif spriteler. eylem yapılınca bunlar gözükmez.
-                if (!this.hitbox.yerdedir()) {
+                if (!this.hitbox.isOnTopOfSomething()) {
                     if (this.v.y <= 0) {
                         return yonluSpriteler.zipla;
                     } else {

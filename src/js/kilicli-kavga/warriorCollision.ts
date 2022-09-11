@@ -36,7 +36,7 @@ export class WarriorCollision {
             savasci1.hitbox.pos.y = savasci2.hitbox.pos.y - savasci1.hitbox.h;
         } else if (savasci1.hitbox.merkezKordinat().y >= savasci2.hitbox.merkezKordinat().y) { // asagisinda olacak
             const yeniYPozisyonu = savasci2.hitbox.pos.y + savasci2.hitbox.h;
-            if (yeniYPozisyonu < savasci1.tuval.yerKordinati - savasci1.hitbox.h) {
+            if (yeniYPozisyonu < savasci1.game.groundLevelY - savasci1.hitbox.h) {
                 savasci1.hitbox.pos.y = yeniYPozisyonu;
             } // aksi taktirde yerin dibine girer, o durumda oteleme yapilmaz.
         }

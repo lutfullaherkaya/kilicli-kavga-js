@@ -1,8 +1,8 @@
-import {Tuval} from "@/js/kilicli-kavga/tuval";
+import {Game} from "@/js/kilicli-kavga/game";
 import {TwoDVector} from "@/js/kilicli-kavga/utility/twoDVector";
 
 export class Dikdortgen {
-    private tuval: Tuval;
+    private game: Game;
     /**
      * Position is pass by reference and can be changed by the caller thus it must not be reassigned.
      */
@@ -12,8 +12,8 @@ export class Dikdortgen {
     private renk: string;
     public carpisabilir: boolean;
 
-    constructor(tuval: Tuval, position: TwoDVector, genislik: number, yukseklik: number, renk = 'rgba(255, 255, 255, 0.5)', carpisabilir = true) {
-        this.tuval = tuval;
+    constructor(tuval: Game, position: TwoDVector, genislik: number, yukseklik: number, renk = 'rgba(255, 255, 255, 0.5)', carpisabilir = true) {
+        this.game = tuval;
         this.pos = position;
         this.w = genislik;
         this.h = yukseklik;
@@ -22,16 +22,20 @@ export class Dikdortgen {
     }
 
     ciz() {
-        this.tuval.context!.fillStyle = this.renk;
-        this.tuval.context!.fillRect(this.pos.x, this.pos.y, this.w, this.h);
+        this.game.context!.fillStyle = this.renk;
+        this.game.context!.fillRect(this.pos.x, this.pos.y, this.w, this.h);
     }
 
-    yerdedir(): boolean {
-        return this.pos.y + this.h >= this.tuval.yerKordinati;
+    isOnTopOfSomething(): boolean {
+        return this.isAtGroundLevel();
+    }
+
+    isAtGroundLevel(): boolean {
+        return this.pos.y + this.h >= this.game.groundLevelY;
     }
 
     ayagininAlti() {
-        return this.tuval.yerKordinati - this.h;
+        return this.game.groundLevelY - this.h;
     }
 
     static carpisir(dikdortgen1: Dikdortgen, dikdortgen2: Dikdortgen) {

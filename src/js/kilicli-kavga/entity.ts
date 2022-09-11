@@ -1,12 +1,12 @@
 import {TwoDVector} from "@/js/kilicli-kavga/utility/twoDVector";
 import {Dikdortgen} from "@/js/kilicli-kavga/utility/dikdortgen";
-import {Tuval} from "@/js/kilicli-kavga/tuval";
+import {Game} from "@/js/kilicli-kavga/game";
 import {Sprite} from "@/js/kilicli-kavga/sprite";
 
 
 export class Entity {
     id: number | string;
-    tuval: Tuval;
+    game: Game;
     readonly pos: TwoDVector;
     readonly v: TwoDVector;
     readonly accel: TwoDVector;
@@ -18,7 +18,7 @@ export class Entity {
     canGoBeyondScreenBorders = false;
 
     constructor(id: number | string,
-                tuval: Tuval,
+                tuval: Game,
                 pos: TwoDVector = new TwoDVector(0, 0),
                 v: TwoDVector = new TwoDVector(0, 0),
                 accel: TwoDVector = new TwoDVector(0, 0),
@@ -28,13 +28,13 @@ export class Entity {
                 height = 100,
                 sprite?: Sprite,) {
         this.id = id;
-        this.tuval = tuval;
+        this.game = tuval;
         this.pos = pos;
         this.v = v;
         this.accel = accel;
         this.hasGravity = hasGravity;
         this.groundY = groundY;
-        this.hitbox = new Dikdortgen(this.tuval, this.pos, width, height);
+        this.hitbox = new Dikdortgen(this.game, this.pos, width, height);
         this.sprite = sprite;
     }
 
@@ -46,9 +46,9 @@ export class Entity {
     move(): this {
         this.beforeMove();
         // coordinates being whole numbers is important for performance (no need to draw sub-pixel objects with anti aliasing)
-        this.pos.setAsInt(this.pos.add(this.v.multiply(this.tuval.thisFrameTimeInMs))); // x = x0 + vt
+        this.pos.setAsInt(this.pos.add(this.v.multiply(this.game.thisFrameTimeInMs))); // x = x0 + vt
 
-        if (this.hasGravity && this.hitbox.yerdedir()) {
+        if (this.hasGravity && this.hitbox.isOnTopOfSomething()) {
             this.v.y = 0;
             this.accel.y = 0;
             this.pos.y = this.hitbox.ayagininAlti();
@@ -57,14 +57,14 @@ export class Entity {
             if (this.pos.x < 0) {
                 this.pos.x = 0;
             }
-            if (this.pos.x + this.hitbox.w > this.tuval.canvas.width) {
-                this.pos.x = this.tuval.canvas.width - this.hitbox.w;
+            if (this.pos.x + this.hitbox.w > this.game.width) {
+                this.pos.x = this.game.width - this.hitbox.w;
             }
         }
 
-        this.v.set(this.v.add(this.accel.multiply(this.tuval.thisFrameTimeInMs))); // v = v0 + at
+        this.v.set(this.v.add(this.accel.multiply(this.game.thisFrameTimeInMs))); // v = v0 + at
         if (this.hasGravity) {
-            this.v.set(this.v.add(this.gravity.multiply(this.tuval.thisFrameTimeInMs))); // v = v0 + gt
+            this.v.set(this.v.add(this.gravity.multiply(this.game.thisFrameTimeInMs))); // v = v0 + gt
         }
         return this;
     }

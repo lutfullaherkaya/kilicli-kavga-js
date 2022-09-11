@@ -1,4 +1,4 @@
-import {Tuval} from "@/js/kilicli-kavga/tuval";
+import {Game} from "@/js/kilicli-kavga/game";
 import {Sprite} from "@/js/kilicli-kavga/sprite";
 
 function mobilMi(): boolean {
@@ -12,7 +12,7 @@ export class SpriteWithSound extends Sprite {
     private mobileChromeLoopDelayInSeconds = 0.3; // in chrome mobile, sound loops with delay. So we loop early.
 
 
-    constructor(tuval: Tuval, {
+    constructor(tuval: Game, {
         soundSrc = '',
         soundLoops = false,
         ...spriteOptions
