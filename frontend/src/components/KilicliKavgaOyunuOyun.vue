@@ -424,7 +424,8 @@ onMounted(() => {
         .observe(gameCanvas.value as HTMLDivElement);
 
     main();
-    watch(props.oyuncular, () => {
+    watch(() => props.oyuncular, () => {
+        console.log('OYUNCULAR DEĞİŞTİ')
         oyuncularDegisince();
     }, { immediate: true });
 })
