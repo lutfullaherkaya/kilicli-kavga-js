@@ -21,7 +21,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true})); // todo: ne ise yarar
 
 // use router
-app.use(Router);
+app.use('/api', Router);
 
 
 app.use(express.static('dist'))

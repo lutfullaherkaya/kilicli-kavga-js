@@ -13,10 +13,14 @@
   "dependencies": {
     "@primevue/themes": "^4.0.4",
     "autoprefixer": "^10.4.20",
+    "axios": "^1.7.4",
+    "nipplejs": "^0.10.2",
     "postcss": "^8.4.41",
     "primevue": "^4.0.4",
+    "socket.io-client": "^4.7.5",
     "tailwindcss": "^3.4.10",
     "tailwindcss-primeui": "^0.3.4",
+    "unplugin-auto-import": "^0.18.2",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3"
   },
