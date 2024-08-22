@@ -21,11 +21,15 @@
             </div>
             <div class="warrior-scores">
                 {{ warrior.can <= 0 ? warrior.respawnTimeLeft : '' }} </div>
-                    <div class="warrior-hearts mt-2">
-                        <img src="/sprites/minecraft-kalp-dolu.png" alt="heart" :class="{ grayscale: warrior.can <= 0 }">
-                        <img src="/sprites/minecraft-kalp-dolu.png" alt="heart" :class="{ grayscale: warrior.can <= 25 }">
-                        <img src="/sprites/minecraft-kalp-dolu.png" alt="heart" :class="{ grayscale: warrior.can <= 50 }">
-                        <img src="/sprites/minecraft-kalp-dolu.png" alt="heart" :class="{ grayscale: warrior.can <= 75 }">
+                    <div class="warrior-hearts mt-2 flex">
+                        <img src="/sprites/minecraft-kalp-dolu.svg" alt="heart"
+                            :class="{ grayscale: warrior.can <= 0 }">
+                        <img src="/sprites/minecraft-kalp-dolu.svg" alt="heart"
+                            :class="{ grayscale: warrior.can <= 25 }">
+                        <img src="/sprites/minecraft-kalp-dolu.svg" alt="heart"
+                            :class="{ grayscale: warrior.can <= 50 }">
+                        <img src="/sprites/minecraft-kalp-dolu.svg" alt="heart"
+                            :class="{ grayscale: warrior.can <= 75 }">
                     </div>
                     <div class="warrior-stats-name">
                         {{ warrior.isim }}
@@ -33,12 +37,21 @@
             </div>
 
             <div class="tam-ekran-butonu">
-                <v-icon v-if="!tamEkrandir" dark right large @click="$emit('tam-ekrani-ac')">
-                    mdi-fullscreen
-                </v-icon>
-                <v-icon v-else dark right large @click="$emit('tam-ekrani-kapat')">
-                    mdi-fullscreen-exit
-                </v-icon>
+                <div v-if="!tamEkrandir" class="cursor-pointer p-1" @click="$emit('tam-ekrani-ac')">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                        fill="#e8eaed">
+                        <path
+                            d="M120-120v-200h80v120h120v80H120Zm520 0v-80h120v-120h80v200H640ZM120-640v-200h200v80H200v120h-80Zm640 0v-120H640v-80h200v200h-80Z" />
+                    </svg>
+                </div>
+
+                <div v-else class="cursor-pointer p-1" @click="$emit('tam-ekrani-kapat')">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                        fill="#e8eaed">
+                        <path
+                            d="m136-80-56-56 264-264H160v-80h320v320h-80v-184L136-80Zm344-400v-320h80v184l264-264 56 56-264 264h184v80H480Z" />
+                    </svg>
+                </div>
             </div>
 
         </div>

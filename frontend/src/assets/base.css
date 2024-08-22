@@ -12,9 +12,5 @@
 
 @font-face {
   font-family: "Minecraft";
-  src: local("Minecraft"), url(./fonts/Minecraft/Minecraft-Regular.otf) format("truetype");
-}
-@font-face {
-  font-family: "Ancient-Modern-Tales";
-  src: local("Ancient-Modern-Tales"), url(./fonts/ancient-modern-tales/Ancient-Modern-Tales.otf) format("truetype");
+  src: local("Minecraft"), url(/fonts/Minecraft/Minecraft-Regular.otf) format("truetype");
 }

@@ -82,7 +82,7 @@ const uzunlukUygun = computed(() => {
 
 
 function tamEkraniAc() {
-    (oyun.value as any)?.tamEkraniAc();
+    oyun.value.tamEkraniAc();
 }
 
 function mobilMi(): boolean {

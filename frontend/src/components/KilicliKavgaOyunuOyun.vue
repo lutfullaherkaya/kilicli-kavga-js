@@ -4,7 +4,7 @@
         </div>
         <div class="genislik-sinirlayici" :style="{ width: genislikSinirlayiciGenisligi }">
             <!-- bunun amaci tam ekran oldugunda kenarlara siyah cubuk koyabilmek -->
-            <v-responsive :aspect-ratio="16 / 9">
+            <div class="aspect-video w-full">
                 <canvas ref="gameCanvas" style="width: 100%; height: 100%;"></canvas>
 
                 <kilicli-kavga-oyunu-arayuz-can-zaman :tam-ekrandir="tamEkrandir"
@@ -14,7 +14,7 @@
                 <!--                <div style="width: 40px; height: 30px; position: absolute; left: 0; top: 0; background-color: red;"
                                      id="kutu">
                                 </div>-->
-            </v-responsive>
+            </div>
         </div>
         <kilicli-kavga-oyunu-arayuz-mobil v-if="mobilKontrolleriGoster" style="z-index: 1111;"
             @mobil-kontroller-degisti="mobilKontrollerDegisince" />
@@ -84,7 +84,9 @@ function ekranBoyutuGuncelle(): void {
 function tamEkranGuncelle(): void {
     tamEkrandir.value = Boolean(document.fullscreenElement);
 }
+
 function tamEkraniAc(): void {
+
     const elem = canvasContainer.value as HTMLElement & {
         mozRequestFullScreen(): Promise<void>;
         webkitRequestFullscreen(): Promise<void>;
@@ -98,6 +100,11 @@ function tamEkraniAc(): void {
         elem.msRequestFullscreen();
     }
 }
+
+defineExpose({
+    tamEkraniAc
+})
+
 function tamEkraniKapat(): void {
     const docWithBrowsersExitFunctions = document as Document & {
         mozCancelFullScreen(): Promise<void>;
