@@ -1,2 +1,27 @@
 @import './base.css';
 
+body {
+  background-image: url('@/assets/logo/logo-arkaplan.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  @apply h-screen;
+  @apply h-dvh;
+  
+}
+
+.p-datatable-column-header-content {
+  display: inline-flex !important;
+}
+
+.oyun-fontu2 {
+  font-family: "Press Start 2P", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.oyun-fontu {
+  font-family: "VT323", monospace;
+  font-weight: 400;
+  font-style: normal;
+}
