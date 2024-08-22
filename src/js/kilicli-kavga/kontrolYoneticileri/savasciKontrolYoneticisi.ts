@@ -1,4 +1,5 @@
-import {Warrior, WarriorControls} from "@/js/kilicli-kavga/warrior";
+import {Warrior} from "@/js/kilicli-kavga/warrior";
+import type {WarriorControls} from "@/js/kilicli-kavga/warrior";
 
 export abstract class SavasciKontrolYoneticisi {
     protected yonetiliyor = false;

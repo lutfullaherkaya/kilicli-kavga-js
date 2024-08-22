@@ -1,7 +1,7 @@
 <template>
-    <div class="arayuz-mobil-komponenti" ref="arayuz-mobil-komponenti">
-        <div ref="joystick-menzili" class="joystick-menzili"></div>
-        <v-responsive class="sag-buton sag-saldiri-butonu" :aspect-ratio="1/1" @mousedown="saldirt"
+    <div class="arayuz-mobil-komponenti" ref="arayuzMobilKomponenti">
+        <div ref="joystickMenzili" class="joystick-menzili"></div>
+        <div class="sag-buton sag-saldiri-butonu aspect-square" @mousedown="saldirt"
                       @touchstart="saldirt">
             <div class="sag-buton-arkaplan" :style="{'background-color': butonRengi}">
             </div>
@@ -9,8 +9,8 @@
                  style="filter: invert(100%); width: 80%; transform: rotate(-45deg);">
 
 
-        </v-responsive>
-        <v-responsive class="sag-buton sag-takla-at-butonu" :aspect-ratio="1/1" @mousedown="taklaAttir"
+        </div>
+        <div class="sag-buton sag-takla-at-butonu aspect-square" @mousedown="taklaAttir"
                       @touchstart="taklaAttir">
 
             <div class="sag-buton-arkaplan" :style="{'background-color': butonRengi}">
@@ -19,24 +19,23 @@
                  style="filter: invert(100%); width: 55%; transform: rotate(120deg);">
 
 
-        </v-responsive>
+        </div>
 
     </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import nipplejs from 'nipplejs';
-import Vue from "vue";
-import {WarriorControls} from "@/js/kilicli-kavga/warrior";
 
-export default Vue.extend({
-    name: "KilicliKavgaOyunuArayuzMobil",
-    props: {},
-    data() {
-        return {
-            butonRengi: "white",
-            joystick: null as any,
-            joystickAyarlari: {
+import { onMounted, onUnmounted } from 'vue';
+
+const emit = defineEmits(['mobil-kontroller-degisti'])
+const joystickMenzili = ref(null)
+const arayuzMobilKomponenti = ref(null);
+
+            const butonRengi =  ref("white")
+            const joystick = ref(null)
+            const joystickAyarlari = ref({
                 size: 200,
                 position: {
                     left: '32.5%',
@@ -44,109 +43,106 @@ export default Vue.extend({
                 },
                 mode: 'semi',
                 catchDistance: 100,
-            } as any,
-            joystickZiplamaYerinde: false,
-            joystickGenislikYuzdesi: 12.5,
-            joystickMenzilYuzdesi: 14,
-        }
-    },
-    methods: {
-        taklaAttir(event: any) {
+            });
+            const joystickZiplamaYerinde = ref(false)
+            const joystickGenislikYuzdesi = ref(12.5)
+            const joystickMenzilYuzdesi = ref(14)
+
+        function taklaAttir(event: any) {
             event.stopPropagation();
             const yeniKontroller = {
                 taklaAt: true,
             };
             // sadece degisen kontrol anahtarları emitlenir.
-            this.$emit('mobil-kontroller-degisti', yeniKontroller);
-        },
-        saldirt(event: any) {
+            emit('mobil-kontroller-degisti', yeniKontroller);
+        }
+        function saldirt(event: any) {
             event.stopPropagation();
             const yeniKontroller = {
                 saldiri: true,
             };
             // sadece degisen kontrol anahtarları emitlenir.
-            this.$emit('mobil-kontroller-degisti', yeniKontroller);
-        },
-        joystickOlustur() {
-            this.joystickAyarlari.zone = this.$refs['joystick-menzili'];
-            this.joystickAyarlari.color = this.butonRengi;
-            this.joystick = nipplejs.create(this.joystickAyarlari);
-            this.joystick.on('dir:left', () => {
+            emit('mobil-kontroller-degisti', yeniKontroller);
+        }
+        function joystickOlustur() {
+            joystickAyarlari.value.zone = joystickMenzili.value;
+            joystickAyarlari.value.color = butonRengi.value;
+            joystick.value = nipplejs.create(joystickAyarlari.value);
+            joystick.value.on('dir:left', () => {
                 const yeniKontroller = {
                     solKosu: true,
                     sagKosu: false,
                     sonKosulanYonSagdir: false,
                 };
-                this.$emit('mobil-kontroller-degisti', yeniKontroller);
+                emit('mobil-kontroller-degisti', yeniKontroller);
             });
-            this.joystick.on('dir:right', () => {
+            joystick.value.on('dir:right', () => {
                 const yeniKontroller = {
                     solKosu: false,
                     sagKosu: true,
                     sonKosulanYonSagdir: true,
                 };
-                this.$emit('mobil-kontroller-degisti', yeniKontroller);
+                emit('mobil-kontroller-degisti', yeniKontroller);
             });
-            this.joystick.on('dir:up dir:down', () => {
+            joystick.value.on('dir:up dir:down', () => {
                 const yeniKontroller = {
                     solKosu: false,
                     sagKosu: false,
                 };
-                this.$emit('mobil-kontroller-degisti', yeniKontroller);
+                emit('mobil-kontroller-degisti', yeniKontroller);
             });
 
-            this.joystick.on('move', (evt: nipplejs.JoystickEventTypes, data: nipplejs.JoystickOutputData) => {
+            joystick.value.on('move', (evt: nipplejs.JoystickEventTypes, data: nipplejs.JoystickOutputData) => {
                 if (data.angle.degree > 30 && data.angle.degree < 150) {
-                    if (!this.joystickZiplamaYerinde) {
+                    if (!joystickZiplamaYerinde.value) {
                         const yeniKontroller = {
                             zipla: true,
                         };
-                        this.$emit('mobil-kontroller-degisti', yeniKontroller);
-                        this.joystickZiplamaYerinde = true;
+                        emit('mobil-kontroller-degisti', yeniKontroller);
+                        joystickZiplamaYerinde.value = true;
                     }
                 } else {
-                    if (this.joystickZiplamaYerinde) {
-                        this.joystickZiplamaYerinde = false;
+                    if (joystickZiplamaYerinde.value) {
+                        joystickZiplamaYerinde.value = false;
                     }
                 }
             })
 
-            this.joystick.on('end', () => {
+            joystick.value.on('end', () => {
                 const yeniKontroller = {
                     solKosu: false,
                     sagKosu: false,
                 };
                 // sadece degisen kontrol anahtarları emitlenir.
-                this.$emit('mobil-kontroller-degisti', yeniKontroller);
-                this.joystickZiplamaYerinde = false;
+                emit('mobil-kontroller-degisti', yeniKontroller);
+                joystickZiplamaYerinde.value = false;
             });
-        },
-        joystickBoyutYenile() {
-            const cWidth = (this.$refs['arayuz-mobil-komponenti'] as HTMLDivElement)!.clientWidth;
-            const yeniBoyut = Math.round(cWidth * this.joystickGenislikYuzdesi / 100);
-            const yeniMenzil = Math.round(cWidth * this.joystickMenzilYuzdesi / 100);
+        }
+        function joystickBoyutYenile() {
+            const cWidth = (arayuzMobilKomponenti.value as HTMLDivElement)!.clientWidth;
+            const yeniBoyut = Math.round(cWidth * joystickGenislikYuzdesi.value / 100);
+            const yeniMenzil = Math.round(cWidth * joystickMenzilYuzdesi.value / 100);
 
-            if (this.joystickAyarlari.size !== yeniBoyut) {
-                this.joystickAyarlari.size = yeniBoyut;
-                this.joystickAyarlari.catchDistance = yeniMenzil;
-                if (this.joystick) {
-                    this.joystick.destroy();
+            if (joystickAyarlari.value.size !== yeniBoyut) {
+                joystickAyarlari.value.size = yeniBoyut;
+                joystickAyarlari.value.catchDistance = yeniMenzil;
+                if (joystick.value) {
+                    joystick.value.destroy();
                 }
-                this.joystickOlustur();
+                joystickOlustur();
             }
 
-        },
-    },
-
-    mounted() {
-        this.joystickBoyutYenile();
-        window.addEventListener('resize', this.joystickBoyutYenile);
-    },
-    destroyed() {
-        window.removeEventListener('resize', this.joystickBoyutYenile);
-        this.joystick.destroy();
-    },
+        }
+onMounted(() => {
+    joystickBoyutYenile();
+    window.addEventListener('resize', joystickBoyutYenile);
 })
+
+onUnmounted(() => {
+    window.removeEventListener('resize', joystickBoyutYenile);
+    joystick.value.destroy();
+})
+
 </script>
 
 <style scoped>

@@ -1,6 +1,6 @@
 import {YayinciSavasciKontrolYoneticisi} from "@/js/kilicli-kavga/kontrolYoneticileri/yayinciSavasciKontrolYoneticisi";
 import {Socket} from "socket.io-client";
-import {WarriorControls} from "@/js/kilicli-kavga/warrior";
+import type {WarriorControls} from "@/js/kilicli-kavga/warrior";
 
 type SavasciKontrolTuslari = {
     [Property in keyof WarriorControls]: string | string[];

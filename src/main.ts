@@ -1,21 +1,25 @@
-import Vue from 'vue'
+import './assets/main.css'
+
+import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-import Vuetify from 'vuetify'
-import 'vuetify/dist/vuetify.min.css'
-import Snotify from 'vue-snotify';
 
+import PrimeVue from 'primevue/config';
+import Aura from '@primevue/themes/aura';
+const app = createApp(App)
 
-Vue.use(Vuetify)
-Vue.use(Snotify)
+app.use(router)
 
-Vue.config.productionTip = false
+app.use(PrimeVue, { 
+  theme: {
+    preset: Aura,
+    options: {
+      cssLayer: {
+          name: 'primevue',
+          order: 'tailwind-base, primevue, tailwind-utilities'
+      }
+  }
+  }
+ });
 
-
-new Vue({
-    vuetify: new Vuetify({
-        theme: { dark: true },
-    }),
-    router,
-    render: h => h(App)
-}).$mount('#app')
+app.mount('#app')
