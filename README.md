@@ -1,5 +1,13 @@
 # kilicli-kavga-js
 
+# gcloud deploy
+
+cd frontend & yarn build &  cd .. &  gcloud app deploy --quiet app.yaml --promote --stop-previous-version --version main-v1
+
+gcloud app deploy
+
+
+
 ## Project setup
 ```
 npm install
