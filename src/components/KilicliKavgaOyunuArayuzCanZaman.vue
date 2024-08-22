@@ -16,9 +16,7 @@
 
         <div class="warrior-stats" v-for="warrior in warriors" :key="warrior.isim" :style="warriorStatStyle(warrior)">
 
-            <div class="warrior-respawn-time">
-                {{ `K:${warrior.score.kill} Ö:${warrior.score.death}` }}
-            </div>
+            
             <div class="warrior-scores">
                 {{ warrior.can <= 0 ? warrior.respawnTimeLeft : '' }} </div>
                     <div class="warrior-hearts mt-2 flex">
@@ -107,8 +105,8 @@ function warriorStatStyle(warrior: Warrior) {
     justify-content: space-between;
     align-items: center;
     color: #e8e8e8;
-    font-family: "Minecraft", Avenir, Helvetica, Arial, sans-serif;
-    font-size: var(--font-boyutu);
+    font-family: "Press Start 2P", system-ui;
+    font-size: calc(var(--font-boyutu) / 1.5);
 }
 
 .can-cubugu {

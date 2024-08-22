@@ -1,15 +1,18 @@
 <template>
     <div class="container mx-auto p-4">
-        <div class="flex flex-col items-center sm:mt-5">
-            <img src="../assets/logo/kiliclikavga.svg" alt="Lerkaya Games logosu" width="422" height="157"
-                style="height: auto;" class="w-full max-w-md">
-            <div class="w-full max-w-md" v-if="!oyuncuIsmiSecildi">
-                <img src="../assets/logo/lerkayagames.svg" alt="Lerkaya Games logosu" width="986" height="104"
-                    style="height: auto;" class="w-full mt-1 max-w-[180px] float-right mr-3">
+        <template v-if="!oyuncuIsmiSecildi">
+
+
+            <div class="flex flex-col items-center sm:mt-5">
+                <img src="../assets/logo/kiliclikavga.svg" alt="Lerkaya Games logosu" width="422" height="157"
+                    style="height: auto;" class="w-full max-w-md">
+                <div class="w-full max-w-md">
+                    <img src="../assets/logo/lerkayagames.svg" alt="Lerkaya Games logosu" width="986" height="104"
+                        style="height: auto;" class="w-full mt-1 max-w-[180px] float-right mr-3">
+                </div>
+
             </div>
 
-        </div>
-        <template v-if="!oyuncuIsmiSecildi">
             <div class="text-center mt-6 golgeli oyun-fontu text-white ana-sayfa-yazi">
                 Lerkaya Games ailesine hoş geldiniz! Oyunumuza katılmak için hemen bir isim seçin:
             </div>
@@ -19,7 +22,7 @@
                 <div class="mt-4 flex justify-center">
 
 
-                    <InputText placeholder="Oyuncu adı..." id="playername" v-model="yeniOyuncuAdi" size="large" />
+                    <InputText class="text-center" placeholder="Oyuncu adı..." id="playername" v-model="yeniOyuncuAdi"/>
 
                     <Message class="mt-2" v-if="yeniOyuncuAdiZatenVar" severity="error">Bu kullanıcı zaten var.
                     </Message>
@@ -29,7 +32,40 @@
 
                 <Button label="Oyuna Katıl" :disabled="!girdiFormuUygun" class="mt-3" type="submit" />
 
+                <div v-if="!mobilMi()" class="text-white oyun-fontu ana-sayfa-yazi !text-2xl mt-3">
+                    
+                    <div class="flex align-center items-center">
+                        <img src="../assets/tuslar/wasd.svg" alt="w, a, s, d tuşları" class="h-auto w-[4.5rem] md:w-[6.5rem]" width="41" height="25">
+                        <span class="ml-2">Hareket et ve zıpla</span>
+                    </div>
+                    <div class="flex align-center items-center mt-3">
+                        <img src="../assets/tuslar/shift.svg" alt="shift tuşu" class="h-auto w-[3rem] md:w-[4.5rem]" width="28" height="12">
+                        <span class="ml-2">Takla at</span>
+                    </div>
+                    <div class="flex align-center items-center mt-3">
+                        <img src="../assets/tuslar/space.svg" alt="space tuşu" class="h-auto w-[3.25rem] md:w-[4.8rem]" width="30" height="12">
+                        /
+                        <img src="../assets/tuslar/soltik.svg" alt="fare sol tık" class="h-auto w-[1.25rem] md:w-[1.5rem]" width="18" height="24">
+                        <span class="ml-2">Saldır</span>
+                    </div>
+                </div>
+                
+
             </form>
+            <Card class="mt-6 max-w-[500px] mx-auto" :pt="{ body: { class: 'px-2 pt-1' } }">
+                <template #content>
+                    <DataTable :value="oyuncular">
+                        <Column field="isim" header="Çevrim İçi Oyuncular" headerStyle="text-align:center"
+                            bodyStyle="text-align:center">
+                        </Column>
+                    </DataTable>
+                </template>
+            </Card>
+
+
+            <p class="text-center ana-sayfa-yazi oyun-fontu text-white mt-6">
+                Yapımcı: Lütfullah Erkaya
+            </p>
         </template>
         <KilicliKavgaOyunuOyun v-else ref="oyun" class="my-3" :mobil-kontrolleri-goster="mobilKontrolleriGoster"
             :dokunmalidir="dokunmalidir" :socket="socket" :oyuncular="oyuncular" :bu-oyuncu-ismi="yeniOyuncuAdi" />
@@ -39,27 +75,7 @@
                 <ToggleSwitch v-model="mobilKontrolleriGoster" />
                 <span class="ml-2">Mobil Kontrolleri Göster</span>
             </div>
-
-            <Button @click="tamEkraniAc">
-                Tam Ekranı Aç
-            </Button>
         </template>
-
-        <Card class="mt-6" :pt="{ body: { class: 'px-2 pt-1' } }">
-            <template #content>
-                <DataTable :value="oyuncular">
-                    <Column field="isim" header="Çevrim İçi Oyuncular" headerStyle="text-align:center"
-                        bodyStyle="text-align:center">
-                    </Column>
-                </DataTable>
-            </template>
-        </Card>
-
-
-        <p class="text-center ana-sayfa-yazi oyun-fontu text-white mt-6">
-            Yapımcı: Lütfullah Erkaya
-        </p>
-
 
     </div>
 
@@ -95,12 +111,6 @@ const yeniOyuncuAdiZatenVar = computed(() => {
 const uzunlukUygun = computed(() => {
     return yeniOyuncuAdi.value.length > 0 && yeniOyuncuAdi.value.length <= 20;
 })
-
-
-
-function tamEkraniAc() {
-    oyun.value.tamEkraniAc();
-}
 
 function mobilMi(): boolean {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -165,9 +175,20 @@ onUnmounted((() => {
         -1px 1px 0 #000,
         -1px -1px 0 #000,
         1px -1px 0 #000,
-        0px 0px 10px rgba(0, 0, 0, 0.9);
+        0px 0px 10px rgba(0, 0, 0, 0.9),
+        0px 0px 8px rgba(0, 0, 0, 0.9),
+        0px 0px 6px rgba(0, 0, 0, 0.9),
+        0px 0px 4px rgba(0, 0, 0, 0.9),
+        0px 0px 2px rgba(0, 0, 0, 0.9);
+
 
     font-size: 1.875rem;
+
+    @media screen and (min-width: 640px) {
+        font-size: 2.5rem;
+
+    }
+
     line-height: normal;
 }
 </style>

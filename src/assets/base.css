@@ -8,9 +8,3 @@
   @tailwind components;
   @tailwind utilities;
 }
-
-
-@font-face {
-  font-family: "Minecraft";
-  src: local("Minecraft"), url(/fonts/Minecraft/Minecraft-Regular.otf) format("truetype");
-}

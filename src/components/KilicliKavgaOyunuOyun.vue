@@ -4,7 +4,7 @@
         </div>
         <div class="genislik-sinirlayici" :style="{ width: genislikSinirlayiciGenisligi }">
             <!-- bunun amaci tam ekran oldugunda kenarlara siyah cubuk koyabilmek -->
-            <div class="aspect-video w-full">
+            <div class="aspect-video w-full relative">
                 <canvas ref="gameCanvas" style="width: 100%; height: 100%;"></canvas>
 
                 <kilicli-kavga-oyunu-arayuz-can-zaman :tam-ekrandir="tamEkrandir"
