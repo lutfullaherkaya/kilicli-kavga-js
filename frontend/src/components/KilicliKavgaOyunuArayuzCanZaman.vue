@@ -31,7 +31,7 @@
                         <img src="/sprites/minecraft-kalp-dolu.svg" alt="heart"
                             :class="{ grayscale: warrior.can <= 75 }">
                     </div>
-                    <div class="warrior-stats-name">
+                    <div class="warrior-stats-name pb-1">
                         {{ warrior.isim }}
                     </div>
             </div>
