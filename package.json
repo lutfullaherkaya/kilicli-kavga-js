@@ -10,7 +10,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build-backend": "tsc -p tsconfig.backend.json",
-    "build": "vue-cli-service build && npm run build-backend",
+    "build": "cd frontend && npm run build && cd .. && npm run build-backend",
     "build-only-backend-and-start": "npm run build-backend && npm run start",
     "lint": "vue-cli-service lint",
     "postinstall": "npm run build",
