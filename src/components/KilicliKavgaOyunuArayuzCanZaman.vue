@@ -1,22 +1,56 @@
 <template>
     <div ref="can-zaman-arayuzu">
         <div class="can-zaman-arayuzu">
-            <div class="can-cubugu can-cubugu-1">
+            <div class="can-cubugu can-cubugu-1 relative">
                 <div class="ic-can-cubugu-1" :style="{ width: (warriors[0]?.can ?? 0) + '%' }"></div>
                 <span class="can-cubugu-isim can-cubugu-isim-1">{{ warriors[0]?.isim ?? '' }}</span>
+                <div class="skorlar absolute bottom-0 left-0 translate-y-[100%] oyun-fontu">
+                    <table v-if="skorTablosuAcik" class="table-auto text-left golgeli-yazi md:text-lg lg:text-3xl">
+                        <thead>
+                            <tr>
+                                <th class="pr-2">Ad</th>
+                                <th class="pr-2">Leş</th>
+                                <th class="pr-2">Ölüm</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr  v-for="warrior in warriors">
+                                <td class="pr-2">{{ warrior.id }}</td>
+                                <td class="pr-2">{{ warrior.score.kill }}</td>
+                                <td class="pr-2">{{ warrior.score.death }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
             </div>
             <div class="zaman-kutusu">
                 <span id="zaman" class="zaman">90</span>
             </div>
-            <div class="can-cubugu can-cubugu-2">
+            <div class="can-cubugu can-cubugu-2 relative">
                 <div class="ic-can-cubugu-2" :style="{ width: (warriors[1]?.can ?? 0) + '%' }"></div>
                 <span class="can-cubugu-isim can-cubugu-isim-2">{{ warriors[1]?.isim ?? '' }}</span>
+                <div class="absolute bottom-0 right-0 translate-y-[100%]">
+                    <div class="flex items-center mt-3">
+                        <Button label="Skorlar" @click="skorTablosuAcik = !skorTablosuAcik" rounded outlined
+                            class="text-white golgeli-yazi mr-1 oyun-fontu h-8 md:h-9 lg:h-12" />
+                        <Button v-if=mobilKontrolleriGoster @click="$emit('toggle-mobil-kontrolleri-goster')"
+                            icon="pi pi-eye-slash"
+                            class="text-white golgeli-yazi text-shadow w-7 h-7 md:w-9 md:h-9 lg:w-12 lg:h-12" rounded
+                            outlined aria-label="Mobil arayüzü göster" />
+                        <Button v-else @click="$emit('toggle-mobil-kontrolleri-goster')" icon="pi pi-eye"
+                            class="text-white golgeli-yazi text-shadow w-7 h-7 md:w-9 md:h-9 lg:w-12 lg:h-12" rounded
+                            outlined aria-label="Mobil arayüzü gizle" />
+                    </div>
+
+                </div>
             </div>
+
         </div>
 
         <div class="warrior-stats" v-for="warrior in warriors" :key="warrior.isim" :style="warriorStatStyle(warrior)">
 
-            
+
             <div class="warrior-scores">
                 {{ warrior.can <= 0 ? warrior.respawnTimeLeft : '' }} </div>
                     <div class="warrior-hearts mt-2 flex">
@@ -71,8 +105,11 @@ const props = defineProps({
         }
     },
     canvasClientWidth: Number,
+    mobilKontrolleriGoster: Boolean,
 })
 
+
+const skorTablosuAcik = ref(true);
 
 function warriorStatStyle(warrior: Warrior) {
     const style = {

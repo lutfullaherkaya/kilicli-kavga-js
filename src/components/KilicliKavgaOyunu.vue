@@ -70,12 +70,7 @@
         <KilicliKavgaOyunuOyun v-else ref="oyun" class="my-3" :mobil-kontrolleri-goster="mobilKontrolleriGoster"
             :dokunmalidir="dokunmalidir" :socket="socket" :oyuncular="oyuncular" :bu-oyuncu-ismi="yeniOyuncuAdi" />
 
-        <template v-if="oyuncuIsmiSecildi">
-            <div class="flex flex-row text-white">
-                <ToggleSwitch v-model="mobilKontrolleriGoster" />
-                <span class="ml-2">Mobil Kontrolleri Göster</span>
-            </div>
-        </template>
+            
 
     </div>
 
@@ -90,11 +85,14 @@ import ToggleSwitch from 'primevue/toggleswitch';
 const oyun = ref(null)
 const oyuncular = ref([]);
 const dokunmalidir = ref(false)
-const mobilKontrolleriGoster = ref(false);
 const socket = io()
 const rakipIsmi = ref('')
 const yeniOyuncuAdi = ref('')
 const oyuncuIsmiSecildi = ref(false)
+
+function mobilMi(): boolean {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
 
 const girdiFormuUygun = computed(() => {
     return !yeniOyuncuAdiZatenVar.value && uzunlukUygun.value;
@@ -112,9 +110,7 @@ const uzunlukUygun = computed(() => {
     return yeniOyuncuAdi.value.length > 0 && yeniOyuncuAdi.value.length <= 20;
 })
 
-function mobilMi(): boolean {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-}
+
 
 function dokunmaliMi(): boolean {
     return (('ontouchstart' in window) ||
@@ -139,7 +135,7 @@ function oyuncuOlustur() {
 
 onBeforeMount(() => {
     dokunmalidir.value = dokunmaliMi();
-    mobilKontrolleriGoster.value = mobilMi();
+    
 })
 onMounted(() => {
     axios.get('/api/oyuncular').then(response => {

@@ -9,11 +9,11 @@
 
                 <kilicli-kavga-oyunu-arayuz-can-zaman :tam-ekrandir="tamEkrandir"
                     :mobil-kontrolleri-goster="mobilKontrolleriGoster" @tam-ekrani-ac="tamEkraniAc"
-                    @tam-ekrani-kapat="tamEkraniKapat" :warriors="game?.warriors"
+                    @tam-ekrani-kapat="tamEkraniKapat" @toggle-mobil-kontrolleri-goster="mobilKontrolleriGoster = !mobilKontrolleriGoster" :warriors="game?.warriors"
                     :canvas-client-width="canvasClientWidth" />
-                <!--                <div style="width: 40px; height: 30px; position: absolute; left: 0; top: 0; background-color: red;"
-                                     id="kutu">
-                                </div>-->
+
+
+
             </div>
         </div>
         <kilicli-kavga-oyunu-arayuz-mobil v-if="mobilKontrolleriGoster" style="z-index: 1111;"
@@ -63,6 +63,7 @@ const game = ref(null as null | Game)
 const mobilKontrolYoneticisi = new MobilSavasciKontrolYoneticisi(props.socket)
 const buSavasci = ref(null as null | Warrior)
 const canvasClientWidth = ref(1000)
+const mobilKontrolleriGoster = ref(false);
 
 
 const genislikSinirlayiciGenisligi = computed(() => {
@@ -414,7 +415,12 @@ function oyuncularDegisince() {
         (buSavasci.value?.kontrolYoneticisi as YayinciSavasciKontrolYoneticisi).sendWarriorInformation();
     }
 }
-
+function mobilMi(): boolean {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+onBeforeMount(() => {
+    mobilKontrolleriGoster.value = mobilMi();
+})
 
 const mounted = ref(false);
 onMounted(() => {
