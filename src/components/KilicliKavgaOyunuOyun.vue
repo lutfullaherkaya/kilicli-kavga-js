@@ -67,7 +67,7 @@ const mobilKontrolleriGoster = ref(false);
 
 
 const genislikSinirlayiciGenisligi = computed(() => {
-    if (tamEkrandir.value && ekranGenisligi.value / ekranYuksekligi.value >= 16 / 9) {
+    if (ekranGenisligi.value / ekranYuksekligi.value >= 16 / 9) {
         return ekranYuksekligi.value * 16 / 9 + 'px';
     } else {
         return '100%';
@@ -412,7 +412,7 @@ function oyuncularDegisince() {
             }
             return true;
         });
-        (buSavasci.value?.kontrolYoneticisi as YayinciSavasciKontrolYoneticisi).sendWarriorInformation();
+        (buSavasci.value?.kontrolYoneticisi as YayinciSavasciKontrolYoneticisi)?.sendWarriorInformation();
     }
 }
 function mobilMi(): boolean {
@@ -425,7 +425,7 @@ onBeforeMount(() => {
 const mounted = ref(false);
 onMounted(() => {
     mounted.value = true;
-
+    ekranBoyutuGuncelle();
     window.addEventListener('resize', ekranBoyutuGuncelle);
     window.addEventListener('fullscreenchange', tamEkranGuncelle);
     window.addEventListener('mozfullscreenchange', tamEkranGuncelle);

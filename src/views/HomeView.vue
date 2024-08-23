@@ -2,7 +2,5 @@
 </script>
 
 <template>
-  <main>
     <KilicliKavgaOyunu />
-  </main>
 </template>
