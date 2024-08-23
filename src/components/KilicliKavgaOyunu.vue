@@ -16,7 +16,7 @@
 
 
         <form class="mb-2 flex flex-col items-center" @submit.prevent="oyuncuOlustur">
-            <div class="mt-4 flex justify-center">
+            <div class="mt-4 justify-center">
 
 
                 <InputText class="text-center oyun-fontu text-2xl" placeholder="Oyuncu adı..." id="playername"
@@ -24,7 +24,7 @@
 
                 <Message class="mt-2" v-if="yeniOyuncuAdiZatenVar" severity="error">Bu kullanıcı zaten var.
                 </Message>
-                <Message class="mt-2" v-if="yeniOyuncuAdi > 20" severity="error">Kullanıcı adı en fazla 20 karakter
+                <Message class="mt-2" v-if="yeniOyuncuAdi.length > 20" severity="error">En fazla 20 karakter
                     olabilir.</Message>
             </div>
 
