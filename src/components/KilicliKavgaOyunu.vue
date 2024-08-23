@@ -76,10 +76,12 @@
 
 
     </div>
-    <div v-else class="w-full h-full h-screen h-dvh oyun-arkaplan">
-        <KilicliKavgaOyunuOyun ref="oyun" class="" :mobil-kontrolleri-goster="mobilKontrolleriGoster"
-            :dokunmalidir="dokunmalidir" :socket="socket" :oyuncular="oyuncular" :bu-oyuncu-ismi="yeniOyuncuAdi" />
-    </div>
+    <Dialog v-else v-model:visible="visible" modal class="w-full h-full bg-transparent border-0 " blockScroll :closeOnEscape="false" :closable="false">
+        <template #container="{ closeCallback }">
+            <KilicliKavgaOyunuOyun ref="oyun" style="background:none;" :mobil-kontrolleri-goster="mobilKontrolleriGoster"
+                :dokunmalidir="dokunmalidir" :socket="socket" :oyuncular="oyuncular" :bu-oyuncu-ismi="yeniOyuncuAdi" />
+        </template>
+    </Dialog>
 
 
 </template>
@@ -118,6 +120,7 @@ const uzunlukUygun = computed(() => {
     return yeniOyuncuAdi.value.length > 0 && yeniOyuncuAdi.value.length <= 20;
 })
 
+const visible = ref(true)
 
 
 function dokunmaliMi(): boolean {
