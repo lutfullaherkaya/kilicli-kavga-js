@@ -76,7 +76,7 @@
 
 
     </div>
-    <Dialog v-else v-model:visible="visible" modal class="w-full h-full bg-transparent border-0 " blockScroll :closeOnEscape="false" :closable="false">
+    <Dialog v-else v-model:visible="visible" modal class="w-full h-full bg-transparent border-0 " :closeOnEscape="false" :closable="false">
         <template #container="{ closeCallback }">
             <KilicliKavgaOyunuOyun ref="oyun" style="background:none;" :mobil-kontrolleri-goster="mobilKontrolleriGoster"
                 :dokunmalidir="dokunmalidir" :socket="socket" :oyuncular="oyuncular" :bu-oyuncu-ismi="yeniOyuncuAdi" />
