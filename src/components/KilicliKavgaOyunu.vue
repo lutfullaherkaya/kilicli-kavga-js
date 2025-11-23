@@ -1,12 +1,9 @@
 <template>
     <div class="container mx-auto p-4" v-if="!oyuncuIsmiSecildi">
-        <div class="flex flex-col items-center sm:mt-5">
+        <div class="flex flex-col items-center mt-4">
             <img src="../assets/logo/kiliclikavga.svg" alt="Lerkaya Games logosu" width="422" height="157"
                 style="height: auto;" class="w-full max-w-md">
-            <div class="w-full max-w-md">
-                <img src="../assets/logo/lerkayagames.svg" alt="Lerkaya Games logosu" width="986" height="104"
-                    style="height: auto;" class="w-full mt-1 max-w-[180px] float-right mr-3">
-            </div>
+            
 
         </div>
 
@@ -19,7 +16,7 @@
             <div class="mt-4 justify-center">
 
 
-                <InputText class="text-center oyun-fontu text-2xl" placeholder="Oyuncu adı..." id="playername"
+                <InputText class="text-center oyun-fontu text-2xl bg-white/35" placeholder="Oyuncu adı..." id="playername"
                     v-model="yeniOyuncuAdi" />
 
                 <Message class="mt-2" v-if="yeniOyuncuAdiZatenVar" severity="error">Bu kullanıcı zaten var.
@@ -68,7 +65,7 @@
         </div>
 
 
-        <p class="text-center ana-sayfa-yazi oyun-fontu text-white mt-12">
+        <p class="text-center ana-sayfa-yazi oyun-fontu text-white mt-20 !text-2xl">
             Yapımcı: Lütfullah Erkaya
         </p>
 
