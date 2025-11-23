@@ -7,7 +7,7 @@
 
         </div>
 
-        <div class="text-center mt-6 golgeli oyun-fontu text-white ana-sayfa-yazi">
+        <div class="text-center mt-6 mb-1 golgeli oyun-fontu text-white ana-sayfa-yazi">
             Lerkaya Games ailesine hoş geldiniz! Oyunumuza katılmak için hemen bir isim seçin:
         </div>
 
