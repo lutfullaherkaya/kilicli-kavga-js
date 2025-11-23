@@ -432,7 +432,7 @@ onMounted(() => {
     window.addEventListener('webkitfullscreenchange', tamEkranGuncelle);
     window.addEventListener('msfullscreenchange', tamEkranGuncelle);
     window.addEventListener('resize', refreshCanvasClientWidth); // in case ResizeObserver is not supported
-    refreshCanvasClientWidth();
+    setTimeout(() => refreshCanvasClientWidth(), 0)
     new ResizeObserver(() => refreshCanvasClientWidth)
         .observe(gameCanvas.value as HTMLDivElement);
 
