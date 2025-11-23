@@ -24,7 +24,7 @@ app.use(bodyParser.urlencoded({extended: true})); // todo: ne ise yarar
 app.use('/api', Router);
 
 
-app.use(express.static('dist'))
+app.use(express.static('dist', { etag: false, lastModified: false }));
 /*app.get('/ws', (req, res) => {
 
 })*/
